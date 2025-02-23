@@ -5,7 +5,7 @@ import (
 	"strconv"
 
 	"github.com/gin-gonic/gin"
-	"github.com/ruziba3vich/soand/internal/models"
+	dto "github.com/ruziba3vich/soand/internal/dtos"
 	"github.com/ruziba3vich/soand/internal/repos"
 	"github.com/sirupsen/logrus"
 	"go.mongodb.org/mongo-driver/bson/primitive"
@@ -27,15 +27,18 @@ func NewPostHandler(service repos.IPostService, logger *logrus.Logger) *PostHand
 
 // CreatePost handles creating a new post
 func (h *PostHandler) CreatePost(c *gin.Context) {
-	var post models.Post
-	if err := c.ShouldBindJSON(&post); err != nil {
+	var req dto.PostRequest
+	if err := c.ShouldBindJSON(&req); err != nil {
 		h.logger.WithField("error", err.Error()).Error("Invalid request payload")
 		c.JSON(http.StatusBadRequest, gin.H{"error": "Invalid request payload"})
 		return
 	}
 
-	// Create post in service
-	id, err := h.service.CreatePost(c.Request.Context(), &post, 3600)
+	// Convert PostRequest to models.Post
+	post := req.ToPost()
+
+	// Call service to create post
+	id, err := h.service.CreatePost(c.Request.Context(), post, req.DeleteAfter)
 	if err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to create post"})
 		return
