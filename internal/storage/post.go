@@ -13,7 +13,7 @@ import (
 )
 
 type Storage struct {
-	DB *mongo.Collection
+	db *mongo.Collection
 }
 
 // CreatePost inserts a new post into the database
@@ -21,14 +21,14 @@ func (s *Storage) CreatePost(ctx context.Context, post *models.Post, deleteAfter
 	post.ID = primitive.NewObjectID()
 	post.CreatedAt = time.Now()
 	post.DeleteAt = post.CreatedAt.Add(time.Duration(deleteAfter) * time.Hour)
-	_, err := s.DB.InsertOne(ctx, post)
+	_, err := s.db.InsertOne(ctx, post)
 	return post.ID, err
 }
 
 // GetPost retrieves a post by ID
 func (s *Storage) GetPost(ctx context.Context, id primitive.ObjectID) (*models.Post, error) {
 	var post models.Post
-	err := s.DB.FindOne(ctx, bson.M{"_id": id}).Decode(&post)
+	err := s.db.FindOne(ctx, bson.M{"_id": id}).Decode(&post)
 	if err == mongo.ErrNoDocuments {
 		return nil, errors.New("post not found")
 	}
@@ -47,7 +47,7 @@ func (s *Storage) UpdatePost(ctx context.Context, id, updaterID primitive.Object
 	}
 
 	// Perform the update
-	result, err := s.DB.UpdateOne(ctx, bson.M{"_id": id}, bson.M{"$set": update})
+	result, err := s.db.UpdateOne(ctx, bson.M{"_id": id}, bson.M{"$set": update})
 	if err != nil {
 		return err
 	}
@@ -60,7 +60,7 @@ func (s *Storage) UpdatePost(ctx context.Context, id, updaterID primitive.Object
 
 // DeletePost permanently removes a post from the database
 func (s *Storage) DeletePost(ctx context.Context, id primitive.ObjectID) error {
-	result, err := s.DB.DeleteOne(ctx, bson.M{"_id": id})
+	result, err := s.db.DeleteOne(ctx, bson.M{"_id": id})
 	if err != nil {
 		return err
 	}
@@ -80,7 +80,7 @@ func (s *Storage) GetAllPosts(ctx context.Context, page, pageSize int64) ([]mode
 
 	skip := int64((page - 1) * pageSize) // Calculate how many documents to skip
 
-	cursor, err := s.DB.Find(ctx, bson.M{}, &options.FindOptions{
+	cursor, err := s.db.Find(ctx, bson.M{}, &options.FindOptions{
 		Sort:  bson.M{"created_at": -1}, // Sort by newest first
 		Skip:  &skip,
 		Limit: &pageSize,
