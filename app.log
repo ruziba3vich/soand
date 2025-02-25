@@ -77,3 +77,28 @@
 [MusicLib] 2025/02/26 02:48:00 user.go:121: Validating JWT token...
 [MusicLib] 2025/02/26 02:48:00 user.go:129: JWT token validated successfully, user ID: 000000000000000000000000
 [MusicLib] 2025/02/26 02:48:00 user.go:66: Fetching user by username: john_doe
+[MusicLib] 2025/02/26 03:05:08 main.go:42: Received signal: interrupt, shutting down...
+[MusicLib] 2025/02/26 03:05:08 main.go:49: Shutdown complete
+[MusicLib] 2025/02/26 03:05:41 user.go:42: Error creating user: invalid username or password
+[MusicLib] 2025/02/26 03:05:41 user.go:64: Error creating user: invalid username or password
+[MusicLib] 2025/02/26 03:06:36 main.go:42: Received signal: interrupt, shutting down...
+[MusicLib] 2025/02/26 03:06:36 main.go:49: Shutdown complete
+[MusicLib] 2025/02/26 03:06:41 user.go:42: Error creating user: invalid username or password
+[MusicLib] 2025/02/26 03:06:41 user.go:64: Error logging in user: invalid username or password
+[MusicLib] 2025/02/26 03:08:29 main.go:42: Received signal: interrupt, shutting down...
+[MusicLib] 2025/02/26 03:08:29 main.go:49: Shutdown complete
+[MusicLib] 2025/02/26 03:08:36 user.go:42: Error creating user: invalid username or password
+[MusicLib] 2025/02/26 03:08:36 user.go:64: Error logging in user: invalid username or password
+[MusicLib] 2025/02/26 03:09:20 main.go:42: Received signal: interrupt, shutting down...
+[MusicLib] 2025/02/26 03:09:20 main.go:49: Shutdown complete
+[MusicLib] 2025/02/26 03:09:28 user.go:42: Error creating user: invalid username or password
+[MusicLib] 2025/02/26 03:09:28 user.go:64: Error logging in user: invalid username or password
+[MusicLib] 2025/02/26 03:10:45 main.go:42: Received signal: interrupt, shutting down...
+[MusicLib] 2025/02/26 03:10:45 main.go:49: Shutdown complete
+[MusicLib] 2025/02/26 03:10:53 user.go:42: Error creating user: invalid username or password
+[MusicLib] 2025/02/26 03:10:53 user.go:64: Error logging in user: invalid username or password
+[MusicLib] 2025/02/26 03:12:14 main.go:42: Received signal: interrupt, shutting down...
+[MusicLib] 2025/02/26 03:12:14 main.go:49: Shutdown complete
+[MusicLib] 2025/02/26 03:12:22 user.go:46: User logged in successfully, ID: john_doe
+[MusicLib] 2025/02/26 03:12:48 user.go:42: Error creating user: invalid username or password
+[MusicLib] 2025/02/26 03:12:48 user.go:64: Error logging in user: invalid username or password

@@ -97,7 +97,7 @@ func (s *UserStorage) Login(ctx context.Context, username, password string) (str
 	}
 
 	// Check password
-	if !CheckPassword(password, user.Password) {
+	if !CheckPassword(user.Password, password) {
 		return "", errors.New("invalid username or password")
 	}
 

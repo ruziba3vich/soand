@@ -61,8 +61,8 @@ func (h *UserHandler) LoginUser(c *gin.Context) {
 
 	token, err := h.repo.LoginUser(c.Request.Context(), request.Username, request.Password)
 	if err != nil {
-		h.logger.Printf("Error creating user: %v", err)
-		c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to create user"})
+		h.logger.Printf("Error logging in user: %v", err)
+		c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to login user " + err.Error()})
 		return
 	}
 
