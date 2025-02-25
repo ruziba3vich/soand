@@ -10,9 +10,10 @@ import (
 
 // Config holds all the configuration settings
 type Config struct {
-	MongoDB MongoDBConfig
-	MinIO   MinIOConfig
-	Redis   RedisConfig
+	MongoDB   MongoDBConfig
+	MinIO     MinIOConfig
+	Redis     RedisConfig
+	JwtSecret string
 }
 
 // MongoDBConfig holds MongoDB settings
@@ -46,6 +47,7 @@ func LoadConfig() *Config {
 	}
 
 	return &Config{
+		JwtSecret: getEnv("JWT_SECRET", "prodonik"),
 		MongoDB: MongoDBConfig{
 			URI:      getEnv("MONGO_URI", "mongodb://localhost:27017"),
 			Database: getEnv("MONGO_DB", "mydatabase"),

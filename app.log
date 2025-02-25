@@ -18,3 +18,5 @@
 [MusicLib] 2025/02/26 01:07:51 service.go:105: id 67be19e4146f5955859b8011
 [MusicLib] 2025/02/26 01:08:08 service.go:58: id 67be19e4146f5955859b8011
 [MusicLib] 2025/02/26 01:08:25 service.go:98: map[error:post not found id:67be19e4146f5955859b8011]
+[MusicLib] 2025/02/26 01:25:15 main.go:42: Received signal: interrupt, shutting down...
+[MusicLib] 2025/02/26 01:25:15 main.go:49: Shutdown complete
