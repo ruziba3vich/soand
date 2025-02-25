@@ -46,6 +46,29 @@ func (h *UserHandler) CreateUser(c *gin.Context) {
 	c.JSON(http.StatusOK, gin.H{"token": token})
 }
 
+// LoginUser handles user login requests
+func (h *UserHandler) LoginUser(c *gin.Context) {
+	var request struct {
+		Username string `json:"username"`
+		Password string `json:"password"`
+	}
+
+	if err := c.ShouldBindJSON(&request); err != nil {
+		h.logger.Printf("Error parsing user data: %v", err)
+		c.JSON(http.StatusBadRequest, gin.H{"error": "Invalid request body"})
+		return
+	}
+
+	token, err := h.repo.LoginUser(c.Request.Context(), request.Username, request.Password)
+	if err != nil {
+		h.logger.Printf("Error creating user: %v", err)
+		c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to create user"})
+		return
+	}
+
+	c.JSON(http.StatusOK, gin.H{"token": token})
+}
+
 // DeleteUser handles user deletion requests
 func (h *UserHandler) DeleteUser(c *gin.Context) {
 	userId, err := h.getUserIdFromRequest(c)
@@ -173,28 +196,6 @@ func (h *UserHandler) UpdateUsername(c *gin.Context) {
 	}
 
 	c.Status(http.StatusOK)
-}
-
-// ValidateJWT handles JWT validation requests
-func (h *UserHandler) ValidateJWT(c *gin.Context) {
-	var request struct {
-		Token string `json:"token"`
-	}
-
-	if err := c.ShouldBindJSON(&request); err != nil {
-		h.logger.Printf("Error parsing JWT validation request: %v", err)
-		c.JSON(http.StatusBadRequest, gin.H{"error": "Invalid request body"})
-		return
-	}
-
-	userID, err := h.repo.ValidateJWT(request.Token)
-	if err != nil {
-		h.logger.Printf("Invalid JWT token: %v", err)
-		c.JSON(http.StatusUnauthorized, gin.H{"error": "Invalid token"})
-		return
-	}
-
-	c.JSON(http.StatusOK, gin.H{"user_id": userID})
 }
 
 func (h *UserHandler) getUserIdFromRequest(c *gin.Context) (primitive.ObjectID, error) {

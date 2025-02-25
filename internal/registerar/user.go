@@ -17,8 +17,7 @@ func RegisterUserRoutes(r *gin.Engine, userRepo repos.UserRepo, logger *log.Logg
 	userRoutes := r.Group("/users")
 	{
 		userRoutes.POST("/", userHandler.CreateUser)
-		userRoutes.POST("/validate", authMiddleware(userHandler.ValidateJWT))
-
+		userRoutes.POST("/login", userHandler.LoginUser)
 		userRoutes.DELETE("/:id", authMiddleware(userHandler.DeleteUser))
 		userRoutes.GET("/:id", authMiddleware(userHandler.GetUserByID))
 		userRoutes.GET("/username/:username", authMiddleware(userHandler.GetUserByUsername))

@@ -9,13 +9,14 @@ import (
 
 type (
 	UserRepo interface {
-		CreateUser(ctx context.Context, user *models.User) (string, error)
-		DeleteUser(ctx context.Context, userID primitive.ObjectID) error
-		GetUserByID(ctx context.Context, userID primitive.ObjectID) (*models.User, error)
-		GetUserByUsername(ctx context.Context, username string) (*models.User, error)
-		UpdateFullname(ctx context.Context, userID primitive.ObjectID, newFullname string) error
-		UpdatePassword(ctx context.Context, userID primitive.ObjectID, oldPassword string, newPassword string) error
-		UpdateUsername(ctx context.Context, userID primitive.ObjectID, newUsername string) error
-		ValidateJWT(tokenString string) (string, error)
+		CreateUser(context.Context, *models.User) (string, error)
+		DeleteUser(context.Context, primitive.ObjectID) error
+		GetUserByID(context.Context, primitive.ObjectID) (*models.User, error)
+		GetUserByUsername(context.Context, string) (*models.User, error)
+		UpdateFullname(context.Context, primitive.ObjectID, string) error
+		UpdatePassword(context.Context, primitive.ObjectID, string, string) error
+		UpdateUsername(context.Context, primitive.ObjectID, string) error
+		ValidateJWT(string) (string, error)
+		LoginUser(context.Context, string, string) (string, error)
 	}
 )

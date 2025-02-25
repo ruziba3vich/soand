@@ -89,6 +89,27 @@ func (s *UserStorage) ValidateJWT(tokenString string) (string, error) {
 	return "", fmt.Errorf("invalid token")
 }
 
+// Login checks user credentials and returns a JWT token
+func (s *UserStorage) Login(ctx context.Context, username, password string) (string, error) {
+	user, err := s.GetUserByUsername(ctx, username)
+	if err != nil {
+		return "", fmt.Errorf("user not found")
+	}
+
+	// Check password
+	if !CheckPassword(password, user.Password) {
+		return "", errors.New("invalid username or password")
+	}
+
+	// Generate JWT token
+	token, err := GenerateJWT(user.ID.Hex(), s.secret)
+	if err != nil {
+		return "", err
+	}
+
+	return token, nil
+}
+
 // GetUserByID fetches a user by their ID
 func (s *UserStorage) GetUserByID(ctx context.Context, userID primitive.ObjectID) (*models.User, error) {
 	var user models.User

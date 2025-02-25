@@ -34,6 +34,19 @@ func (s *UserService) CreateUser(ctx context.Context, user *models.User) (string
 	return token, nil
 }
 
+// CreateUser creates a new user and returns a JWT token
+func (s *UserService) LoginUser(ctx context.Context, username, password string) (string, error) {
+
+	token, err := s.storage.Login(ctx, username, password)
+	if err != nil {
+		s.logger.Printf("Error creating user: %v\n", err)
+		return "", err
+	}
+
+	s.logger.Printf("User logged in successfully, ID: %s\n", username)
+	return token, nil
+}
+
 // DeleteUser removes a user from the database
 func (s *UserService) DeleteUser(ctx context.Context, userID primitive.ObjectID) error {
 	s.logger.Printf("Deleting user with ID: %s\n", userID.Hex())
