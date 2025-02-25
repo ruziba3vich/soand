@@ -17,15 +17,13 @@ func RegisterUserRoutes(r *gin.Engine, userRepo repos.UserRepo, logger *log.Logg
 	userRoutes := r.Group("/users")
 	{
 		userRoutes.POST("/", userHandler.CreateUser)
-		userRoutes.POST("/validate", userHandler.ValidateJWT)
+		userRoutes.POST("/validate", authMiddleware(userHandler.ValidateJWT))
 
-		// Protected routes (require authentication)
-		userRoutes.Use(authMiddleware)
-		userRoutes.DELETE("/:id", userHandler.DeleteUser)
-		userRoutes.GET("/:id", userHandler.GetUserByID)
-		userRoutes.GET("/username/:username", userHandler.GetUserByUsername)
-		userRoutes.PATCH("/fullname", userHandler.UpdateFullname)
-		userRoutes.PATCH("/password", userHandler.UpdatePassword)
-		userRoutes.PATCH("/username", userHandler.UpdateUsername)
+		userRoutes.DELETE("/:id", authMiddleware(userHandler.DeleteUser))
+		userRoutes.GET("/:id", authMiddleware(userHandler.GetUserByID))
+		userRoutes.GET("/username/:username", authMiddleware(userHandler.GetUserByUsername))
+		userRoutes.PATCH("/fullname", authMiddleware(userHandler.UpdateFullname))
+		userRoutes.PATCH("/password", authMiddleware(userHandler.UpdatePassword))
+		userRoutes.PATCH("/username", authMiddleware(userHandler.UpdateUsername))
 	}
 }

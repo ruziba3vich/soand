@@ -7,7 +7,7 @@ type User struct {
 	Fullname    string             `json:"full_name" bson:"full_name"`
 	Phone       string             `json:"phone" bson:"phone" binding:"required"`
 	Username    string             `json:"username" bson:"username" binding:"required"`
-	Password    string             `json:"-" bson:"password"`
-	Status      string             `json:"status" bson:"status" binding:"required,oneof=basic premium super_premium"`
+	Password    string             `json:"password" bson:"password"`
+	Status      string             `json:"status" bson:"status"`
 	ProfilePics []string           `json:"profile_pics" bson:"profile_pics"`
 }
