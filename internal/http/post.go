@@ -25,6 +25,18 @@ func NewPostHandler(service repos.IPostService, logger *logrus.Logger) *PostHand
 	}
 }
 
+// RegisterRoutes registers the post-related endpoints to the given router
+func (h *PostHandler) RegisterRoutes(router *gin.RouterGroup) {
+	posts := router.Group("/posts")
+	{
+		posts.POST("", h.CreatePost)
+		posts.GET("", h.GetPost)           // Get post by query param "id"
+		posts.GET("/all", h.GetAllPosts)   // Get all posts with pagination
+		posts.PUT("/:id", h.UpdatePost)    // Update post by ID
+		posts.DELETE("/:id", h.DeletePost) // Delete post by ID
+	}
+}
+
 // CreatePost handles creating a new post
 func (h *PostHandler) CreatePost(c *gin.Context) {
 	var req dto.PostRequest
