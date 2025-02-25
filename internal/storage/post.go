@@ -13,7 +13,8 @@ import (
 )
 
 type Storage struct {
-	db *mongo.Collection
+	db            *mongo.Collection
+	users_storage *UserStorage
 }
 
 // CreatePost inserts a new post into the database

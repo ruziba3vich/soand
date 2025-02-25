@@ -14,23 +14,8 @@ import (
 
 func Run(ctx context.Context, logger *log.Logger) error {
 	cfg := config.LoadConfig()
-	posts_collection, err := storage.ConnectMongoDB(ctx, cfg, "posts_collection")
-	if err != nil {
-		return err
-	}
-
-	// posts
-	posts_storage := storage.NewStorage(posts_collection)
-	posts_service := service.NewPostService(posts_storage, logger)
-
-	posts_handler := handler.NewPostHandler(posts_service, logger)
-
-	if err := posts_storage.EnsureTTLIndex(ctx); err != nil {
-		return err
-	}
 
 	router := gin.Default()
-	posts_handler.RegisterRoutes(router)
 
 	// users
 
@@ -44,6 +29,23 @@ func Run(ctx context.Context, logger *log.Logger) error {
 	user_service := service.NewUserService(user_storage, logger)
 
 	registerar.RegisterUserRoutes(router, user_service, logger)
+
+	// posts
+
+	posts_collection, err := storage.ConnectMongoDB(ctx, cfg, "posts_collection")
+	if err != nil {
+		return err
+	}
+
+	posts_storage := storage.NewStorage(posts_collection, user_storage)
+	posts_service := service.NewPostService(posts_storage, logger)
+
+	posts_handler := handler.NewPostHandler(posts_service, logger)
+	posts_handler.RegisterRoutes(router)
+
+	if err := posts_storage.EnsureTTLIndex(ctx); err != nil {
+		return err
+	}
 
 	return router.Run(":7777")
 }

@@ -142,3 +142,16 @@ func (s *UserService) ValidateJWT(tokenString string) (string, error) {
 	s.logger.Printf("JWT token validated successfully, user ID: %s\n", userID)
 	return userID, nil
 }
+
+func (s *UserService) ChangeProfileVisibility(ctx context.Context, userID primitive.ObjectID, hidden bool) error {
+	s.logger.Printf("Changing profile visibility for user %s to %v", userID.Hex(), hidden)
+
+	err := s.storage.ChangeProfileVisibility(ctx, userID, hidden)
+	if err != nil {
+		s.logger.Printf("Failed to change profile visibility for user %s: %v", userID.Hex(), err)
+		return err
+	}
+
+	s.logger.Printf("Successfully changed profile visibility for user %s", userID.Hex())
+	return nil
+}

@@ -209,3 +209,38 @@ func (h *UserHandler) getUserIdFromRequest(c *gin.Context) (primitive.ObjectID, 
 
 	return oid, err
 }
+
+func (h *UserHandler) ChangeProfileVisibility(c *gin.Context) {
+	// Extract user ID from context (set by AuthMiddleware)
+	userId, err := h.getUserIdFromRequest(c)
+	if err != nil {
+		c.JSON(http.StatusUnauthorized, gin.H{"error": "Unauthorized"})
+		return
+	}
+
+	var req struct {
+		Hidden bool `json:"hidden"`
+	}
+
+	if err := c.ShouldBindJSON(&req); err != nil {
+		h.logger.Printf("Invalid request payload: %v", err)
+		c.JSON(http.StatusBadRequest, gin.H{"error": "invalid request payload"})
+		return
+	}
+
+	if err != nil {
+		h.logger.Printf("Invalid user ID format: %v", err)
+		c.JSON(http.StatusBadRequest, gin.H{"error": "invalid user ID"})
+		return
+	}
+
+	// Call service to update profile visibility
+	if err := h.repo.ChangeProfileVisibility(c.Request.Context(), userId, req.Hidden); err != nil {
+		h.logger.Printf("Failed to change profile visibility for user %s: %v", userId.Hex(), err)
+		c.JSON(http.StatusInternalServerError, gin.H{"error": "failed to update profile visibility"})
+		return
+	}
+
+	h.logger.Printf("Successfully changed profile visibility for user %s", userId.Hex())
+	c.JSON(http.StatusOK, gin.H{"message": "profile visibility updated"})
+}

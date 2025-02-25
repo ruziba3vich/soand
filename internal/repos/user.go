@@ -18,5 +18,6 @@ type (
 		UpdateUsername(context.Context, primitive.ObjectID, string) error
 		ValidateJWT(string) (string, error)
 		LoginUser(context.Context, string, string) (string, error)
+		ChangeProfileVisibility(context.Context, primitive.ObjectID, bool) error
 	}
 )
