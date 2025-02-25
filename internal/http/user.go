@@ -71,7 +71,7 @@ func (h *UserHandler) LoginUser(c *gin.Context) {
 
 // DeleteUser handles user deletion requests
 func (h *UserHandler) DeleteUser(c *gin.Context) {
-	userId, err := h.getUserIdFromRequest(c)
+	userId, err := getUserIdFromRequest(c)
 	if err != nil {
 		c.JSON(http.StatusUnauthorized, gin.H{"error": "Unauthorized"})
 		return
@@ -88,7 +88,7 @@ func (h *UserHandler) DeleteUser(c *gin.Context) {
 
 // GetUserByID handles retrieving a user by ID
 func (h *UserHandler) GetUserByID(c *gin.Context) {
-	userId, err := h.getUserIdFromRequest(c)
+	userId, err := getUserIdFromRequest(c)
 	if err != nil {
 		c.JSON(http.StatusUnauthorized, gin.H{"error": "Unauthorized"})
 		return
@@ -124,7 +124,7 @@ func (h *UserHandler) UpdateFullname(c *gin.Context) {
 		NewFullname string `json:"new_fullname"`
 	}
 
-	userId, err := h.getUserIdFromRequest(c)
+	userId, err := getUserIdFromRequest(c)
 	if err != nil {
 		c.JSON(http.StatusUnauthorized, gin.H{"error": "Unauthorized"})
 		return
@@ -146,7 +146,7 @@ func (h *UserHandler) UpdateFullname(c *gin.Context) {
 
 // UpdatePassword handles updating a user's password
 func (h *UserHandler) UpdatePassword(c *gin.Context) {
-	userId, err := h.getUserIdFromRequest(c)
+	userId, err := getUserIdFromRequest(c)
 	if err != nil {
 		c.JSON(http.StatusUnauthorized, gin.H{"error": "Unauthorized"})
 		return
@@ -177,7 +177,7 @@ func (h *UserHandler) UpdateUsername(c *gin.Context) {
 		NewUsername string `json:"new_username"`
 	}
 
-	userId, err := h.getUserIdFromRequest(c)
+	userId, err := getUserIdFromRequest(c)
 	if err != nil {
 		c.JSON(http.StatusUnauthorized, gin.H{"error": "Unauthorized"})
 		return
@@ -198,10 +198,9 @@ func (h *UserHandler) UpdateUsername(c *gin.Context) {
 	c.Status(http.StatusOK)
 }
 
-func (h *UserHandler) getUserIdFromRequest(c *gin.Context) (primitive.ObjectID, error) {
+func getUserIdFromRequest(c *gin.Context) (primitive.ObjectID, error) {
 	userID, exists := c.Get("userID")
 	if !exists {
-		h.logger.Println("User ID not found in context")
 		return primitive.NilObjectID, fmt.Errorf(" ")
 	}
 
@@ -212,7 +211,7 @@ func (h *UserHandler) getUserIdFromRequest(c *gin.Context) (primitive.ObjectID, 
 
 func (h *UserHandler) ChangeProfileVisibility(c *gin.Context) {
 	// Extract user ID from context (set by AuthMiddleware)
-	userId, err := h.getUserIdFromRequest(c)
+	userId, err := getUserIdFromRequest(c)
 	if err != nil {
 		c.JSON(http.StatusUnauthorized, gin.H{"error": "Unauthorized"})
 		return

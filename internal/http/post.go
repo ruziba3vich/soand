@@ -13,8 +13,9 @@ import (
 
 // PostHandler struct that handles HTTP requests
 type PostHandler struct {
-	service repos.IPostService
-	logger  *log.Logger
+	service      repos.IPostService
+	user_service repos.UserRepo
+	logger       *log.Logger
 }
 
 // NewPostHandler initializes a new PostHandler with a service and logger
@@ -25,20 +26,12 @@ func NewPostHandler(service repos.IPostService, logger *log.Logger) *PostHandler
 	}
 }
 
-// RegisterRoutes registers the post-related endpoints to the given router
-func (h *PostHandler) RegisterRoutes(router *gin.Engine) {
-	posts := router.Group("/posts")
-	{
-		posts.POST("", h.CreatePost)
-		posts.GET("", h.GetPost)           // Get post by query param "id"
-		posts.GET("/all", h.GetAllPosts)   // Get all posts with pagination
-		posts.PUT("/:id", h.UpdatePost)    // Update post by ID
-		posts.DELETE("/:id", h.DeletePost) // Delete post by ID
-	}
-}
-
 // CreatePost handles creating a new post
 func (h *PostHandler) CreatePost(c *gin.Context) {
+	userId, err := getUserIdFromRequest(c)
+	if err != nil {
+		c.JSON(http.StatusUnauthorized, gin.H{"error": "Unauthorized"})
+	}
 	var req dto.PostRequest
 	if err := c.ShouldBindJSON(&req); err != nil {
 		h.logger.Println("error", err.Error())
@@ -48,6 +41,7 @@ func (h *PostHandler) CreatePost(c *gin.Context) {
 
 	// Convert PostRequest to models.Post
 	post := req.ToPost()
+	post.CreatorId = userId
 
 	// Call service to create post
 	id, err := h.service.CreatePost(c.Request.Context(), post, req.DeleteAfter)

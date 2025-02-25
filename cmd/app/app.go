@@ -5,7 +5,7 @@ import (
 	"log"
 
 	"github.com/gin-gonic/gin"
-	handler "github.com/ruziba3vich/soand/internal/http"
+	"github.com/ruziba3vich/soand/internal/middleware"
 	"github.com/ruziba3vich/soand/internal/registerar"
 	"github.com/ruziba3vich/soand/internal/service"
 	"github.com/ruziba3vich/soand/internal/storage"
@@ -28,7 +28,9 @@ func Run(ctx context.Context, logger *log.Logger) error {
 	user_storage := storage.NewUserStorage(user_collection, cfg)
 	user_service := service.NewUserService(user_storage, logger)
 
-	registerar.RegisterUserRoutes(router, user_service, logger)
+	authMiddleware := middleware.AuthMiddleware(user_service, logger)
+
+	registerar.RegisterUserRoutes(router, user_service, logger, authMiddleware)
 
 	// posts
 
@@ -40,8 +42,7 @@ func Run(ctx context.Context, logger *log.Logger) error {
 	posts_storage := storage.NewStorage(posts_collection, user_storage)
 	posts_service := service.NewPostService(posts_storage, logger)
 
-	posts_handler := handler.NewPostHandler(posts_service, logger)
-	posts_handler.RegisterRoutes(router)
+	registerar.RegisterPostRoutes(router, posts_service, logger, authMiddleware)
 
 	if err := posts_storage.EnsureTTLIndex(ctx); err != nil {
 		return err

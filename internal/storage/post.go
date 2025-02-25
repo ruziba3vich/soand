@@ -92,8 +92,30 @@ func (s *Storage) GetAllPosts(ctx context.Context, page, pageSize int64) ([]mode
 	defer cursor.Close(ctx)
 
 	var posts []models.Post
-	if err := cursor.All(ctx, &posts); err != nil {
+	for cursor.Next(ctx) {
+		var post models.Post
+		if err := cursor.Decode(&post); err != nil {
+			return nil, err
+		}
+
+		// Fetch owner details
+		owner, err := s.users_storage.GetUserByID(ctx, post.CreatorId)
+		if err != nil {
+			return nil, err
+		}
+
+		// Check if the owner's profile is hidden
+		if owner.HiddenProfile {
+			post.CreatorId = primitive.NilObjectID // Set to "00000" equivalent
+		}
+
+		posts = append(posts, post)
+	}
+
+	// Check for cursor errors
+	if err := cursor.Err(); err != nil {
 		return nil, err
 	}
+
 	return posts, nil
 }
