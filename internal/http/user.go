@@ -1,6 +1,7 @@
 package handler
 
 import (
+	"fmt"
 	"log"
 	"net/http"
 
@@ -43,15 +44,13 @@ func (h *UserHandler) CreateUser(c *gin.Context) {
 
 // DeleteUser handles user deletion requests
 func (h *UserHandler) DeleteUser(c *gin.Context) {
-	userID := c.Param("id")
-	objID, err := primitive.ObjectIDFromHex(userID)
+	userId, err := h.getUserIdFromRequest(c)
 	if err != nil {
-		h.logger.Printf("Invalid user ID: %v", err)
-		c.JSON(http.StatusBadRequest, gin.H{"error": "Invalid user ID"})
+		c.JSON(http.StatusUnauthorized, gin.H{"error": "Unauthorized"})
 		return
 	}
 
-	if err := h.repo.DeleteUser(c.Request.Context(), objID); err != nil {
+	if err := h.repo.DeleteUser(c.Request.Context(), userId); err != nil {
 		h.logger.Printf("Error deleting user: %v", err)
 		c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to delete user"})
 		return
@@ -62,15 +61,13 @@ func (h *UserHandler) DeleteUser(c *gin.Context) {
 
 // GetUserByID handles retrieving a user by ID
 func (h *UserHandler) GetUserByID(c *gin.Context) {
-	userID := c.Param("id")
-	objID, err := primitive.ObjectIDFromHex(userID)
+	userId, err := h.getUserIdFromRequest(c)
 	if err != nil {
-		h.logger.Printf("Invalid user ID: %v", err)
-		c.JSON(http.StatusBadRequest, gin.H{"error": "Invalid user ID"})
+		c.JSON(http.StatusUnauthorized, gin.H{"error": "Unauthorized"})
 		return
 	}
 
-	user, err := h.repo.GetUserByID(c.Request.Context(), objID)
+	user, err := h.repo.GetUserByID(c.Request.Context(), userId)
 	if err != nil {
 		h.logger.Printf("Error fetching user: %v", err)
 		c.JSON(http.StatusNotFound, gin.H{"error": "User not found"})
@@ -97,24 +94,21 @@ func (h *UserHandler) GetUserByUsername(c *gin.Context) {
 // UpdateFullname handles updating a user's full name
 func (h *UserHandler) UpdateFullname(c *gin.Context) {
 	var request struct {
-		UserID      string `json:"id"`
 		NewFullname string `json:"new_fullname"`
 	}
 
+	userId, err := h.getUserIdFromRequest(c)
+	if err != nil {
+		c.JSON(http.StatusUnauthorized, gin.H{"error": "Unauthorized"})
+		return
+	}
 	if err := c.ShouldBindJSON(&request); err != nil {
 		h.logger.Printf("Error parsing fullname update request: %v", err)
 		c.JSON(http.StatusBadRequest, gin.H{"error": "Invalid request body"})
 		return
 	}
 
-	objID, err := primitive.ObjectIDFromHex(request.UserID)
-	if err != nil {
-		h.logger.Printf("Invalid user ID: %v", err)
-		c.JSON(http.StatusBadRequest, gin.H{"error": "Invalid user ID"})
-		return
-	}
-
-	if err := h.repo.UpdateFullname(c.Request.Context(), objID, request.NewFullname); err != nil {
+	if err := h.repo.UpdateFullname(c.Request.Context(), userId, request.NewFullname); err != nil {
 		h.logger.Printf("Error updating fullname: %v", err)
 		c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to update fullname"})
 		return
@@ -125,8 +119,12 @@ func (h *UserHandler) UpdateFullname(c *gin.Context) {
 
 // UpdatePassword handles updating a user's password
 func (h *UserHandler) UpdatePassword(c *gin.Context) {
+	userId, err := h.getUserIdFromRequest(c)
+	if err != nil {
+		c.JSON(http.StatusUnauthorized, gin.H{"error": "Unauthorized"})
+		return
+	}
 	var request struct {
-		UserID      string `json:"id"`
 		OldPassword string `json:"old_password"`
 		NewPassword string `json:"new_password"`
 	}
@@ -137,14 +135,7 @@ func (h *UserHandler) UpdatePassword(c *gin.Context) {
 		return
 	}
 
-	objID, err := primitive.ObjectIDFromHex(request.UserID)
-	if err != nil {
-		h.logger.Printf("Invalid user ID: %v", err)
-		c.JSON(http.StatusBadRequest, gin.H{"error": "Invalid user ID"})
-		return
-	}
-
-	if err := h.repo.UpdatePassword(c.Request.Context(), objID, request.OldPassword, request.NewPassword); err != nil {
+	if err := h.repo.UpdatePassword(c.Request.Context(), userId, request.OldPassword, request.NewPassword); err != nil {
 		h.logger.Printf("Error updating password: %v", err)
 		c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to update password"})
 		return
@@ -156,8 +147,13 @@ func (h *UserHandler) UpdatePassword(c *gin.Context) {
 // UpdateUsername handles updating a user's username
 func (h *UserHandler) UpdateUsername(c *gin.Context) {
 	var request struct {
-		UserID      string `json:"id"`
 		NewUsername string `json:"new_username"`
+	}
+
+	userId, err := h.getUserIdFromRequest(c)
+	if err != nil {
+		c.JSON(http.StatusUnauthorized, gin.H{"error": "Unauthorized"})
+		return
 	}
 
 	if err := c.ShouldBindJSON(&request); err != nil {
@@ -166,14 +162,7 @@ func (h *UserHandler) UpdateUsername(c *gin.Context) {
 		return
 	}
 
-	objID, err := primitive.ObjectIDFromHex(request.UserID)
-	if err != nil {
-		h.logger.Printf("Invalid user ID: %v", err)
-		c.JSON(http.StatusBadRequest, gin.H{"error": "Invalid user ID"})
-		return
-	}
-
-	if err := h.repo.UpdateUsername(c.Request.Context(), objID, request.NewUsername); err != nil {
+	if err := h.repo.UpdateUsername(c.Request.Context(), userId, request.NewUsername); err != nil {
 		h.logger.Printf("Error updating username: %v", err)
 		c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to update username"})
 		return
@@ -204,17 +193,18 @@ func (h *UserHandler) ValidateJWT(c *gin.Context) {
 	c.JSON(http.StatusOK, gin.H{"user_id": userID})
 }
 
-func (h *UserHandler) RegisterUserRoutes(r *gin.Engine, logger *log.Logger) {
-
-	userRoutes := r.Group("/users")
-	{
-		userRoutes.POST("/", h.CreateUser)
-		userRoutes.DELETE("/:id", h.DeleteUser)
-		userRoutes.GET("/:id", h.GetUserByID)
-		userRoutes.GET("/username/:username", h.GetUserByUsername)
-		userRoutes.PATCH("/fullname", h.UpdateFullname)
-		userRoutes.PATCH("/password", h.UpdatePassword)
-		userRoutes.PATCH("/username", h.UpdateUsername)
-		userRoutes.POST("/validate", h.ValidateJWT)
+func (h *UserHandler) getUserIdFromRequest(c *gin.Context) (primitive.ObjectID, error) {
+	userID, exists := c.Get("userID")
+	if !exists {
+		h.logger.Println("User ID not found in context")
+		return primitive.NilObjectID, fmt.Errorf(" ")
 	}
+
+	oid, ok := userID.(primitive.ObjectID)
+	if !ok {
+		h.logger.Println("Invalid user ID type")
+		return primitive.NilObjectID, fmt.Errorf(" ")
+	}
+
+	return oid, nil
 }
