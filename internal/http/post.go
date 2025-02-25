@@ -26,7 +26,7 @@ func NewPostHandler(service repos.IPostService, logger *logrus.Logger) *PostHand
 }
 
 // RegisterRoutes registers the post-related endpoints to the given router
-func (h *PostHandler) RegisterRoutes(router *gin.RouterGroup) {
+func (h *PostHandler) RegisterRoutes(router *gin.Engine) {
 	posts := router.Group("/posts")
 	{
 		posts.POST("", h.CreatePost)
