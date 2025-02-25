@@ -1,0 +1,20 @@
+[MusicLib] 2025/02/26 01:00:08 post.go:67: error the provided hex string is not a valid ObjectID
+[MusicLib] 2025/02/26 01:01:15 main.go:42: Received signal: %v, shutting down... interrupt
+[MusicLib] 2025/02/26 01:01:15 main.go:49: Shutdown complete
+[MusicLib] 2025/02/26 01:01:22 post.go:67: error the provided hex string is not a valid ObjectID
+[MusicLib] 2025/02/26 01:02:07 service.go:86: map[count:1 page:1 pageSize:10]
+[MusicLib] 2025/02/26 01:03:37 main.go:42: Received signal: interrupt, shutting down...
+[MusicLib] 2025/02/26 01:03:37 main.go:49: Shutdown complete
+[MusicLib] 2025/02/26 01:03:46 service.go:86: map[count:1 page:1 pageSize:10]
+[MusicLib] 2025/02/26 01:04:02 post.go:67: error the provided hex string is not a valid ObjectID the provided hex string is not a valid ObjectID
+[MusicLib] 2025/02/26 01:05:53 service.go:86: map[count:1 page:1 pageSize:10]
+[MusicLib] 2025/02/26 01:06:17 service.go:122: map[id:67be19e4146f5955859b8011 update:map[created_at:2025-02-25T19:28:36.492Z creator_id:000000000000000000000000 delete_at:2025-02-27T01:28:36.492Z description:This was my first post! id:67be19e4146f5955859b8011 picture:<nil> tags:[golang mongodb gin]] updaterID:000000000000000000000000]
+[MusicLib] 2025/02/26 01:06:43 service.go:122: map[id:67be19e4146f5955859b8011 update:map[created_at:2025-02-25T19:28:36.492Z creator_id:000000000000000000000000 delete_at:2025-02-27T01:28:36.492Z description:This is my first post! id:67be19e4146f5955859b8011 picture:<nil> tags:[golang mongodb gin]] updaterID:000000000000000000000000]
+[MusicLib] 2025/02/26 01:06:57 service.go:86: map[count:1 page:1 pageSize:10]
+[MusicLib] 2025/02/26 01:07:16 post.go:67: error the provided hex string is not a valid ObjectID the provided hex string is not a valid ObjectID
+[MusicLib] 2025/02/26 01:07:26 post.go:67: error the provided hex string is not a valid ObjectID the provided hex string is not a valid ObjectID
+[MusicLib] 2025/02/26 01:07:43 main.go:42: Received signal: interrupt, shutting down...
+[MusicLib] 2025/02/26 01:07:43 main.go:49: Shutdown complete
+[MusicLib] 2025/02/26 01:07:51 service.go:105: id 67be19e4146f5955859b8011
+[MusicLib] 2025/02/26 01:08:08 service.go:58: id 67be19e4146f5955859b8011
+[MusicLib] 2025/02/26 01:08:25 service.go:98: map[error:post not found id:67be19e4146f5955859b8011]

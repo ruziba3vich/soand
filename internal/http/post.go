@@ -1,24 +1,24 @@
 package handler
 
 import (
+	"log"
 	"net/http"
 	"strconv"
 
 	"github.com/gin-gonic/gin"
 	dto "github.com/ruziba3vich/soand/internal/dtos"
 	"github.com/ruziba3vich/soand/internal/repos"
-	"github.com/sirupsen/logrus"
 	"go.mongodb.org/mongo-driver/bson/primitive"
 )
 
 // PostHandler struct that handles HTTP requests
 type PostHandler struct {
 	service repos.IPostService
-	logger  *logrus.Logger
+	logger  *log.Logger
 }
 
 // NewPostHandler initializes a new PostHandler with a service and logger
-func NewPostHandler(service repos.IPostService, logger *logrus.Logger) *PostHandler {
+func NewPostHandler(service repos.IPostService, logger *log.Logger) *PostHandler {
 	return &PostHandler{
 		service: service,
 		logger:  logger,
@@ -41,7 +41,7 @@ func (h *PostHandler) RegisterRoutes(router *gin.Engine) {
 func (h *PostHandler) CreatePost(c *gin.Context) {
 	var req dto.PostRequest
 	if err := c.ShouldBindJSON(&req); err != nil {
-		h.logger.WithField("error", err.Error()).Error("Invalid request payload")
+		h.logger.Println("error", err.Error())
 		c.JSON(http.StatusBadRequest, gin.H{"error": "Invalid request payload"})
 		return
 	}
@@ -61,11 +61,11 @@ func (h *PostHandler) CreatePost(c *gin.Context) {
 
 // GetPost handles retrieving a single post by ID
 func (h *PostHandler) GetPost(c *gin.Context) {
-	idParam := c.Param("id")
+	idParam := c.Query("id")
 	id, err := primitive.ObjectIDFromHex(idParam)
 	if err != nil {
-		h.logger.WithField("error", err.Error()).Error("Invalid post ID format")
-		c.JSON(http.StatusBadRequest, gin.H{"error": "Invalid post ID format"})
+		h.logger.Println("error", err.Error()+idParam+" "+err.Error())
+		c.JSON(http.StatusBadRequest, gin.H{"error": "Invalid post ID format " + idParam + " " + err.Error()})
 		return
 	}
 
@@ -97,20 +97,21 @@ func (h *PostHandler) UpdatePost(c *gin.Context) {
 	idParam := c.Param("id")
 	id, err := primitive.ObjectIDFromHex(idParam)
 	if err != nil {
-		h.logger.WithField("error", err.Error()).Error("Invalid post ID format")
+		h.logger.Println("error", err.Error())
 		c.JSON(http.StatusBadRequest, gin.H{"error": "Invalid post ID format"})
 		return
 	}
 
-	var updateData map[string]interface{}
+	var updateData map[string]any
 	if err := c.ShouldBindJSON(&updateData); err != nil {
-		h.logger.WithField("error", err.Error()).Error("Invalid update payload")
-		c.JSON(http.StatusBadRequest, gin.H{"error": "Invalid update payload"})
+		h.logger.Println("error", err.Error())
+		c.JSON(http.StatusBadRequest, gin.H{"error": "Invalid update payload " + err.Error()})
 		return
 	}
 
-	updaterID := primitive.NewObjectID() // Assume it's coming from auth context
-	if err := h.service.UpdatePost(c.Request.Context(), id, updaterID, updateData); err != nil {
+	updaterId, _ := primitive.ObjectIDFromHex(updateData["creator_id"].(string))
+
+	if err := h.service.UpdatePost(c.Request.Context(), id, updaterId, updateData); err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to update post"})
 		return
 	}
@@ -123,8 +124,8 @@ func (h *PostHandler) DeletePost(c *gin.Context) {
 	idParam := c.Param("id")
 	id, err := primitive.ObjectIDFromHex(idParam)
 	if err != nil {
-		h.logger.WithField("error", err.Error()).Error("Invalid post ID format")
-		c.JSON(http.StatusBadRequest, gin.H{"error": "Invalid post ID format"})
+		h.logger.Println("error", err.Error())
+		c.JSON(http.StatusBadRequest, gin.H{"error": "Invalid post ID format "})
 		return
 	}
 

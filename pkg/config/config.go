@@ -17,8 +17,7 @@ type Config struct {
 
 // MongoDBConfig holds MongoDB settings
 type MongoDBConfig struct {
-	URI      string
-	Database string
+	URI, User, Password, Database string
 }
 
 // MinIOConfig holds MinIO settings
@@ -50,6 +49,8 @@ func LoadConfig() *Config {
 		MongoDB: MongoDBConfig{
 			URI:      getEnv("MONGO_URI", "mongodb://localhost:27017"),
 			Database: getEnv("MONGO_DB", "mydatabase"),
+			User:     getEnv("MONGO_USER", "mongodb_pro"),
+			Password: getEnv("MONGO_PASSWORD", ""),
 		},
 		MinIO: MinIOConfig{
 			Endpoint:  getEnv("MINIO_ENDPOINT", "localhost:9000"),
