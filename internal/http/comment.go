@@ -5,11 +5,12 @@ import (
 	"encoding/json"
 	"log"
 	"net/http"
-	"sync"
+	"strconv"
 	"time"
 
 	"github.com/gin-gonic/gin"
 	"github.com/gorilla/websocket"
+	"github.com/redis/go-redis/v9"
 	"github.com/ruziba3vich/soand/internal/models"
 	"github.com/ruziba3vich/soand/internal/repos"
 	"go.mongodb.org/mongo-driver/bson/primitive"
@@ -20,38 +21,31 @@ var upgrader = websocket.Upgrader{
 	CheckOrigin: func(r *http.Request) bool { return true },
 }
 
-// Connection struct to track users per post
-type Connection struct {
-	PostID primitive.ObjectID
-	Conn   *websocket.Conn
-}
-
-// CommentHandler struct
 type CommentHandler struct {
 	service repos.ICommentService
 	logger  *log.Logger
-	mu      sync.Mutex
-	clients map[*Connection]bool
+	redis   *redis.Client
 }
 
-// NewCommentHandler initializes a new comment handler
-func NewCommentHandler(service repos.ICommentService, logger *log.Logger) *CommentHandler {
+func NewCommentHandler(service repos.ICommentService, logger *log.Logger, redis *redis.Client) *CommentHandler {
 	return &CommentHandler{
 		service: service,
 		logger:  logger,
-		clients: make(map[*Connection]bool),
+		redis:   redis,
 	}
 }
 
-// WebSocket connection handler
+// Handle WebSocket connections for real-time comments
 func (h *CommentHandler) HandleWebSocket(c *gin.Context) {
-	postID, err := primitive.ObjectIDFromHex(c.Param("post_id"))
-	if err != nil {
-		h.logger.Println("Invalid post ID:", err)
-		c.JSON(http.StatusBadRequest, gin.H{"error": "invalid post ID"})
+	// Extract post ID from query parameters
+	postID := c.Query("post_id")
+	if postID == "" {
+		h.logger.Println("Missing post ID in WebSocket request")
+		c.JSON(http.StatusBadRequest, gin.H{"error": "post_id is required"})
 		return
 	}
 
+	// Upgrade HTTP to WebSocket connection
 	conn, err := upgrader.Upgrade(c.Writer, c.Request, nil)
 	if err != nil {
 		h.logger.Println("WebSocket upgrade failed:", err)
@@ -59,60 +53,162 @@ func (h *CommentHandler) HandleWebSocket(c *gin.Context) {
 	}
 	defer conn.Close()
 
-	client := &Connection{PostID: postID, Conn: conn}
+	h.logger.Println("New WebSocket client connected for post:", postID)
 
-	h.mu.Lock()
-	h.clients[client] = true
-	h.mu.Unlock()
+	ctx, cancel := context.WithCancel(context.Background())
+	defer cancel()
 
-	h.logger.Println("New WebSocket connection for post:", postID.Hex())
+	// Subscribe to Redis channel for this specific post
+	pubsub := h.redis.Subscribe(ctx, "comments:"+postID)
+	defer pubsub.Close()
 
+	// Goroutine to listen for messages from Redis and send to WebSocket client
+	go func() {
+		for msg := range pubsub.Channel() {
+			h.logger.Println("Received message from Redis for post", postID, ":", msg.Payload)
+			if err := conn.WriteMessage(websocket.TextMessage, []byte(msg.Payload)); err != nil {
+				h.logger.Println("Error sending message to WebSocket client:", err)
+				cancel() // Cancel context to stop subscription
+				return
+			}
+		}
+	}()
+
+	// Listen for new comments from WebSocket client
 	for {
-		_, message, err := conn.ReadMessage()
+		_, msg, err := conn.ReadMessage()
 		if err != nil {
-			h.logger.Println("WebSocket read error:", err)
-			h.mu.Lock()
-			delete(h.clients, client)
-			h.mu.Unlock()
-			return
+			h.logger.Println("WebSocket connection closed:", err)
+			break
 		}
 
 		var comment models.Comment
-		if err := json.Unmarshal(message, &comment); err != nil {
+		if err := json.Unmarshal(msg, &comment); err != nil {
 			h.logger.Println("Invalid comment format:", err)
 			continue
 		}
 
-		comment.PostID = postID
-		comment.CreatedAt = time.Now()
-
-		if err := h.service.CreateComment(context.Background(), &comment); err != nil {
-			h.logger.Println("Failed to store comment:", err)
+		// Ensure comment belongs to the correct post
+		if comment.PostID.Hex() != postID {
+			h.logger.Println("Comment post ID mismatch:", comment.PostID.Hex(), "Expected:", postID)
 			continue
 		}
 
-		h.broadcastComment(comment)
+		comment.ID = primitive.NewObjectID()
+		comment.CreatedAt = time.Now()
+
+		// Save comment to DB
+		if err := h.service.CreateComment(ctx, &comment); err != nil {
+			h.logger.Println("Error saving comment:", err)
+			continue
+		}
+
+		// Publish the comment to Redis channel for this post
+		commentJSON, _ := json.Marshal(comment)
+		h.redis.Publish(ctx, "comments:"+postID, string(commentJSON))
+
+		h.logger.Println("New comment published to post", postID, "ID:", comment.ID.Hex())
 	}
 }
 
-// Broadcasts comments to all WebSocket clients
-func (h *CommentHandler) broadcastComment(comment models.Comment) {
-	h.mu.Lock()
-	defer h.mu.Unlock()
-
-	message, err := json.Marshal(comment)
+// GetCommentsByPostID retrieves all comments for a post with pagination
+func (h *CommentHandler) GetCommentsByPostID(c *gin.Context) {
+	postIDStr := c.Param("post_id")
+	postID, err := primitive.ObjectIDFromHex(postIDStr)
 	if err != nil {
-		h.logger.Println("Failed to serialize comment:", err)
+		h.logger.Println("Invalid post ID:", err)
+		c.JSON(http.StatusBadRequest, gin.H{"error": "invalid post ID"})
 		return
 	}
 
-	for client := range h.clients {
-		if client.PostID == comment.PostID {
-			if err := client.Conn.WriteMessage(websocket.TextMessage, message); err != nil {
-				h.logger.Println("Failed to send message:", err)
-				client.Conn.Close()
-				delete(h.clients, client)
-			}
-		}
+	// Get pagination params
+	page, _ := strconv.ParseInt(c.DefaultQuery("page", "1"), 10, 64)
+	pageSize, _ := strconv.ParseInt(c.DefaultQuery("pageSize", "10"), 10, 64)
+
+	comments, err := h.service.GetCommentsByPostID(c.Request.Context(), postID, page, pageSize)
+	if err != nil {
+		h.logger.Println("Failed to fetch comments:", err)
+		c.JSON(http.StatusInternalServerError, gin.H{"error": "could not fetch comments"})
+		return
 	}
+
+	c.JSON(http.StatusOK, comments)
+}
+
+// UpdateComment updates the text of a comment
+func (h *CommentHandler) UpdateComment(c *gin.Context) {
+	commentIDStr := c.Param("comment_id")
+	commentID, err := primitive.ObjectIDFromHex(commentIDStr)
+	if err != nil {
+		h.logger.Println("Invalid comment ID:", err)
+		c.JSON(http.StatusBadRequest, gin.H{"error": "invalid comment ID"})
+		return
+	}
+
+	// Extract user ID from context (Assuming AuthMiddleware sets user_id)
+	userID, exists := c.Get("user_id")
+	if !exists {
+		h.logger.Println("User ID not found in context")
+		c.JSON(http.StatusUnauthorized, gin.H{"error": "unauthorized"})
+		return
+	}
+	userObjectID, ok := userID.(primitive.ObjectID)
+	if !ok {
+		h.logger.Println("Invalid user ID format")
+		c.JSON(http.StatusUnauthorized, gin.H{"error": "unauthorized"})
+		return
+	}
+
+	var req struct {
+		NewText string `json:"new_text" binding:"required"`
+	}
+
+	if err := c.ShouldBindJSON(&req); err != nil {
+		h.logger.Println("Invalid request body:", err)
+		c.JSON(http.StatusBadRequest, gin.H{"error": "invalid request body"})
+		return
+	}
+
+	err = h.service.UpdateCommentText(c.Request.Context(), commentID, userObjectID, req.NewText)
+	if err != nil {
+		h.logger.Println("Failed to update comment:", err)
+		c.JSON(http.StatusInternalServerError, gin.H{"error": "could not update comment"})
+		return
+	}
+
+	c.JSON(http.StatusOK, gin.H{"message": "comment updated successfully"})
+}
+
+// DeleteComment removes a comment
+func (h *CommentHandler) DeleteComment(c *gin.Context) {
+	commentIDStr := c.Param("comment_id")
+	commentID, err := primitive.ObjectIDFromHex(commentIDStr)
+	if err != nil {
+		h.logger.Println("Invalid comment ID:", err)
+		c.JSON(http.StatusBadRequest, gin.H{"error": "invalid comment ID"})
+		return
+	}
+
+	// Extract user ID from context
+	userID, exists := c.Get("user_id")
+	if !exists {
+		h.logger.Println("User ID not found in context")
+		c.JSON(http.StatusUnauthorized, gin.H{"error": "unauthorized"})
+		return
+	}
+	userObjectID, ok := userID.(primitive.ObjectID)
+	if !ok {
+		h.logger.Println("Invalid user ID format")
+		c.JSON(http.StatusUnauthorized, gin.H{"error": "unauthorized"})
+		return
+	}
+
+	err = h.service.DeleteComment(c.Request.Context(), commentID, userObjectID)
+	if err != nil {
+		h.logger.Println("Failed to delete comment:", err)
+		c.JSON(http.StatusInternalServerError, gin.H{"error": "could not delete comment"})
+		return
+	}
+
+	c.JSON(http.StatusOK, gin.H{"message": "comment deleted successfully"})
 }

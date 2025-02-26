@@ -4,8 +4,10 @@ import (
 	"log"
 
 	"github.com/gin-gonic/gin"
+	"github.com/redis/go-redis/v9"
 	handler "github.com/ruziba3vich/soand/internal/http"
 	"github.com/ruziba3vich/soand/internal/repos"
+	"github.com/ruziba3vich/soand/internal/service"
 )
 
 func RegisterUserRoutes(r *gin.Engine, userRepo repos.UserRepo, logger *log.Logger, authMiddleware func(gin.HandlerFunc) gin.HandlerFunc) {
@@ -36,5 +38,17 @@ func RegisterPostRoutes(r *gin.Engine, postRepo repos.IPostService, logger *log.
 		posts.GET("/all", h.GetAllPosts)                   // Get all posts with pagination
 		posts.PUT("/:id", authMiddleware(h.UpdatePost))    // Update post by ID
 		posts.DELETE("/:id", authMiddleware(h.DeletePost)) // Delete post by ID
+	}
+}
+
+func RegisterCommentRoutes(r *gin.Engine, commentService *service.CommentService, logger *log.Logger, redis *redis.Client) {
+	commentHandler := handler.NewCommentHandler(commentService, logger, redis)
+
+	commentRoutes := r.Group("/comments")
+	{
+		commentRoutes.GET("/ws", commentHandler.HandleWebSocket)           // WebSocket endpoint
+		commentRoutes.GET("/:post_id", commentHandler.GetCommentsByPostID) // Fetch comments with pagination
+		commentRoutes.PATCH("/:comment_id", commentHandler.UpdateComment)  // Update comment text
+		commentRoutes.DELETE("/:comment_id", commentHandler.DeleteComment) // Delete comment
 	}
 }
