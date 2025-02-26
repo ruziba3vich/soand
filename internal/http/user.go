@@ -6,7 +6,6 @@ import (
 	"net/http"
 
 	"github.com/gin-gonic/gin"
-	"github.com/k0kubun/pp"
 	"github.com/ruziba3vich/soand/internal/models"
 	"github.com/ruziba3vich/soand/internal/repos"
 	"go.mongodb.org/mongo-driver/bson/primitive"
@@ -33,7 +32,6 @@ func (h *UserHandler) CreateUser(c *gin.Context) {
 		return
 	}
 	user.Status = "basic"
-	pp.Println(user)
 	h.logger.Println(user.Password, len(user.Password))
 
 	token, err := h.repo.CreateUser(c.Request.Context(), &user)

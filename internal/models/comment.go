@@ -13,6 +13,6 @@ type Comment struct {
 	Text         string             `json:"text,omitempty" bson:"text,omitempty"`
 	VoiceMessage string             `json:"voice_message,omitempty" bson:"voice_message,omitempty"`
 	Pictures     []string           `json:"pictures,omitempty" bson:"pictures,omitempty"`
-	ReplyTo      primitive.ObjectID `json:"reply_to" bson:"reply_to"`
+	ReplyTo      primitive.ObjectID `json:"reply_to,omitempty" bson:"reply_to"`
 	CreatedAt    time.Time          `json:"created_at" bson:"created_at"`
 }

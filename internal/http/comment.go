@@ -35,7 +35,6 @@ func NewCommentHandler(service repos.ICommentService, logger *log.Logger, redis 
 	}
 }
 
-// Handle WebSocket connections for real-time comments
 func (h *CommentHandler) HandleWebSocket(c *gin.Context) {
 	// Extract post ID from query parameters
 	postID := c.Query("post_id")
@@ -49,6 +48,7 @@ func (h *CommentHandler) HandleWebSocket(c *gin.Context) {
 	conn, err := upgrader.Upgrade(c.Writer, c.Request, nil)
 	if err != nil {
 		h.logger.Println("WebSocket upgrade failed:", err)
+		c.JSON(http.StatusInternalServerError, gin.H{"error": "WebSocket upgrade failed"})
 		return
 	}
 	defer conn.Close()
@@ -64,12 +64,23 @@ func (h *CommentHandler) HandleWebSocket(c *gin.Context) {
 
 	// Goroutine to listen for messages from Redis and send to WebSocket client
 	go func() {
-		for msg := range pubsub.Channel() {
-			h.logger.Println("Received message from Redis for post", postID, ":", msg.Payload)
-			if err := conn.WriteMessage(websocket.TextMessage, []byte(msg.Payload)); err != nil {
-				h.logger.Println("Error sending message to WebSocket client:", err)
-				cancel() // Cancel context to stop subscription
+		for {
+			select {
+			case <-ctx.Done():
 				return
+			default:
+				msg, err := pubsub.ReceiveMessage(ctx)
+				if err != nil {
+					h.logger.Println("Redis subscription error:", err)
+					time.Sleep(5 * time.Second) // Retry after delay
+					continue
+				}
+				h.logger.Println("Received message from Redis for post", postID, ":", msg.Payload)
+				if err := conn.WriteMessage(websocket.TextMessage, []byte(msg.Payload)); err != nil {
+					h.logger.Println("Error sending message to WebSocket client:", err)
+					cancel() // Cancel context to stop subscription
+					return
+				}
 			}
 		}
 	}()
@@ -85,26 +96,42 @@ func (h *CommentHandler) HandleWebSocket(c *gin.Context) {
 		var comment models.Comment
 		if err := json.Unmarshal(msg, &comment); err != nil {
 			h.logger.Println("Invalid comment format:", err)
+			conn.WriteMessage(websocket.TextMessage, []byte(`{"error": "invalid comment format"}`))
 			continue
 		}
 
 		// Ensure comment belongs to the correct post
-		if comment.PostID.Hex() != postID {
-			h.logger.Println("Comment post ID mismatch:", comment.PostID.Hex(), "Expected:", postID)
+		if comment.PostID.IsZero() || comment.PostID.Hex() != postID {
+			h.logger.Println("Comment post ID mismatch or missing:", comment.PostID.Hex(), "Expected:", postID)
+			conn.WriteMessage(websocket.TextMessage, []byte(`{"error": "invalid post ID"}`))
+			continue
+		}
+
+		userID, err := getUserIdFromRequest(c)
+		if err != nil {
+			h.logger.Println("Failed to extract user ID:", err)
+			conn.WriteMessage(websocket.TextMessage, []byte(`{"error": "unauthorized"}`))
 			continue
 		}
 
 		comment.ID = primitive.NewObjectID()
 		comment.CreatedAt = time.Now()
+		comment.UserID = userID
 
 		// Save comment to DB
 		if err := h.service.CreateComment(ctx, &comment); err != nil {
 			h.logger.Println("Error saving comment:", err)
+			conn.WriteMessage(websocket.TextMessage, []byte(`{"error": "could not save comment"}`))
 			continue
 		}
 
 		// Publish the comment to Redis channel for this post
-		commentJSON, _ := json.Marshal(comment)
+		commentJSON, err := json.Marshal(comment)
+		if err != nil {
+			h.logger.Println("Error marshaling comment:", err)
+			conn.WriteMessage(websocket.TextMessage, []byte(`{"error": "internal server error"}`))
+			continue
+		}
 		h.redis.Publish(ctx, "comments:"+postID, string(commentJSON))
 
 		h.logger.Println("New comment published to post", postID, "ID:", comment.ID.Hex())

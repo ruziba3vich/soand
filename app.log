@@ -104,3 +104,138 @@
 [MusicLib] 2025/02/26 03:12:48 user.go:64: Error logging in user: invalid username or password
 [MusicLib] 2025/02/26 03:13:40 main.go:42: Received signal: interrupt, shutting down...
 [MusicLib] 2025/02/26 03:13:40 main.go:49: Shutdown complete
+[MusicLib] 2025/02/27 00:47:35 user.go:46: User logged in successfully, ID: john_doe
+[MusicLib] 2025/02/27 00:48:05 service.go:86: map[count:0 page:1 pageSize:10]
+[MusicLib] 2025/02/27 00:49:54 user.go:134: Validating JWT token...
+[MusicLib] 2025/02/27 00:49:54 user.go:142: JWT token validated successfully, user ID: 67be38c6dbf92eb31b2c93e4
+[MusicLib] 2025/02/27 00:49:54 service.go:40: map[content:This is my first post! id:67bf7062f569e1bde9b3a651]
+[MusicLib] 2025/02/27 00:50:06 service.go:86: map[count:1 page:1 pageSize:10]
+[MusicLib] 2025/02/27 00:51:38 main.go:42: Received signal: interrupt, shutting down...
+[MusicLib] 2025/02/27 00:51:38 main.go:49: Shutdown complete
+[MusicLib] 2025/02/27 00:57:32 service.go:86: map[count:1 page:1 pageSize:10]
+[MusicLib] 2025/02/27 01:11:48 middleware.go:18: Missing authorization token
+[MusicLib] 2025/02/27 01:13:20 middleware.go:18: Missing authorization token
+[MusicLib] 2025/02/27 01:16:45 middleware.go:18: Missing authorization token
+[MusicLib] 2025/02/27 01:19:31 main.go:42: Received signal: interrupt, shutting down...
+[MusicLib] 2025/02/27 01:19:31 main.go:49: Shutdown complete
+[MusicLib] 2025/02/27 01:50:36 user.go:134: Validating JWT token...
+[MusicLib] 2025/02/27 01:50:36 user.go:142: JWT token validated successfully, user ID: 67be38c6dbf92eb31b2c93e4
+[MusicLib] 2025/02/27 01:50:36 comment.go:56: New WebSocket client connected for post: 67bf7062f569e1bde9b3a651
+[MusicLib] 2025/02/27 01:50:37 comment.go:81: WebSocket connection closed: websocket: close 1006 (abnormal closure): unexpected EOF
+[MusicLib] 2025/02/27 01:50:51 user.go:134: Validating JWT token...
+[MusicLib] 2025/02/27 01:50:51 user.go:142: JWT token validated successfully, user ID: 67be38c6dbf92eb31b2c93e4
+[MusicLib] 2025/02/27 01:50:51 comment.go:56: New WebSocket client connected for post: 67bf7062f569e1bde9b3a651
+[MusicLib] 2025/02/27 01:50:51 comment.go:81: WebSocket connection closed: websocket: close 1006 (abnormal closure): unexpected EOF
+[MusicLib] 2025/02/27 01:52:13 user.go:134: Validating JWT token...
+[MusicLib] 2025/02/27 01:52:13 user.go:142: JWT token validated successfully, user ID: 67be38c6dbf92eb31b2c93e4
+[MusicLib] 2025/02/27 01:52:13 comment.go:56: New WebSocket client connected for post: 67bf7062f569e1bde9b3a651
+[MusicLib] 2025/02/27 01:52:13 comment.go:81: WebSocket connection closed: websocket: close 1006 (abnormal closure): unexpected EOF
+[MusicLib] 2025/02/27 01:52:17 user.go:134: Validating JWT token...
+[MusicLib] 2025/02/27 01:52:17 user.go:142: JWT token validated successfully, user ID: 67be38c6dbf92eb31b2c93e4
+[MusicLib] 2025/02/27 01:52:17 comment.go:56: New WebSocket client connected for post: 67bf7062f569e1bde9b3a651
+[MusicLib] 2025/02/27 01:52:17 comment.go:81: WebSocket connection closed: websocket: close 1006 (abnormal closure): unexpected EOF
+[MusicLib] 2025/02/27 01:52:18 user.go:134: Validating JWT token...
+[MusicLib] 2025/02/27 01:52:18 user.go:142: JWT token validated successfully, user ID: 67be38c6dbf92eb31b2c93e4
+[MusicLib] 2025/02/27 01:52:18 comment.go:56: New WebSocket client connected for post: 67bf7062f569e1bde9b3a651
+[MusicLib] 2025/02/27 01:52:18 comment.go:81: WebSocket connection closed: websocket: close 1006 (abnormal closure): unexpected EOF
+[MusicLib] 2025/02/27 01:55:12 user.go:134: Validating JWT token...
+[MusicLib] 2025/02/27 01:55:12 user.go:142: JWT token validated successfully, user ID: 67be38c6dbf92eb31b2c93e4
+[MusicLib] 2025/02/27 01:55:12 comment.go:56: New WebSocket client connected for post: 67bf7062f569e1bde9b3a651
+[MusicLib] 2025/02/27 01:55:12 comment.go:81: WebSocket connection closed: websocket: close 1006 (abnormal closure): unexpected EOF
+[MusicLib] 2025/02/27 01:55:20 user.go:134: Validating JWT token...
+[MusicLib] 2025/02/27 01:55:20 user.go:142: JWT token validated successfully, user ID: 67be38c6dbf92eb31b2c93e4
+[MusicLib] 2025/02/27 01:55:20 comment.go:56: New WebSocket client connected for post: 67bf7062f569e1bde9b3a651
+[MusicLib] 2025/02/27 01:55:20 comment.go:81: WebSocket connection closed: websocket: close 1006 (abnormal closure): unexpected EOF
+[MusicLib] 2025/02/27 01:55:22 main.go:42: Received signal: interrupt, shutting down...
+[MusicLib] 2025/02/27 01:55:22 main.go:49: Shutdown complete
+[MusicLib] 2025/02/27 01:55:26 user.go:134: Validating JWT token...
+[MusicLib] 2025/02/27 01:55:26 user.go:142: JWT token validated successfully, user ID: 67be38c6dbf92eb31b2c93e4
+[MusicLib] 2025/02/27 01:55:26 comment.go:56: New WebSocket client connected for post: 67bf7062f569e1bde9b3a651
+[MusicLib] 2025/02/27 01:55:26 comment.go:81: WebSocket connection closed: websocket: close 1006 (abnormal closure): unexpected EOF
+[MusicLib] 2025/02/27 02:01:20 main.go:42: Received signal: interrupt, shutting down...
+[MusicLib] 2025/02/27 02:01:20 main.go:49: Shutdown complete
+[MusicLib] 2025/02/27 02:01:27 user.go:134: Validating JWT token...
+[MusicLib] 2025/02/27 02:01:27 user.go:142: JWT token validated successfully, user ID: 67be38c6dbf92eb31b2c93e4
+[MusicLib] 2025/02/27 02:01:27 comment.go:56: New WebSocket client connected for post: 67bf7062f569e1bde9b3a651
+[MusicLib] 2025/02/27 02:01:27 comment.go:92: WebSocket connection closed: websocket: close 1006 (abnormal closure): unexpected EOF
+[MusicLib] 2025/02/27 02:01:27 comment.go:74: Redis subscription error: read tcp [::1]:41834->[::1]:6379: use of closed network connection
+[MusicLib] 2025/02/27 02:01:39 main.go:42: Received signal: interrupt, shutting down...
+[MusicLib] 2025/02/27 02:01:39 main.go:49: Shutdown complete
+[MusicLib] 2025/02/27 02:01:53 user.go:134: Validating JWT token...
+[MusicLib] 2025/02/27 02:01:53 user.go:142: JWT token validated successfully, user ID: 67be38c6dbf92eb31b2c93e4
+[MusicLib] 2025/02/27 02:01:53 comment.go:56: New WebSocket client connected for post: 67bf7062f569e1bde9b3a651
+[MusicLib] 2025/02/27 02:01:53 comment.go:92: WebSocket connection closed: websocket: close 1006 (abnormal closure): unexpected EOF
+[MusicLib] 2025/02/27 02:01:53 comment.go:74: Redis subscription error: redis: client is closed
+[MusicLib] 2025/02/27 02:01:55 user.go:134: Validating JWT token...
+[MusicLib] 2025/02/27 02:01:55 user.go:142: JWT token validated successfully, user ID: 67be38c6dbf92eb31b2c93e4
+[MusicLib] 2025/02/27 02:01:55 comment.go:56: New WebSocket client connected for post: 67bf7062f569e1bde9b3a651
+[MusicLib] 2025/02/27 02:01:55 comment.go:92: WebSocket connection closed: websocket: close 1006 (abnormal closure): unexpected EOF
+[MusicLib] 2025/02/27 02:01:55 comment.go:74: Redis subscription error: read tcp [::1]:35214->[::1]:6379: use of closed network connection
+[MusicLib] 2025/02/27 02:06:39 middleware.go:66: Missing WebSocket authorization token
+[MusicLib] 2025/02/27 02:07:19 user.go:134: Validating JWT token...
+[MusicLib] 2025/02/27 02:07:19 user.go:142: JWT token validated successfully, user ID: 67be38c6dbf92eb31b2c93e4
+[MusicLib] 2025/02/27 02:07:19 comment.go:56: New WebSocket client connected for post: 67bf7062f569e1bde9b3a651
+[MusicLib] 2025/02/27 02:07:19 comment.go:92: WebSocket connection closed: websocket: close 1006 (abnormal closure): unexpected EOF
+[MusicLib] 2025/02/27 02:07:19 comment.go:74: Redis subscription error: read tcp [::1]:52596->[::1]:6379: use of closed network connection
+[MusicLib] 2025/02/27 02:09:41 main.go:42: Received signal: interrupt, shutting down...
+[MusicLib] 2025/02/27 02:09:41 main.go:49: Shutdown complete
+[MusicLib] 2025/02/27 02:09:53 user.go:134: Validating JWT token...
+[MusicLib] 2025/02/27 02:09:53 user.go:142: JWT token validated successfully, user ID: 67be38c6dbf92eb31b2c93e4
+[MusicLib] 2025/02/27 02:09:53 comment.go:56: New WebSocket client connected for post: 67bf7062f569e1bde9b3a651
+[MusicLib] 2025/02/27 02:10:21 comment.go:98: Invalid comment format: invalid character 'h' looking for beginning of value
+[MusicLib] 2025/02/27 02:11:34 comment.go:112: Failed to extract user ID:  
+[MusicLib] 2025/02/27 02:12:03 main.go:42: Received signal: interrupt, shutting down...
+[MusicLib] 2025/02/27 02:12:03 main.go:49: Shutdown complete
+[MusicLib] 2025/02/27 02:12:11 user.go:134: Validating JWT token...
+[MusicLib] 2025/02/27 02:12:11 user.go:142: JWT token validated successfully, user ID: 67be38c6dbf92eb31b2c93e4
+[MusicLib] 2025/02/27 02:12:11 comment.go:56: New WebSocket client connected for post: 67bf7062f569e1bde9b3a651
+[MusicLib] 2025/02/27 02:12:14 comment.go:112: Failed to extract user ID:  
+[MusicLib] 2025/02/27 02:13:12 main.go:42: Received signal: interrupt, shutting down...
+[MusicLib] 2025/02/27 02:13:12 main.go:49: Shutdown complete
+[MusicLib] 2025/02/27 02:13:17 user.go:134: Validating JWT token...
+[MusicLib] 2025/02/27 02:13:17 user.go:142: JWT token validated successfully, user ID: 67be38c6dbf92eb31b2c93e4
+[MusicLib] 2025/02/27 02:13:17 comment.go:56: New WebSocket client connected for post: 67bf7062f569e1bde9b3a651
+[MusicLib] 2025/02/27 02:13:19 comment.go:49: Comment published to Redis on channel: comments:67bf7062f569e1bde9b3a651
+[MusicLib] 2025/02/27 02:13:19 comment.go:78: Received message from Redis for post 67bf7062f569e1bde9b3a651 : {"id":"67bf83ef67952ab0338f606e","user_id":"67be38c6dbf92eb31b2c93e4","post_id":"67bf7062f569e1bde9b3a651","reply_to":"000000000000000000000000","created_at":"2025-02-27T02:13:19.128844468+05:00"}
+[MusicLib] 2025/02/27 02:13:19 comment.go:137: New comment published to post 67bf7062f569e1bde9b3a651 ID: 67bf83ef67952ab0338f606e
+[MusicLib] 2025/02/27 02:13:19 comment.go:78: Received message from Redis for post 67bf7062f569e1bde9b3a651 : {"id":"67bf83ef67952ab0338f606e","user_id":"67be38c6dbf92eb31b2c93e4","post_id":"67bf7062f569e1bde9b3a651","reply_to":"000000000000000000000000","created_at":"2025-02-27T02:13:19.128844468+05:00"}
+[MusicLib] 2025/02/27 02:14:37 comment.go:71: Fetched 1 comments for post 67bf7062f569e1bde9b3a651
+[MusicLib] 2025/02/27 02:16:13 main.go:42: Received signal: interrupt, shutting down...
+[MusicLib] 2025/02/27 02:16:13 main.go:49: Shutdown complete
+[MusicLib] 2025/02/27 02:16:19 comment.go:71: Fetched 1 comments for post 67bf7062f569e1bde9b3a651
+[MusicLib] 2025/02/27 02:16:27 comment.go:71: Fetched 1 comments for post 67bf7062f569e1bde9b3a651
+[MusicLib] 2025/02/27 02:16:34 user.go:134: Validating JWT token...
+[MusicLib] 2025/02/27 02:16:34 user.go:142: JWT token validated successfully, user ID: 67be38c6dbf92eb31b2c93e4
+[MusicLib] 2025/02/27 02:16:34 comment.go:56: New WebSocket client connected for post: 67bf7062f569e1bde9b3a651
+[MusicLib] 2025/02/27 02:16:43 comment.go:78: Received message from Redis for post 67bf7062f569e1bde9b3a651 : {"id":"67bf84bbdf64892542cf399a","user_id":"67be38c6dbf92eb31b2c93e4","post_id":"67bf7062f569e1bde9b3a651","reply_to":"000000000000000000000000","created_at":"2025-02-27T02:16:43.803170212+05:00"}
+[MusicLib] 2025/02/27 02:16:43 comment.go:49: Comment published to Redis on channel: comments:67bf7062f569e1bde9b3a651
+[MusicLib] 2025/02/27 02:16:43 comment.go:137: New comment published to post 67bf7062f569e1bde9b3a651 ID: 67bf84bbdf64892542cf399a
+[MusicLib] 2025/02/27 02:16:43 comment.go:78: Received message from Redis for post 67bf7062f569e1bde9b3a651 : {"id":"67bf84bbdf64892542cf399a","user_id":"67be38c6dbf92eb31b2c93e4","post_id":"67bf7062f569e1bde9b3a651","reply_to":"000000000000000000000000","created_at":"2025-02-27T02:16:43.803170212+05:00"}
+[MusicLib] 2025/02/27 02:16:48 comment.go:71: Fetched 2 comments for post 67bf7062f569e1bde9b3a651
+[MusicLib] 2025/02/27 02:20:46 main.go:42: Received signal: interrupt, shutting down...
+[MusicLib] 2025/02/27 02:20:46 main.go:49: Shutdown complete
+[MusicLib] 2025/02/27 02:21:26 user.go:134: Validating JWT token...
+[MusicLib] 2025/02/27 02:21:26 user.go:142: JWT token validated successfully, user ID: 67be38c6dbf92eb31b2c93e4
+[MusicLib] 2025/02/27 02:21:26 comment.go:56: New WebSocket client connected for post: 67bf7062f569e1bde9b3a651
+[MusicLib] 2025/02/27 02:21:36 comment.go:49: Comment published to Redis on channel: comments:67bf7062f569e1bde9b3a651
+[MusicLib] 2025/02/27 02:21:36 comment.go:78: Received message from Redis for post 67bf7062f569e1bde9b3a651 : {"id":"67bf85e05a108e240ad77e82","user_id":"67be38c6dbf92eb31b2c93e4","post_id":"67bf7062f569e1bde9b3a651","reply_to":"000000000000000000000000","created_at":"2025-02-27T02:21:36.313069306+05:00"}
+[MusicLib] 2025/02/27 02:21:36 comment.go:137: New comment published to post 67bf7062f569e1bde9b3a651 ID: 67bf85e05a108e240ad77e82
+[MusicLib] 2025/02/27 02:21:36 comment.go:78: Received message from Redis for post 67bf7062f569e1bde9b3a651 : {"id":"67bf85e05a108e240ad77e82","user_id":"67be38c6dbf92eb31b2c93e4","post_id":"67bf7062f569e1bde9b3a651","reply_to":"000000000000000000000000","created_at":"2025-02-27T02:21:36.313069306+05:00"}
+[MusicLib] 2025/02/27 02:24:54 main.go:42: Received signal: interrupt, shutting down...
+[MusicLib] 2025/02/27 02:24:54 main.go:49: Shutdown complete
+[MusicLib] 2025/02/27 02:25:06 user.go:134: Validating JWT token...
+[MusicLib] 2025/02/27 02:25:06 user.go:142: JWT token validated successfully, user ID: 67be38c6dbf92eb31b2c93e4
+[MusicLib] 2025/02/27 02:25:06 comment.go:57: New WebSocket client connected for post: 67bf7062f569e1bde9b3a651
+[MusicLib] 2025/02/27 02:25:09 comment.go:49: Comment published to Redis on channel: comments:67bf7062f569e1bde9b3a651
+[MusicLib] 2025/02/27 02:25:09 comment.go:79: Received message from Redis for post 67bf7062f569e1bde9b3a651 : {"id":"67bf86b54074058f67890271","user_id":"67be38c6dbf92eb31b2c93e4","post_id":"67bf7062f569e1bde9b3a651","reply_to":"000000000000000000000000","created_at":"2025-02-27T02:25:09.516963401+05:00"}
+[MusicLib] 2025/02/27 02:25:09 comment.go:140: New comment published to post 67bf7062f569e1bde9b3a651 ID: 67bf86b54074058f67890271
+[MusicLib] 2025/02/27 02:25:09 comment.go:79: Received message from Redis for post 67bf7062f569e1bde9b3a651 : {"id":"67bf86b54074058f67890271","user_id":"67be38c6dbf92eb31b2c93e4","post_id":"67bf7062f569e1bde9b3a651","reply_to":"000000000000000000000000","created_at":"2025-02-27T02:25:09.516963401+05:00"}
+[MusicLib] 2025/02/27 02:26:05 comment.go:79: Received message from Redis for post 67bf7062f569e1bde9b3a651 : {"id":"67bf86ed4074058f67890273","user_id":"67be38c6dbf92eb31b2c93e4","post_id":"67bf7062f569e1bde9b3a651","text":"This is other message again","reply_to":"000000000000000000000000","created_at":"2025-02-27T02:26:05.967206742+05:00"}
+[MusicLib] 2025/02/27 02:26:05 comment.go:49: Comment published to Redis on channel: comments:67bf7062f569e1bde9b3a651
+[MusicLib] 2025/02/27 02:26:05 comment.go:140: New comment published to post 67bf7062f569e1bde9b3a651 ID: 67bf86ed4074058f67890273
+[MusicLib] 2025/02/27 02:26:05 comment.go:79: Received message from Redis for post 67bf7062f569e1bde9b3a651 : {"id":"67bf86ed4074058f67890273","user_id":"67be38c6dbf92eb31b2c93e4","post_id":"67bf7062f569e1bde9b3a651","text":"This is other message again","reply_to":"000000000000000000000000","created_at":"2025-02-27T02:26:05.967206742+05:00"}
+[MusicLib] 2025/02/27 02:26:09 comment.go:71: Fetched 5 comments for post 67bf7062f569e1bde9b3a651
+[MusicLib] 2025/02/27 02:26:28 comment.go:93: WebSocket connection closed: websocket: close 1000 (normal)
+[MusicLib] 2025/02/27 02:26:28 comment.go:75: Redis subscription error: read tcp [::1]:53356->[::1]:6379: use of closed network connection
+[MusicLib] 2025/02/27 02:26:34 main.go:42: Received signal: interrupt, shutting down...
+[MusicLib] 2025/02/27 02:26:34 main.go:49: Shutdown complete

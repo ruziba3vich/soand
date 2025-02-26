@@ -13,12 +13,12 @@ import (
 )
 
 type CommentService struct {
-	storage storage.CommentStorage
+	storage *storage.CommentStorage
 	redis   *redis.Client
 	logger  *log.Logger
 }
 
-func NewCommentService(storage storage.CommentStorage, redis *redis.Client, logger *log.Logger) *CommentService {
+func NewCommentService(storage *storage.CommentStorage, redis *redis.Client, logger *log.Logger) *CommentService {
 	return &CommentService{
 		storage: storage,
 		redis:   redis,
