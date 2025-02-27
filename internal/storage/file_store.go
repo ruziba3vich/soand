@@ -25,12 +25,12 @@ func NewFileStorage(cfg *config.Config, minio_client *minio.Client) *FileStorage
 	}
 }
 
-func (s *FileStorage) UploadFile(file *multipart.FileHeader) error {
+func (s *FileStorage) UploadFile(file *multipart.FileHeader) (string, error) {
 
 	// Open file
 	f, err := file.Open()
 	if err != nil {
-		return fmt.Errorf("Cannot open file: " + err.Error())
+		return "", fmt.Errorf("Cannot open file: " + err.Error())
 	}
 	defer f.Close()
 
@@ -43,7 +43,7 @@ func (s *FileStorage) UploadFile(file *multipart.FileHeader) error {
 		Secure: false,
 	})
 	if err != nil {
-		return fmt.Errorf("Failed to connect to MinIO: " + err.Error())
+		return "", fmt.Errorf("Failed to connect to MinIO: " + err.Error())
 	}
 
 	// Upload file to MinIO
@@ -56,10 +56,10 @@ func (s *FileStorage) UploadFile(file *multipart.FileHeader) error {
 		minio.PutObjectOptions{ContentType: file.Header.Get("Content-Type")},
 	)
 	if err != nil {
-		return fmt.Errorf("Failed to upload file: " + err.Error())
+		return "", fmt.Errorf("Failed to upload file: " + err.Error())
 	}
 
-	return nil
+	return filename, nil
 }
 
 func (s *FileStorage) GetFile(filename string) (string, error) {
