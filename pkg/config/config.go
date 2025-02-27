@@ -8,35 +8,36 @@ import (
 	"github.com/joho/godotenv"
 )
 
-// Config holds all the configuration settings
-type Config struct {
-	MongoDB   MongoDBConfig
-	MinIO     MinIOConfig
-	Redis     RedisConfig
-	JwtSecret string
-}
+type (
+	// Config holds all the configuration settings
+	Config struct {
+		MongoDB   MongoDBConfig
+		MinIO     MinIOConfig
+		Redis     RedisConfig
+		JwtSecret string
+	}
 
-// MongoDBConfig holds MongoDB settings
-type MongoDBConfig struct {
-	URI, User, Password, Database string
-}
+	// MongoDBConfig holds MongoDB settings
+	MongoDBConfig struct {
+		URI, User, Password, Database string
+	}
 
-// MinIOConfig holds MinIO settings
-type MinIOConfig struct {
-	Endpoint  string
-	AccessKey string
-	SecretKey string
-	Bucket    string
-	UseSSL    bool
-}
+	// MinIOConfig holds MinIO settings
+	MinIOConfig struct {
+		Endpoint  string
+		AccessKey string
+		SecretKey string
+		Bucket    string
+	}
 
-// RedisConfig holds Redis settings
-type RedisConfig struct {
-	Host     string
-	Port     string
-	Password string
-	DB       int
-}
+	// RedisConfig holds Redis settings
+	RedisConfig struct {
+		Host     string
+		Port     string
+		Password string
+		DB       int
+	}
+)
 
 // LoadConfig loads configurations from environment variables or .env file
 func LoadConfig() *Config {
@@ -59,7 +60,6 @@ func LoadConfig() *Config {
 			AccessKey: getEnv("MINIO_ACCESS_KEY", "my-access-key"),
 			SecretKey: getEnv("MINIO_SECRET_KEY", "my-secret-key"),
 			Bucket:    getEnv("MINIO_BUCKET", "my-bucket"),
-			UseSSL:    getEnvBool("MINIO_USE_SSL", false),
 		},
 		Redis: RedisConfig{
 			Host:     getEnv("REDIS_HOST", "localhost"),
@@ -74,14 +74,6 @@ func LoadConfig() *Config {
 func getEnv(key, fallback string) string {
 	if value, exists := os.LookupEnv(key); exists {
 		return value
-	}
-	return fallback
-}
-
-// getEnvBool retrieves a boolean environment variable
-func getEnvBool(key string, fallback bool) bool {
-	if value, exists := os.LookupEnv(key); exists {
-		return value == "true" || value == "1"
 	}
 	return fallback
 }
