@@ -25,6 +25,12 @@ var upgrader = websocket.Upgrader{
 	CheckOrigin: func(r *http.Request) bool { return true },
 }
 
+/*
+var upgrader = websocket.Upgrader{
+	CheckOrigin: func(r *http.Request) bool { return r.Header.Get("Origin") == "https://trusted-domain.com" },
+}
+*/
+
 var supportedImageExtensions = map[string]bool{
 	".jpg":  true,
 	".jpeg": true,
@@ -40,12 +46,6 @@ var supportedMimeTypes = map[string]bool{
 	"image/gif":  true,
 	"image/webp": true,
 }
-
-/*
-var upgrader = websocket.Upgrader{
-	CheckOrigin: func(r *http.Request) bool { return r.Header.Get("Origin") == "https://trusted-domain.com" },
-}
-*/
 
 type CommentHandler struct {
 	service      repos.ICommentService

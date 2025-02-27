@@ -1,11 +1,13 @@
 package middleware
 
 import (
+	"context"
 	"log"
 	"net/http"
 	"strings"
 
 	"github.com/gin-gonic/gin"
+	limiter "github.com/ruziba3vich/soand/internal/rate_limiter"
 	"github.com/ruziba3vich/soand/internal/repos"
 )
 
@@ -13,13 +15,15 @@ import (
 type AuthHandler struct {
 	userRepo repos.UserRepo
 	logger   *log.Logger
+	limiter  *limiter.TokenBucketLimiter
 }
 
 // NewAuthHandler initializes and returns an AuthHandler instance
-func NewAuthHandler(userRepo repos.UserRepo, logger *log.Logger) *AuthHandler {
+func NewAuthHandler(userRepo repos.UserRepo, logger *log.Logger, limiter *limiter.TokenBucketLimiter) *AuthHandler {
 	return &AuthHandler{
 		userRepo: userRepo,
 		logger:   logger,
+		limiter:  limiter,
 	}
 }
 
@@ -27,6 +31,24 @@ func NewAuthHandler(userRepo repos.UserRepo, logger *log.Logger) *AuthHandler {
 func (a *AuthHandler) AuthMiddleware() func(gin.HandlerFunc) gin.HandlerFunc {
 	return func(handler gin.HandlerFunc) gin.HandlerFunc {
 		return func(c *gin.Context) {
+			ctx := context.Background()
+			ip := c.ClientIP() // Get user IP for rate limiting
+
+			allowed, err := a.limiter.AllowRequest(ctx, ip)
+			if err != nil {
+				a.logger.Println("Rate limiter error:", err)
+				c.JSON(http.StatusInternalServerError, gin.H{"error": "Internal server error"})
+				c.Abort()
+				return
+			}
+
+			if !allowed {
+				a.logger.Println("Rate limit exceeded for IP:", ip)
+				c.JSON(http.StatusTooManyRequests, gin.H{"error": "Too many requests"})
+				c.Abort()
+				return
+			}
+
 			tokenString := c.GetHeader("Authorization")
 			if tokenString == "" {
 				a.logger.Println("Missing authorization token")
@@ -57,6 +79,32 @@ func (a *AuthHandler) AuthMiddleware() func(gin.HandlerFunc) gin.HandlerFunc {
 func (a *AuthHandler) WebSocketAuthMiddleware() func(gin.HandlerFunc) gin.HandlerFunc {
 	return func(handler gin.HandlerFunc) gin.HandlerFunc {
 		return func(c *gin.Context) {
+			ctx := context.Background()
+			ip := c.ClientIP() // Get user IP for rate limiting
+
+			allowed, err := a.limiter.AllowRequest(ctx, ip)
+			if err != nil {
+				a.logger.Println("Rate limiter error:", err)
+				c.JSON(http.StatusInternalServerError, gin.H{"error": "Internal server error"})
+				c.Abort()
+				return
+			}
+
+			if !allowed {
+				a.logger.Println("Rate limit exceeded for IP:", ip)
+				c.JSON(http.StatusTooManyRequests, gin.H{"error": "Too many requests"})
+				c.Abort()
+				return
+			}
+
+			tokenString := c.GetHeader("Authorization")
+			if tokenString == "" {
+				a.logger.Println("Missing authorization token")
+				c.JSON(http.StatusUnauthorized, gin.H{"error": "Unauthorized"})
+				c.Abort()
+				return
+			}
+			
 			token := c.GetHeader("Authorization") // Extract token from WebSocket header
 
 			if token == "" {

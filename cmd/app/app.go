@@ -4,12 +4,14 @@ import (
 	"context"
 	"fmt"
 	"log"
+	"time"
 
 	"github.com/gin-gonic/gin"
 	"github.com/minio/minio-go/v7"
 	"github.com/minio/minio-go/v7/pkg/credentials"
 	"github.com/redis/go-redis/v9"
 	"github.com/ruziba3vich/soand/internal/middleware"
+	limiter "github.com/ruziba3vich/soand/internal/rate_limiter"
 	"github.com/ruziba3vich/soand/internal/registerar"
 	"github.com/ruziba3vich/soand/internal/service"
 	"github.com/ruziba3vich/soand/internal/storage"
@@ -21,6 +23,13 @@ func Run(ctx context.Context, logger *log.Logger) error {
 
 	router := gin.Default()
 
+	// Redis client
+	redisClient := redis.NewClient(&redis.Options{
+		Addr:     cfg.Redis.Host + ":" + cfg.Redis.Port,
+		Password: cfg.Redis.Password,
+		DB:       cfg.Redis.DB,
+	})
+
 	// users
 
 	user_collection, err := storage.ConnectMongoDB(ctx, cfg, "users_collection")
@@ -29,10 +38,12 @@ func Run(ctx context.Context, logger *log.Logger) error {
 		return err
 	}
 
+	rate_limiter := limiter.NewTokenBucketLimiter(redisClient, 15, 0.25, 1*time.Minute)
+
 	user_storage := storage.NewUserStorage(user_collection, cfg)
 	user_service := service.NewUserService(user_storage, logger)
 
-	authMiddleware := middleware.NewAuthHandler(user_service, logger)
+	authMiddleware := middleware.NewAuthHandler(user_service, logger, rate_limiter)
 
 	registerar.RegisterUserRoutes(router, user_service, logger, authMiddleware.AuthMiddleware())
 
@@ -69,13 +80,6 @@ func Run(ctx context.Context, logger *log.Logger) error {
 	if err := posts_storage.EnsureTTLIndex(ctx); err != nil {
 		return err
 	}
-
-	// Redis client
-	redisClient := redis.NewClient(&redis.Options{
-		Addr:     cfg.Redis.Host + ":" + cfg.Redis.Port,
-		Password: cfg.Redis.Password,
-		DB:       cfg.Redis.DB,
-	})
 
 	// Comments
 	comments_collection, err := storage.ConnectMongoDB(ctx, cfg, "comments_collection")
