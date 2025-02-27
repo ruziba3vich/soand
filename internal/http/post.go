@@ -16,13 +16,15 @@ type PostHandler struct {
 	service      repos.IPostService
 	user_service repos.UserRepo
 	logger       *log.Logger
+	file_service repos.IFIleStoreService
 }
 
 // NewPostHandler initializes a new PostHandler with a service and logger
-func NewPostHandler(service repos.IPostService, logger *log.Logger) *PostHandler {
+func NewPostHandler(service repos.IPostService, logger *log.Logger, file_service repos.IFIleStoreService) *PostHandler {
 	return &PostHandler{
-		service: service,
-		logger:  logger,
+		service:      service,
+		logger:       logger,
+		file_service: file_service,
 	}
 }
 
@@ -42,6 +44,27 @@ func (h *PostHandler) CreatePost(c *gin.Context) {
 	// Convert PostRequest to models.Post
 	post := req.ToPost()
 	post.CreatorId = userId
+	files, err := c.MultipartForm()
+	if err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"error": "Failed to get uploaded files"})
+		return
+	}
+
+	// Extract files from the form
+	uploadedFiles := files.File["files"] // "files" should match the form field name
+	if len(uploadedFiles) == 0 {
+		c.JSON(http.StatusBadRequest, gin.H{"error": "No files uploaded"})
+		return
+	}
+
+	for _, file := range uploadedFiles {
+		file_url, err := h.file_service.UploadFile(file)
+		if err != nil {
+			c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+			return
+		}
+		post.Pictures = append(post.Pictures, file_url)
+	}
 
 	// Call service to create post
 	id, err := h.service.CreatePost(c.Request.Context(), post, req.DeleteAfter)

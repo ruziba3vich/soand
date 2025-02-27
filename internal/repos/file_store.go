@@ -4,8 +4,8 @@ import "mime/multipart"
 
 type (
 	IFIleStoreService interface {
-		DeleteFile(string) (string, error)
+		DeleteFile(string) error
 		GetFile(string) (string, error)
-		UploadFile(*multipart.FileHeader) error
+		UploadFile(*multipart.FileHeader) (string, error)
 	}
 )

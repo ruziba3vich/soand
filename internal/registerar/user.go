@@ -28,8 +28,13 @@ func RegisterUserRoutes(r *gin.Engine, userRepo repos.UserRepo, logger *log.Logg
 	}
 }
 
-func RegisterPostRoutes(r *gin.Engine, postRepo repos.IPostService, logger *log.Logger, authMiddleware func(gin.HandlerFunc) gin.HandlerFunc) {
-	h := handler.NewPostHandler(postRepo, logger)
+func RegisterPostRoutes(
+	r *gin.Engine,
+	postRepo repos.IPostService,
+	logger *log.Logger,
+	file_service repos.IFIleStoreService,
+	authMiddleware func(gin.HandlerFunc) gin.HandlerFunc) {
+	h := handler.NewPostHandler(postRepo, logger, file_service)
 
 	posts := r.Group("/posts")
 	{
@@ -44,11 +49,12 @@ func RegisterPostRoutes(r *gin.Engine, postRepo repos.IPostService, logger *log.
 func RegisterCommentRoutes(
 	r *gin.Engine,
 	commentService *service.CommentService,
+	file_service repos.IFIleStoreService,
 	logger *log.Logger,
 	redis *redis.Client,
 	authMiddleware func(gin.HandlerFunc) gin.HandlerFunc,
 	wsMiddleware func(gin.HandlerFunc) gin.HandlerFunc) {
-	commentHandler := handler.NewCommentHandler(commentService, logger, redis)
+	commentHandler := handler.NewCommentHandler(commentService, file_service, logger, redis)
 
 	commentRoutes := r.Group("/comments")
 	{

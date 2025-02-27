@@ -2,9 +2,12 @@ package app
 
 import (
 	"context"
+	"fmt"
 	"log"
 
 	"github.com/gin-gonic/gin"
+	"github.com/minio/minio-go/v7"
+	"github.com/minio/minio-go/v7/pkg/credentials"
 	"github.com/redis/go-redis/v9"
 	"github.com/ruziba3vich/soand/internal/middleware"
 	"github.com/ruziba3vich/soand/internal/registerar"
@@ -33,6 +36,18 @@ func Run(ctx context.Context, logger *log.Logger) error {
 
 	registerar.RegisterUserRoutes(router, user_service, logger, authMiddleware.AuthMiddleware())
 
+	// Initialize MinIO client
+	minio_client, err := minio.New(cfg.MinIO.Endpoint, &minio.Options{
+		Creds:  credentials.NewStaticV4(cfg.MinIO.AccessKey, cfg.MinIO.SecretKey, ""),
+		Secure: false,
+	})
+	if err != nil {
+		return fmt.Errorf("Failed to connect to MinIO: " + err.Error())
+	}
+
+	file_storage := storage.NewFileStorage(cfg, minio_client)
+	file_store_service := service.NewFileStoreService(file_storage, logger)
+
 	// posts
 
 	posts_collection, err := storage.ConnectMongoDB(ctx, cfg, "posts_collection")
@@ -43,7 +58,13 @@ func Run(ctx context.Context, logger *log.Logger) error {
 	posts_storage := storage.NewStorage(posts_collection, user_storage)
 	posts_service := service.NewPostService(posts_storage, logger)
 
-	registerar.RegisterPostRoutes(router, posts_service, logger, authMiddleware.AuthMiddleware())
+	registerar.RegisterPostRoutes(
+		router,
+		posts_service,
+		logger,
+		file_store_service,
+		authMiddleware.AuthMiddleware(),
+	)
 
 	if err := posts_storage.EnsureTTLIndex(ctx); err != nil {
 		return err
@@ -66,7 +87,15 @@ func Run(ctx context.Context, logger *log.Logger) error {
 	comments_storage := storage.NewCommentStorage(comments_collection)
 	comments_service := service.NewCommentService(comments_storage, redisClient, logger)
 
-	registerar.RegisterCommentRoutes(router, comments_service, logger, redisClient, authMiddleware.AuthMiddleware(), authMiddleware.WebSocketAuthMiddleware())
+	registerar.RegisterCommentRoutes(
+		router,
+		comments_service,
+		file_store_service,
+		logger,
+		redisClient,
+		authMiddleware.AuthMiddleware(),
+		authMiddleware.WebSocketAuthMiddleware(),
+	)
 
 	return router.Run(":7777")
 }

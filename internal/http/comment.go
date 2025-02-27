@@ -3,9 +3,13 @@ package handler
 import (
 	"context"
 	"encoding/json"
+	"fmt"
 	"log"
+	"mime/multipart"
 	"net/http"
+	"path/filepath"
 	"strconv"
+	"strings"
 	"time"
 
 	"github.com/gin-gonic/gin"
@@ -21,17 +25,45 @@ var upgrader = websocket.Upgrader{
 	CheckOrigin: func(r *http.Request) bool { return true },
 }
 
-type CommentHandler struct {
-	service repos.ICommentService
-	logger  *log.Logger
-	redis   *redis.Client
+var supportedImageExtensions = map[string]bool{
+	".jpg":  true,
+	".jpeg": true,
+	".png":  true,
+	".gif":  true,
+	".webp": true,
 }
 
-func NewCommentHandler(service repos.ICommentService, logger *log.Logger, redis *redis.Client) *CommentHandler {
+// Supported MIME types
+var supportedMimeTypes = map[string]bool{
+	"image/jpeg": true,
+	"image/png":  true,
+	"image/gif":  true,
+	"image/webp": true,
+}
+
+/*
+var upgrader = websocket.Upgrader{
+	CheckOrigin: func(r *http.Request) bool { return r.Header.Get("Origin") == "https://trusted-domain.com" },
+}
+*/
+
+type CommentHandler struct {
+	service      repos.ICommentService
+	file_service repos.IFIleStoreService
+	logger       *log.Logger
+	redis        *redis.Client
+}
+
+func NewCommentHandler(
+	service repos.ICommentService,
+	file_service repos.IFIleStoreService,
+	logger *log.Logger,
+	redis *redis.Client) *CommentHandler {
 	return &CommentHandler{
-		service: service,
-		logger:  logger,
-		redis:   redis,
+		service:      service,
+		file_service: file_service,
+		logger:       logger,
+		redis:        redis,
 	}
 }
 
@@ -87,26 +119,79 @@ func (h *CommentHandler) HandleWebSocket(c *gin.Context) {
 
 	// Listen for new comments from WebSocket client
 	for {
-		_, msg, err := conn.ReadMessage()
+		messageType, msg, err := conn.ReadMessage()
 		if err != nil {
 			h.logger.Println("WebSocket connection closed:", err)
 			break
 		}
 
 		var comment models.Comment
-		if err := json.Unmarshal(msg, &comment); err != nil {
-			h.logger.Println("Invalid comment format:", err)
-			conn.WriteMessage(websocket.TextMessage, []byte(`{"error": "invalid comment format"}`))
-			continue
+
+		// Handle JSON comment message
+		if messageType == websocket.TextMessage {
+			if err := json.Unmarshal(msg, &comment); err != nil {
+				h.logger.Println("Invalid comment format:", err)
+				conn.WriteMessage(websocket.TextMessage, []byte(`{"error": "invalid comment format"}`))
+				continue
+			}
+		} else if messageType == websocket.BinaryMessage {
+			// Handle binary messages (e.g., images or voice messages)
+			fileHeader := &multipart.FileHeader{
+				Filename: fmt.Sprintf("%d", time.Now().UnixMilli()), // Unique filename
+				Size:     int64(len(msg)),                           // File size
+			}
+
+			fileURL, err := h.file_service.UploadFile(fileHeader)
+			if err != nil {
+				h.logger.Println("Error uploading file:", err)
+				conn.WriteMessage(websocket.TextMessage, []byte(`{"error": "file upload failed"}`))
+				continue
+			}
+
+			// Validate file extension
+			ext := strings.ToLower(filepath.Ext(fileHeader.Filename))
+			if !supportedImageExtensions[ext] {
+				h.logger.Println("Unsupported image type:", ext)
+				conn.WriteMessage(websocket.TextMessage, []byte(`{"error": "unsupported image type"}`))
+				continue
+			}
+
+			// Validate MIME type
+			mimeType := http.DetectContentType(msg)
+			if !supportedMimeTypes[mimeType] {
+				h.logger.Println("Unsupported MIME type:", mimeType)
+				conn.WriteMessage(websocket.TextMessage, []byte(`{"error": "unsupported MIME type"}`))
+				continue
+			}
+
+			// Check file type and store accordingly
+			if strings.HasSuffix(fileHeader.Filename, ".jpg") || strings.HasSuffix(fileHeader.Filename, ".png") {
+				// Append multiple images to the list
+				comment.Pictures = append(comment.Pictures, fileURL)
+			} else if strings.HasSuffix(fileHeader.Filename, ".mp3") || strings.HasSuffix(fileHeader.Filename, ".wav") {
+				// Only allow **one** voice message
+				if comment.VoiceMessage == "" {
+					comment.VoiceMessage = fileURL
+				} else {
+					h.logger.Println("Multiple voice messages detected. Only one is allowed.")
+					conn.WriteMessage(websocket.TextMessage, []byte(`{"error": "only one voice message allowed"}`))
+					continue
+				}
+			} else {
+				h.logger.Println("Unsupported file type:", fileHeader.Filename)
+				conn.WriteMessage(websocket.TextMessage, []byte(`{"error": "unsupported file type"}`))
+				continue
+			}
 		}
 
-		// Ensure comment belongs to the correct post
+		// Validate post ID
 		if comment.PostID.IsZero() || comment.PostID.Hex() != postID {
 			h.logger.Println("Comment post ID mismatch or missing:", comment.PostID.Hex(), "Expected:", postID)
 			conn.WriteMessage(websocket.TextMessage, []byte(`{"error": "invalid post ID"}`))
 			continue
 		}
 
+		// Extract user ID
 		userID, err := getUserIdFromRequest(c)
 		if err != nil {
 			h.logger.Println("Failed to extract user ID:", err)
@@ -118,14 +203,14 @@ func (h *CommentHandler) HandleWebSocket(c *gin.Context) {
 		comment.CreatedAt = time.Now()
 		comment.UserID = userID
 
-		// Save comment to DB
+		// Save to DB
 		if err := h.service.CreateComment(ctx, &comment); err != nil {
 			h.logger.Println("Error saving comment:", err)
 			conn.WriteMessage(websocket.TextMessage, []byte(`{"error": "could not save comment"}`))
 			continue
 		}
 
-		// Publish the comment to Redis channel for this post
+		// Publish comment to Redis
 		commentJSON, err := json.Marshal(comment)
 		if err != nil {
 			h.logger.Println("Error marshaling comment:", err)
