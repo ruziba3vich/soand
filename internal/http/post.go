@@ -1,6 +1,7 @@
 package handler
 
 import (
+	"encoding/json"
 	"log"
 	"net/http"
 	"strconv"
@@ -28,45 +29,48 @@ func NewPostHandler(service repos.IPostService, logger *log.Logger, file_service
 	}
 }
 
-// CreatePost handles creating a new post
 func (h *PostHandler) CreatePost(c *gin.Context) {
 	userId, err := getUserIdFromRequest(c)
 	if err != nil {
 		c.JSON(http.StatusUnauthorized, gin.H{"error": "Unauthorized"})
-	}
-	var req dto.PostRequest
-	if err := c.ShouldBindJSON(&req); err != nil {
-		h.logger.Println("error", err.Error())
-		c.JSON(http.StatusBadRequest, gin.H{"error": "Invalid request payload"})
 		return
+	}
+
+	// Read text fields from form-data
+	req := dto.PostRequest{
+		Description: c.PostForm("description"),
+		DeleteAfter: stringToInt(c.PostForm("delete_after")),
+		Tags:        c.PostFormArray("tags"), // Option 1: Read tags as an array
+	}
+
+	// Handle JSON stringified array for tags (if sent as a JSON string)
+	tagsStr := c.PostForm("tags_json") // Alternative key for JSON array
+	if tagsStr != "" {
+		if err := json.Unmarshal([]byte(tagsStr), &req.Tags); err != nil {
+			c.JSON(http.StatusBadRequest, gin.H{"error": "Invalid tags format"})
+			return
+		}
 	}
 
 	// Convert PostRequest to models.Post
 	post := req.ToPost()
 	post.CreatorId = userId
-	files, err := c.MultipartForm()
-	if err != nil {
-		c.JSON(http.StatusBadRequest, gin.H{"error": "Failed to get uploaded files"})
-		return
-	}
 
-	// Extract files from the form
-	uploadedFiles := files.File["files"] // "files" should match the form field name
-	if len(uploadedFiles) == 0 {
-		c.JSON(http.StatusBadRequest, gin.H{"error": "No files uploaded"})
-		return
-	}
-
-	for _, file := range uploadedFiles {
-		file_url, err := h.file_service.UploadFile(file)
-		if err != nil {
-			c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
-			return
+	// Handle file uploads
+	form, err := c.MultipartForm()
+	if err == nil {
+		uploadedFiles := form.File["files"]
+		for _, file := range uploadedFiles {
+			fileURL, err := h.file_service.UploadFile(file)
+			if err != nil {
+				c.JSON(http.StatusInternalServerError, gin.H{"error": "File upload failed: " + err.Error()})
+				return
+			}
+			post.Pictures = append(post.Pictures, fileURL)
 		}
-		post.Pictures = append(post.Pictures, file_url)
 	}
 
-	// Call service to create post
+	// Create the post
 	id, err := h.service.CreatePost(c.Request.Context(), post, req.DeleteAfter)
 	if err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to create post"})
@@ -161,4 +165,12 @@ func stringToInt64(s string) int64 {
 		return 1
 	}
 	return val
+}
+
+func stringToInt(s string) int {
+	num, err := strconv.Atoi(s)
+	if err != nil {
+		return 1
+	}
+	return num
 }

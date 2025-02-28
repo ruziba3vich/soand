@@ -7,8 +7,8 @@ import (
 
 // PostRequest represents the request payload for creating a post
 type PostRequest struct {
-	Description string   `json:"content" binding:"required"`
-	CreatorId   string   `json:"-"`
+	Description string   `json:"description" binding:"required"`
+	CreatorId   string   `json:"creator_id"`
 	DeleteAfter int      `json:"delete_after" binding:"required"`
 	Tags        []string `json:"tags"`
 }

@@ -56,6 +56,10 @@ func Run(ctx context.Context, logger *log.Logger) error {
 		return fmt.Errorf("Failed to connect to MinIO: " + err.Error())
 	}
 
+	if err := createBucket(minio_client, cfg.MinIO.Bucket); err != nil {
+		return err
+	}
+
 	file_storage := storage.NewFileStorage(cfg, minio_client)
 	file_store_service := service.NewFileStoreService(file_storage, logger)
 
@@ -102,4 +106,17 @@ func Run(ctx context.Context, logger *log.Logger) error {
 	)
 
 	return router.Run(":7777")
+}
+
+// Ensure bucket exists
+func createBucket(client *minio.Client, bucket string) error {
+	exists, err := client.BucketExists(context.Background(), bucket)
+	if err != nil {
+		return err
+	}
+
+	if !exists {
+		return client.MakeBucket(context.Background(), bucket, minio.MakeBucketOptions{})
+	}
+	return nil
 }

@@ -114,24 +114,3 @@ func (s *FileStorage) DeleteFile(filename string) error {
 
 	return nil
 }
-
-/*
-// Ensure bucket exists
-	err = createBucket(minioClient, bucketName)
-	if err != nil {
-		c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to create/check bucket"})
-		return
-	}
-
-    func createBucket(client *minio.Client, bucket string) error {
-	exists, err := client.BucketExists(context.Background(), bucket)
-	if err != nil {
-		return err
-	}
-
-	if !exists {
-		return client.MakeBucket(context.Background(), bucket, minio.MakeBucketOptions{})
-	}
-	return nil
-}
-*/
