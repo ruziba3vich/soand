@@ -241,3 +241,30 @@ func (h *UserHandler) ChangeProfileVisibility(c *gin.Context) {
 	h.logger.Printf("Successfully changed profile visibility for user %s", userId.Hex())
 	c.JSON(http.StatusOK, gin.H{"message": "profile visibility updated"})
 }
+
+// SetBio handles updating a user's bio
+func (h *UserHandler) SetBio(c *gin.Context) {
+	var request struct {
+		Bio string `json:"bio"`
+	}
+
+	userId, err := getUserIdFromRequest(c)
+	if err != nil {
+		c.JSON(http.StatusUnauthorized, gin.H{"error": "Unauthorized"})
+		return
+	}
+
+	if err := c.ShouldBindJSON(&request); err != nil {
+		h.logger.Printf("Error parsing bio request: %v", err)
+		c.JSON(http.StatusBadRequest, gin.H{"error": "Invalid request body"})
+		return
+	}
+
+	if err := h.repo.SetBio(c.Request.Context(), userId, request.Bio); err != nil {
+		h.logger.Printf("Error updating bio: %v", err)
+		c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to update bio"})
+		return
+	}
+
+	c.Status(http.StatusOK)
+}

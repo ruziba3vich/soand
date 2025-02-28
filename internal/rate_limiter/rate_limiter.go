@@ -67,7 +67,7 @@ func (t *TokenBucketLimiter) AllowRequest(ctx context.Context, ip string) (bool,
 	tokens--
 
 	// Store updated values in Redis
-	t.redisClient.HSet(ctx, key, map[string]interface{}{
+	t.redisClient.HSet(ctx, key, map[string]any{
 		"tokens":       tokens,
 		"last_updated": lastUpdated,
 	})

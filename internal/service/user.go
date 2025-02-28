@@ -155,3 +155,16 @@ func (s *UserService) ChangeProfileVisibility(ctx context.Context, userID primit
 	s.logger.Printf("Successfully changed profile visibility for user %s", userID.Hex())
 	return nil
 }
+
+func (s *UserService) SetBio(ctx context.Context, userId primitive.ObjectID, bio string) error {
+	s.logger.Printf("Changing bio for user %s to %s", userId.Hex(), bio[:10])
+
+	err := s.storage.SetBio(ctx, userId, bio)
+	if err != nil {
+		s.logger.Printf("Failed to change bio for user %s: %s", userId.Hex(), err.Error())
+		return err
+	}
+
+	s.logger.Printf("Successfully changed bio for user %s", userId.Hex())
+	return nil
+}

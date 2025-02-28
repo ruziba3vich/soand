@@ -8,6 +8,7 @@ type User struct {
 	Phone         string             `json:"phone" bson:"phone" binding:"required"`
 	Username      string             `json:"username" bson:"username" binding:"required"`
 	Password      string             `json:"password" bson:"password"`
+	Bio           string             `json:"bio" bson:"bio"`
 	Status        string             `json:"status" bson:"status"`
 	ProfilePics   []string           `json:"profile_pics" bson:"profile_pics"`
 	HiddenProfile bool               `json:"profile_hidden" bson:"profile_hidden"`

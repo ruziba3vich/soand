@@ -19,5 +19,6 @@ type (
 		ValidateJWT(string) (string, error)
 		LoginUser(context.Context, string, string) (string, error)
 		ChangeProfileVisibility(context.Context, primitive.ObjectID, bool) error
+		SetBio(context.Context, primitive.ObjectID, string) error
 	}
 )

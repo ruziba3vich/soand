@@ -24,7 +24,7 @@ func RegisterUserRoutes(r *gin.Engine, userRepo repos.UserRepo, logger *log.Logg
 		userRoutes.PATCH("/password", authMiddleware(userHandler.UpdatePassword))
 		userRoutes.PATCH("/username", authMiddleware(userHandler.UpdateUsername))
 		userRoutes.PATCH("/visibility", authMiddleware(userHandler.ChangeProfileVisibility))
-
+		userRoutes.PATCH("/bio", authMiddleware(userHandler.SetBio))
 	}
 }
 

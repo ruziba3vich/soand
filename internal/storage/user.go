@@ -197,6 +197,14 @@ func HashPassword(password string) (string, error) {
 	return string(bytes), err
 }
 
+func (s *UserStorage) SetBio(ctx context.Context, userId primitive.ObjectID, bio string) error {
+	ctx, cancel := context.WithTimeout(ctx, 5*time.Second)
+	defer cancel()
+
+	_, err := s.db.UpdateOne(ctx, bson.M{"_id": userId}, bson.M{"$set": bson.M{"bio": bio}})
+	return err
+}
+
 // CheckPassword verifies a hashed password
 func CheckPassword(hashedPassword, plainPassword string) bool {
 	err := bcrypt.CompareHashAndPassword([]byte(hashedPassword), []byte(plainPassword))
