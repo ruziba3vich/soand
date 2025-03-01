@@ -20,7 +20,7 @@ jobs:
 
       - name: Ensure target directory exists on server
         run: |
-          ssh -o StrictHostKeyChecking=no ${{ secrets.SSH_USER }}@${{ secrets.SERVER_IP }} "mkdir -p /home/${{ secrets.SSH_USER }}/app"
+          ssh -T -o StrictHostKeyChecking=no ${{ secrets.SSH_USER }}@${{ secrets.SERVER_IP }} "mkdir -p /home/${{ secrets.SSH_USER }}/app"
 
       - name: Copy files to server
         run: |
@@ -28,8 +28,13 @@ jobs:
 
       - name: Deploy with Docker Compose
         run: |
-          ssh -o StrictHostKeyChecking=no ${{ secrets.SSH_USER }}@${{ secrets.SERVER_IP }} << 'EOF'
+          ssh -T -o StrictHostKeyChecking=no ${{ secrets.SSH_USER }}@${{ secrets.SERVER_IP }} << 'EOF'
+            set -e
+            echo "Changing directory to /home/${{ secrets.SSH_USER }}/app..."
             cd /home/${{ secrets.SSH_USER }}/app
+            echo "Running docker-compose down..."
             docker-compose down
+            echo "Running docker-compose up -d --build..."
             docker-compose up -d --build
+            echo "Deployment completed successfully!"
           EOF
