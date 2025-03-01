@@ -26,15 +26,19 @@ jobs:
         run: |
           scp -o StrictHostKeyChecking=no -r . ${{ secrets.SSH_USER }}@${{ secrets.SERVER_IP }}:/home/${{ secrets.SSH_USER }}/app
 
+      - name: Verify Docker Compose is installed
+        run: |
+          ssh -T -o StrictHostKeyChecking=no ${{ secrets.SSH_USER }}@${{ secrets.SERVER_IP }} "docker-compose --version || { echo 'Docker Compose is not installed'; exit 1; }"
+
       - name: Deploy with Docker Compose
         run: |
           ssh -T -o StrictHostKeyChecking=no ${{ secrets.SSH_USER }}@${{ secrets.SERVER_IP }} << 'EOF'
             set -e
             echo "Changing directory to /home/${{ secrets.SSH_USER }}/app..."
             cd /home/${{ secrets.SSH_USER }}/app
-            echo "Running docker-compose down..."
-            docker-compose down
-            echo "Running docker-compose up -d --build..."
-            docker-compose up -d --build
+            echo "Running docker compose down..."
+            docker compose down
+            echo "Running docker compose up -d --build..."
+            docker compose up -d --build
             echo "Deployment completed successfully!"
           EOF
