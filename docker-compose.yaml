@@ -1,4 +1,5 @@
 services:
+
   my-go-app:
     build: .
     container_name: my-go-app
