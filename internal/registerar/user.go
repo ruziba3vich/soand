@@ -2,6 +2,7 @@ package registerar
 
 import (
 	"log"
+	"net/http"
 
 	"github.com/gin-gonic/gin"
 	"github.com/redis/go-redis/v9"
@@ -14,6 +15,7 @@ import (
 )
 
 func RegisterUserRoutes(r *gin.Engine, userRepo repos.UserRepo, logger *log.Logger, authMiddleware func(gin.HandlerFunc) gin.HandlerFunc) {
+	r.Use(CORSMiddleware())
 	r.GET("/swagger/*any", ginSwagger.WrapHandler(swaggerFiles.Handler))
 	userHandler := handler.NewUserHandler(userRepo, logger)
 
@@ -67,5 +69,22 @@ func RegisterCommentRoutes(
 		commentRoutes.GET("/:post_id", commentHandler.GetCommentsByPostID)                 // Fetch comments with pagination
 		commentRoutes.PATCH("/:comment_id", authMiddleware(commentHandler.UpdateComment))  // Update comment text
 		commentRoutes.DELETE("/:comment_id", authMiddleware(commentHandler.DeleteComment)) // Delete comment
+	}
+}
+
+func CORSMiddleware() gin.HandlerFunc {
+	return func(c *gin.Context) {
+		c.Writer.Header().Set("Access-Control-Allow-Origin", "http://45.130.164.130:7777") // Replace with your origin
+		c.Writer.Header().Set("Access-Control-Allow-Methods", "GET, POST, PUT, PATCH, DELETE")
+		c.Writer.Header().Set("Access-Control-Allow-Headers", "Content-Type, Authorization")
+		c.Writer.Header().Set("Access-Control-Allow-Credentials", "true")
+		c.Writer.Header().Set("Access-Control-Max-Age", "86400") // Cache for 24 hours
+
+		if c.Request.Method == "OPTIONS" {
+			c.AbortWithStatus(http.StatusNoContent)
+			return
+		}
+
+		c.Next()
 	}
 }
