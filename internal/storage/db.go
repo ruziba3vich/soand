@@ -13,17 +13,21 @@ import (
 
 // ConnectMongoDB initializes a MongoDB connection and returns a *mongo.Collection
 func ConnectMongoDB(ctx context.Context, cfg *config.Config, collectionName string) (*mongo.Collection, error) {
-	// Define MongoDB credentials with explicit authentication source and mechanism
-	credential := options.Credential{
-		Username:      cfg.MongoDB.User,     // Ensure this is set correctly
-		Password:      cfg.MongoDB.Password, // Ensure this is set correctly
-		AuthSource:    "admin",              // 👈 Specify the authentication database (check if it's different in your case)
-		AuthMechanism: "SCRAM-SHA-256",      // 👈 Try SCRAM-SHA-256, or use SCRAM-SHA-1 if your MongoDB version only supports that
-	}
+	// Print connection details for debugging (don't include password in production logs)
+	fmt.Printf("Attempting to connect to MongoDB at %s with user %s\n", cfg.MongoDB.URI, cfg.MongoDB.User)
 
-	clientOptions := options.Client().
-		ApplyURI(cfg.MongoDB.URI).
-		SetAuth(credential) // 👈 Explicitly set authentication credentials
+	cfg.MongoDB.URI = "mongodb://mongo:27017/soand"
+	cfg.MongoDB.User = "mongo_user"
+	cfg.MongoDB.Password = "Dost0n1k"
+
+	// Then in your connection code
+	credential := options.Credential{
+		Username:   cfg.MongoDB.User,
+		Password:   cfg.MongoDB.Password,
+		AuthSource: "admin",
+	}
+	clientOptions := options.Client().ApplyURI(cfg.MongoDB.URI).SetAuth(credential)
+	clientOptions.SetAuth(credential)
 
 	// Set a timeout for the connection
 	ctx, cancel := context.WithTimeout(ctx, 10*time.Second)

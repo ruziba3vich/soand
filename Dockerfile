@@ -11,14 +11,11 @@ RUN go mod download
 # Copy the source code
 COPY . .
 
-# Build the Go application (Set correct path)
-RUN go build -o main ./cmd/main.go
+# Build the Go application with CGO disabled and statically linked
+RUN CGO_ENABLED=0 GOOS=linux go build -a -installsuffix cgo -o main ./cmd/main.go
 
 # Use a minimal base image for production
 FROM alpine:latest
-
-# Install necessary dependencies (e.g., libc)
-RUN apk --no-cache add ca-certificates
 
 # Set working directory
 WORKDIR /root/
