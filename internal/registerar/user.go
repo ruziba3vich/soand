@@ -5,12 +5,16 @@ import (
 
 	"github.com/gin-gonic/gin"
 	"github.com/redis/go-redis/v9"
+	_ "github.com/ruziba3vich/soand/docs"
 	handler "github.com/ruziba3vich/soand/internal/http"
 	"github.com/ruziba3vich/soand/internal/repos"
 	"github.com/ruziba3vich/soand/internal/service"
+	swaggerFiles "github.com/swaggo/files"
+	ginSwagger "github.com/swaggo/gin-swagger"
 )
 
 func RegisterUserRoutes(r *gin.Engine, userRepo repos.UserRepo, logger *log.Logger, authMiddleware func(gin.HandlerFunc) gin.HandlerFunc) {
+	r.GET("/swagger/*any", ginSwagger.WrapHandler(swaggerFiles.Handler))
 	userHandler := handler.NewUserHandler(userRepo, logger)
 
 	userRoutes := r.Group("/users")
@@ -54,6 +58,7 @@ func RegisterCommentRoutes(
 	redis *redis.Client,
 	authMiddleware func(gin.HandlerFunc) gin.HandlerFunc,
 	wsMiddleware func(gin.HandlerFunc) gin.HandlerFunc) {
+
 	commentHandler := handler.NewCommentHandler(commentService, file_service, logger, redis)
 
 	commentRoutes := r.Group("/comments")

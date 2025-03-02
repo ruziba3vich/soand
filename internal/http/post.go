@@ -29,6 +29,23 @@ func NewPostHandler(service repos.IPostService, logger *log.Logger, file_service
 	}
 }
 
+// CreatePost creates a new post with optional file uploads
+// @Summary Create a new post
+// @Description Creates a post with description, tags, optional delete_after time, and file attachments
+// @Tags posts
+// @Accept multipart/form-data
+// @Produce json
+// @Security BearerAuth
+// @Param description formData string true "Post description"
+// @Param delete_after formData string false "Time in minutes after which the post will be deleted"
+// @Param tags formData string false "Comma-separated list of tags or JSON array"
+// @Param tags_json formData string false "JSON stringified array of tags (alternative to tags)"
+// @Param files formData file false "Files to upload (multiple allowed)"
+// @Success 201 {object} map[string]string "Post created successfully with ID"
+// @Failure 400 {object} map[string]string "Invalid request payload"
+// @Failure 401 {object} map[string]string "Unauthorized"
+// @Failure 500 {object} map[string]string "Internal server error"
+// @Router /posts [post]
 func (h *PostHandler) CreatePost(c *gin.Context) {
 	userId, err := getUserIdFromRequest(c)
 	if err != nil {
@@ -36,15 +53,13 @@ func (h *PostHandler) CreatePost(c *gin.Context) {
 		return
 	}
 
-	// Read text fields from form-data
 	req := dto.PostRequest{
 		Description: c.PostForm("description"),
 		DeleteAfter: stringToInt(c.PostForm("delete_after")),
-		Tags:        c.PostFormArray("tags"), // Option 1: Read tags as an array
+		Tags:        c.PostFormArray("tags"),
 	}
 
-	// Handle JSON stringified array for tags (if sent as a JSON string)
-	tagsStr := c.PostForm("tags_json") // Alternative key for JSON array
+	tagsStr := c.PostForm("tags_json")
 	if tagsStr != "" {
 		if err := json.Unmarshal([]byte(tagsStr), &req.Tags); err != nil {
 			c.JSON(http.StatusBadRequest, gin.H{"error": "Invalid tags format"})
@@ -52,11 +67,9 @@ func (h *PostHandler) CreatePost(c *gin.Context) {
 		}
 	}
 
-	// Convert PostRequest to models.Post
 	post := req.ToPost()
 	post.CreatorId = userId
 
-	// Handle file uploads
 	form, err := c.MultipartForm()
 	if err == nil {
 		uploadedFiles := form.File["files"]
@@ -70,7 +83,6 @@ func (h *PostHandler) CreatePost(c *gin.Context) {
 		}
 	}
 
-	// Create the post
 	id, err := h.service.CreatePost(c.Request.Context(), post, req.DeleteAfter)
 	if err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to create post"})
@@ -80,7 +92,17 @@ func (h *PostHandler) CreatePost(c *gin.Context) {
 	c.JSON(http.StatusCreated, gin.H{"message": "Post created successfully", "id": id.Hex()})
 }
 
-// GetPost handles retrieving a single post by ID
+// GetPost retrieves a post by its ID
+// @Summary Get a post by ID
+// @Description Retrieves a single post using its MongoDB ObjectID
+// @Tags posts
+// @Accept json
+// @Produce json
+// @Param id query string true "Post ID (MongoDB ObjectID)"
+// @Success 200 {object} interface{} "Post details"
+// @Failure 400 {object} map[string]string "Invalid post ID format"
+// @Failure 404 {object} map[string]string "Post not found"
+// @Router /posts [get]
 func (h *PostHandler) GetPost(c *gin.Context) {
 	idParam := c.Query("id")
 	id, err := primitive.ObjectIDFromHex(idParam)
@@ -99,7 +121,17 @@ func (h *PostHandler) GetPost(c *gin.Context) {
 	c.JSON(http.StatusOK, post)
 }
 
-// GetAllPosts handles retrieving all posts with pagination
+// GetAllPosts retrieves all posts with pagination
+// @Summary Get all posts
+// @Description Retrieves a paginated list of all posts
+// @Tags posts
+// @Accept json
+// @Produce json
+// @Param page query string false "Page number (default: 1)"
+// @Param pageSize query string false "Number of posts per page (default: 10)"
+// @Success 200 {array} interface{} "List of posts"
+// @Failure 500 {object} map[string]string "Failed to retrieve posts"
+// @Router /posts/all [get]
 func (h *PostHandler) GetAllPosts(c *gin.Context) {
 	page := c.DefaultQuery("page", "1")
 	pageSize := c.DefaultQuery("pageSize", "10")
@@ -113,7 +145,19 @@ func (h *PostHandler) GetAllPosts(c *gin.Context) {
 	c.JSON(http.StatusOK, posts)
 }
 
-// UpdatePost handles updating an existing post
+// UpdatePost updates an existing post
+// @Summary Update a post
+// @Description Updates a post by ID with new data
+// @Tags posts
+// @Accept json
+// @Security BearerAuth
+// @Produce json
+// @Param id path string true "Post ID (MongoDB ObjectID)"
+// @Param updateData body map[string]interface{} true "Fields to update (e.g., description, tags)"
+// @Success 200 {object} map[string]string "Post updated successfully"
+// @Failure 400 {object} map[string]string "Invalid post ID or payload"
+// @Failure 500 {object} map[string]string "Failed to update post"
+// @Router /posts/{id} [put]
 func (h *PostHandler) UpdatePost(c *gin.Context) {
 	idParam := c.Param("id")
 	id, err := primitive.ObjectIDFromHex(idParam)
@@ -140,7 +184,18 @@ func (h *PostHandler) UpdatePost(c *gin.Context) {
 	c.JSON(http.StatusOK, gin.H{"message": "Post updated successfully"})
 }
 
-// DeletePost handles deleting a post by ID
+// DeletePost deletes a post by its ID
+// @Summary Delete a post
+// @Description Deletes a post using its MongoDB ObjectID
+// @Tags posts
+// @Accept json
+// @Produce json
+// @Security BearerAuth
+// @Param id path string true "Post ID (MongoDB ObjectID)"
+// @Success 200 {object} map[string]string "Post deleted successfully"
+// @Failure 400 {object} map[string]string "Invalid post ID format"
+// @Failure 500 {object} map[string]string "Failed to delete post"
+// @Router /posts/{id} [delete]
 func (h *PostHandler) DeletePost(c *gin.Context) {
 	idParam := c.Param("id")
 	id, err := primitive.ObjectIDFromHex(idParam)

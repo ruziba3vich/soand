@@ -224,6 +224,17 @@ func (h *CommentHandler) HandleWebSocket(c *gin.Context) {
 }
 
 // GetCommentsByPostID retrieves all comments for a post with pagination
+// @Summary Get comments by post ID
+// @Description Retrieves a paginated list of comments for a specific post
+// @Tags comments
+// @Produce json
+// @Param post_id path string true "Post ID (MongoDB ObjectID)"
+// @Param page query string false "Page number (default: 1)"
+// @Param pageSize query string false "Number of comments per page (default: 10)"
+// @Success 200 {array} interface{} "List of comments"
+// @Failure 400 {object} map[string]string "Invalid post ID"
+// @Failure 500 {object} map[string]string "Could not fetch comments"
+// @Router /posts/{post_id}/comments [get]
 func (h *CommentHandler) GetCommentsByPostID(c *gin.Context) {
 	postIDStr := c.Param("post_id")
 	postID, err := primitive.ObjectIDFromHex(postIDStr)
@@ -248,6 +259,19 @@ func (h *CommentHandler) GetCommentsByPostID(c *gin.Context) {
 }
 
 // UpdateComment updates the text of a comment
+// @Summary Update a comment
+// @Description Updates the text of a specific comment for the authenticated user
+// @Tags comments
+// @Accept json
+// @Produce json
+// @Security BearerAuth
+// @Param comment_id path string true "Comment ID (MongoDB ObjectID)"
+// @Param comment body object{new_text=string} true "New comment text"
+// @Success 200 {object} map[string]string "Comment updated successfully"
+// @Failure 400 {object} map[string]string "Invalid comment ID or request body"
+// @Failure 401 {object} map[string]string "Unauthorized"
+// @Failure 500 {object} map[string]string "Could not update comment"
+// @Router /comments/{comment_id} [put]
 func (h *CommentHandler) UpdateComment(c *gin.Context) {
 	commentIDStr := c.Param("comment_id")
 	commentID, err := primitive.ObjectIDFromHex(commentIDStr)
@@ -292,6 +316,17 @@ func (h *CommentHandler) UpdateComment(c *gin.Context) {
 }
 
 // DeleteComment removes a comment
+// @Summary Delete a comment
+// @Description Deletes a specific comment for the authenticated user
+// @Tags comments
+// @Produce json
+// @Security BearerAuth
+// @Param comment_id path string true "Comment ID (MongoDB ObjectID)"
+// @Success 200 {object} map[string]string "Comment deleted successfully"
+// @Failure 400 {object} map[string]string "Invalid comment ID"
+// @Failure 401 {object} map[string]string "Unauthorized"
+// @Failure 500 {object} map[string]string "Could not delete comment"
+// @Router /comments/{comment_id} [delete]
 func (h *CommentHandler) DeleteComment(c *gin.Context) {
 	commentIDStr := c.Param("comment_id")
 	commentID, err := primitive.ObjectIDFromHex(commentIDStr)

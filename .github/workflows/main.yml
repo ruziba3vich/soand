@@ -28,7 +28,7 @@ jobs:
 
       - name: Verify Docker Compose is installed
         run: |
-          ssh -T -o StrictHostKeyChecking=no ${{ secrets.SSH_USER }}@${{ secrets.SERVER_IP }} "docker-compose --version || { echo 'Docker Compose is not installed'; exit 1; }"
+          ssh -T -o StrictHostKeyChecking=no ${{ secrets.SSH_USER }}@${{ secrets.SERVER_IP }} "docker compose version || { echo 'Docker Compose is not installed'; exit 1; }"
 
       - name: Deploy with Docker Compose
         run: |

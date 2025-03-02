@@ -1,0 +1,755 @@
+definitions:
+  github_com_ruziba3vich_soand_internal_models.User:
+    properties:
+      bio:
+        type: string
+      full_name:
+        type: string
+      id:
+        type: string
+      password:
+        type: string
+      phone:
+        type: string
+      profile_hidden:
+        type: boolean
+      profile_pics:
+        items:
+          type: string
+        type: array
+      status:
+        type: string
+      username:
+        type: string
+    required:
+    - phone
+    - username
+    type: object
+info:
+  contact:
+    email: support@swagger.io
+    name: API Support
+    url: http://www.swagger.io/support
+  description: Soand API Documentation
+  license:
+    name: Apache 2.0
+    url: http://www.apache.org/licenses/LICENSE-2.0.html
+  termsOfService: http://swagger.io/terms/
+  title: Soand API
+  version: "1.0"
+paths:
+  /comments/{comment_id}:
+    delete:
+      description: Deletes a specific comment for the authenticated user
+      parameters:
+      - description: Comment ID (MongoDB ObjectID)
+        in: path
+        name: comment_id
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Comment deleted successfully
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "400":
+          description: Invalid comment ID
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "401":
+          description: Unauthorized
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "500":
+          description: Could not delete comment
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+      security:
+      - BearerAuth: []
+      summary: Delete a comment
+      tags:
+      - comments
+    put:
+      consumes:
+      - application/json
+      description: Updates the text of a specific comment for the authenticated user
+      parameters:
+      - description: Comment ID (MongoDB ObjectID)
+        in: path
+        name: comment_id
+        required: true
+        type: string
+      - description: New comment text
+        in: body
+        name: comment
+        required: true
+        schema:
+          properties:
+            new_text:
+              type: string
+          type: object
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Comment updated successfully
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "400":
+          description: Invalid comment ID or request body
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "401":
+          description: Unauthorized
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "500":
+          description: Could not update comment
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+      security:
+      - BearerAuth: []
+      summary: Update a comment
+      tags:
+      - comments
+  /posts:
+    get:
+      consumes:
+      - application/json
+      description: Retrieves a single post using its MongoDB ObjectID
+      parameters:
+      - description: Post ID (MongoDB ObjectID)
+        in: query
+        name: id
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Post details
+          schema: {}
+        "400":
+          description: Invalid post ID format
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "404":
+          description: Post not found
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+      summary: Get a post by ID
+      tags:
+      - posts
+    post:
+      consumes:
+      - multipart/form-data
+      description: Creates a post with description, tags, optional delete_after time,
+        and file attachments
+      parameters:
+      - description: Post description
+        in: formData
+        name: description
+        required: true
+        type: string
+      - description: Time in minutes after which the post will be deleted
+        in: formData
+        name: delete_after
+        type: string
+      - description: Comma-separated list of tags or JSON array
+        in: formData
+        name: tags
+        type: string
+      - description: JSON stringified array of tags (alternative to tags)
+        in: formData
+        name: tags_json
+        type: string
+      - description: Files to upload (multiple allowed)
+        in: formData
+        name: files
+        type: file
+      produces:
+      - application/json
+      responses:
+        "201":
+          description: Post created successfully with ID
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "400":
+          description: Invalid request payload
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "401":
+          description: Unauthorized
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "500":
+          description: Internal server error
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+      security:
+      - BearerAuth: []
+      summary: Create a new post
+      tags:
+      - posts
+  /posts/{id}:
+    delete:
+      consumes:
+      - application/json
+      description: Deletes a post using its MongoDB ObjectID
+      parameters:
+      - description: Post ID (MongoDB ObjectID)
+        in: path
+        name: id
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Post deleted successfully
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "400":
+          description: Invalid post ID format
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "500":
+          description: Failed to delete post
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+      security:
+      - BearerAuth: []
+      summary: Delete a post
+      tags:
+      - posts
+    put:
+      consumes:
+      - application/json
+      description: Updates a post by ID with new data
+      parameters:
+      - description: Post ID (MongoDB ObjectID)
+        in: path
+        name: id
+        required: true
+        type: string
+      - description: Fields to update (e.g., description, tags)
+        in: body
+        name: updateData
+        required: true
+        schema:
+          additionalProperties: true
+          type: object
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Post updated successfully
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "400":
+          description: Invalid post ID or payload
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "500":
+          description: Failed to update post
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+      security:
+      - BearerAuth: []
+      summary: Update a post
+      tags:
+      - posts
+  /posts/{post_id}/comments:
+    get:
+      description: Retrieves a paginated list of comments for a specific post
+      parameters:
+      - description: Post ID (MongoDB ObjectID)
+        in: path
+        name: post_id
+        required: true
+        type: string
+      - description: 'Page number (default: 1)'
+        in: query
+        name: page
+        type: string
+      - description: 'Number of comments per page (default: 10)'
+        in: query
+        name: pageSize
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: List of comments
+          schema:
+            items: {}
+            type: array
+        "400":
+          description: Invalid post ID
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "500":
+          description: Could not fetch comments
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+      summary: Get comments by post ID
+      tags:
+      - comments
+  /posts/all:
+    get:
+      consumes:
+      - application/json
+      description: Retrieves a paginated list of all posts
+      parameters:
+      - description: 'Page number (default: 1)'
+        in: query
+        name: page
+        type: string
+      - description: 'Number of posts per page (default: 10)'
+        in: query
+        name: pageSize
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: List of posts
+          schema:
+            items: {}
+            type: array
+        "500":
+          description: Failed to retrieve posts
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+      summary: Get all posts
+      tags:
+      - posts
+  /users:
+    delete:
+      description: Deletes the authenticated user's account
+      produces:
+      - application/json
+      responses:
+        "204":
+          description: User deleted successfully
+        "401":
+          description: Unauthorized
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "500":
+          description: Failed to delete user
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+      security:
+      - BearerAuth: []
+      summary: Delete a user
+      tags:
+      - users
+    post:
+      consumes:
+      - application/json
+      description: Creates a new user and returns an authentication token
+      parameters:
+      - description: User data
+        in: body
+        name: user
+        required: true
+        schema:
+          $ref: '#/definitions/github_com_ruziba3vich_soand_internal_models.User'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Token for the created user
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "400":
+          description: Invalid request body
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "500":
+          description: Failed to create user
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+      summary: Create a new user
+      tags:
+      - users
+  /users/{username}:
+    get:
+      description: Retrieves a user's details by their username
+      parameters:
+      - description: Username of the user
+        in: path
+        name: username
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: User details
+          schema:
+            $ref: '#/definitions/github_com_ruziba3vich_soand_internal_models.User'
+        "404":
+          description: User not found
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+      summary: Get user by username
+      tags:
+      - users
+  /users/bio:
+    put:
+      consumes:
+      - application/json
+      description: Updates the authenticated user's bio
+      parameters:
+      - description: New bio
+        in: body
+        name: bio
+        required: true
+        schema:
+          properties:
+            bio:
+              type: string
+          type: object
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Bio updated successfully
+        "400":
+          description: Invalid request body
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "401":
+          description: Unauthorized
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "500":
+          description: Failed to update bio
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+      security:
+      - BearerAuth: []
+      summary: Set user bio
+      tags:
+      - users
+  /users/fullname:
+    put:
+      consumes:
+      - application/json
+      description: Updates the authenticated user's full name
+      parameters:
+      - description: New full name
+        in: body
+        name: fullname
+        required: true
+        schema:
+          properties:
+            new_fullname:
+              type: string
+          type: object
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Full name updated successfully
+        "400":
+          description: Invalid request body
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "401":
+          description: Unauthorized
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "500":
+          description: Failed to update fullname
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+      security:
+      - BearerAuth: []
+      summary: Update user full name
+      tags:
+      - users
+  /users/login:
+    post:
+      consumes:
+      - application/json
+      description: Authenticates a user and returns an authentication token
+      parameters:
+      - description: Login credentials
+        in: body
+        name: credentials
+        required: true
+        schema:
+          properties:
+            password:
+              type: string
+            username:
+              type: string
+          type: object
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Authentication token
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "400":
+          description: Invalid request body
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "500":
+          description: Failed to login user
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+      summary: Login a user
+      tags:
+      - users
+  /users/me:
+    get:
+      description: Retrieves the authenticated user's details by their ID
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: User details
+          schema:
+            $ref: '#/definitions/github_com_ruziba3vich_soand_internal_models.User'
+        "401":
+          description: Unauthorized
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "404":
+          description: User not found
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+      summary: Get user by ID
+      tags:
+      - users
+  /users/password:
+    put:
+      consumes:
+      - application/json
+      description: Updates the authenticated user's password
+      parameters:
+      - description: Old and new passwords
+        in: body
+        name: passwords
+        required: true
+        schema:
+          properties:
+            new_password:
+              type: string
+            old_password:
+              type: string
+          type: object
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Password updated successfully
+        "400":
+          description: Invalid request body
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "401":
+          description: Unauthorized
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "500":
+          description: Failed to update password
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+      security:
+      - BearerAuth: []
+      summary: Update user password
+      tags:
+      - users
+  /users/username:
+    put:
+      consumes:
+      - application/json
+      description: Updates the authenticated user's username
+      parameters:
+      - description: New username
+        in: body
+        name: username
+        required: true
+        schema:
+          properties:
+            new_username:
+              type: string
+          type: object
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Username updated successfully
+        "400":
+          description: Invalid request body
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "401":
+          description: Unauthorized
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "500":
+          description: Failed to update username
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+      security:
+      - BearerAuth: []
+      summary: Update user username
+      tags:
+      - users
+  /users/visibility:
+    put:
+      consumes:
+      - application/json
+      description: Updates the authenticated user's profile visibility (hidden or
+        visible)
+      parameters:
+      - description: Profile visibility status
+        in: body
+        name: visibility
+        required: true
+        schema:
+          properties:
+            hidden:
+              type: boolean
+          type: object
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Profile visibility updated
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "400":
+          description: Invalid request payload
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "401":
+          description: Unauthorized
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "500":
+          description: Failed to update profile visibility
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+      security:
+      - BearerAuth: []
+      summary: Change profile visibility
+      tags:
+      - users
+securityDefinitions:
+  BearerAuth:
+    description: '"JWT Authorization header using the Bearer scheme. Example: ''Bearer
+      {token}''"'
+    in: header
+    name: Authorization
+    type: apiKey
+swagger: "2.0"
