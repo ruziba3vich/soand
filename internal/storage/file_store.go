@@ -7,7 +7,6 @@ import (
 	"time"
 
 	"github.com/minio/minio-go/v7"
-	"github.com/minio/minio-go/v7/pkg/credentials"
 	"github.com/ruziba3vich/soand/pkg/config"
 )
 
@@ -36,18 +35,9 @@ func (s *FileStorage) UploadFile(file *multipart.FileHeader) (string, error) {
 
 	// Generate unique filename
 	filename := fmt.Sprintf("%d", time.Now().UnixMilli())
-
-	// Initialize MinIO client
-	minioClient, err := minio.New(s.cfg.MinIO.Endpoint, &minio.Options{
-		Creds:  credentials.NewStaticV4(s.cfg.MinIO.AccessKey, s.cfg.MinIO.SecretKey, ""),
-		Secure: false,
-	})
-	if err != nil {
-		return "", fmt.Errorf("Failed to connect to MinIO: " + err.Error())
-	}
-
+	
 	// Upload file to MinIO
-	_, err = minioClient.PutObject(
+	_, err = s.minio_client.PutObject(
 		context.Background(),
 		s.cfg.MinIO.Bucket,
 		filename,
@@ -63,25 +53,15 @@ func (s *FileStorage) UploadFile(file *multipart.FileHeader) (string, error) {
 }
 
 func (s *FileStorage) GetFile(filename string) (string, error) {
-
-	// Initialize MinIO client
-	minioClient, err := minio.New(s.cfg.MinIO.Endpoint, &minio.Options{
-		Creds:  credentials.NewStaticV4(s.cfg.MinIO.AccessKey, s.cfg.MinIO.SecretKey, ""),
-		Secure: false,
-	})
-	if err != nil {
-		return "", fmt.Errorf("Failed to connect to MinIO: " + err.Error())
-	}
-
 	// Check if the file exists
-	_, err = minioClient.StatObject(context.Background(), s.cfg.MinIO.Bucket, filename, minio.StatObjectOptions{})
+	_, err := s.minio_client.StatObject(context.Background(), s.cfg.MinIO.Bucket, filename, minio.StatObjectOptions{})
 	if err != nil {
 		return "", fmt.Errorf("File not found: " + err.Error())
 	}
 
 	// Generate pre-signed URL
 	expiry := time.Hour * 24
-	url, err := minioClient.PresignedGetObject(context.Background(), s.cfg.MinIO.Bucket, filename, expiry, nil)
+	url, err := s.minio_client.PresignedGetObject(context.Background(), s.cfg.MinIO.Bucket, filename, expiry, nil)
 	if err != nil {
 		return "", fmt.Errorf("Failed to get file: " + err.Error())
 	}
@@ -90,24 +70,14 @@ func (s *FileStorage) GetFile(filename string) (string, error) {
 }
 
 func (s *FileStorage) DeleteFile(filename string) error {
-
-	// Initialize MinIO client
-	minioClient, err := minio.New(s.cfg.MinIO.Endpoint, &minio.Options{
-		Creds:  credentials.NewStaticV4(s.cfg.MinIO.AccessKey, s.cfg.MinIO.SecretKey, ""),
-		Secure: false,
-	})
-	if err != nil {
-		return fmt.Errorf("Failed to connect to MinIO: " + err.Error())
-	}
-
 	// Check if the file exists before attempting deletion
-	_, err = minioClient.StatObject(context.Background(), s.cfg.MinIO.Bucket, filename, minio.StatObjectOptions{})
+	_, err := s.minio_client.StatObject(context.Background(), s.cfg.MinIO.Bucket, filename, minio.StatObjectOptions{})
 	if err != nil {
 		return fmt.Errorf("File not found: " + err.Error())
 	}
 
 	// Delete file from MinIO
-	err = minioClient.RemoveObject(context.Background(), s.cfg.MinIO.Bucket, filename, minio.RemoveObjectOptions{})
+	err = s.minio_client.RemoveObject(context.Background(), s.cfg.MinIO.Bucket, filename, minio.RemoveObjectOptions{})
 	if err != nil {
 		return fmt.Errorf("Failed to delete file: " + err.Error())
 	}
