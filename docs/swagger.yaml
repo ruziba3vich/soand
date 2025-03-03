@@ -8,6 +8,8 @@ definitions:
     type: object
   github_com_ruziba3vich_soand_internal_models.User:
     properties:
+      background_pic:
+        type: string
       bio:
         type: string
       full_name:
@@ -577,6 +579,53 @@ paths:
               type: string
             type: object
       summary: Get user by username
+      tags:
+      - users
+  /users/background:
+    put:
+      consumes:
+      - application/json
+      description: Sets the authenticated user's background picture
+      parameters:
+      - description: New background picture ID (e.g., UUID or MinIO object key)
+        in: body
+        name: background_pic
+        required: true
+        schema:
+          properties:
+            pic_id:
+              type: string
+          type: object
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Background picture is set successfully
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "400":
+          description: Invalid request body
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "401":
+          description: Unauthorized
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "500":
+          description: Failed to update background picture
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+      security:
+      - BearerAuth: []
+      summary: Set user background picture
       tags:
       - users
   /users/bio:
