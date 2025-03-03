@@ -30,6 +30,7 @@ func RegisterUserRoutes(r *gin.Engine, userRepo repos.UserRepo, logger *log.Logg
 		userRoutes.PATCH("/username", authMiddleware(userHandler.UpdateUsername))
 		userRoutes.PATCH("/visibility", authMiddleware(userHandler.ChangeProfileVisibility))
 		userRoutes.PATCH("/bio", authMiddleware(userHandler.SetBio))
+		userRoutes.PATCH("/background", authMiddleware(userHandler.SetBackgroundPic))
 	}
 }
 

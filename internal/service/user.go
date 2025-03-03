@@ -168,3 +168,12 @@ func (s *UserService) SetBio(ctx context.Context, userId primitive.ObjectID, bio
 	s.logger.Printf("Successfully changed bio for user %s", userId.Hex())
 	return nil
 }
+
+func (s *UserService) SetBackgroundPic(ctx context.Context, userID primitive.ObjectID, pic_id string) error {
+	s.logger.Printf("Changing background_pic for user %s", userID.Hex())
+	if err := s.SetBackgroundPic(ctx, userID, pic_id); err != nil {
+		return err
+	}
+	s.logger.Printf("Changed background_pic for user %s successfully", userID.Hex())
+	return nil
+}

@@ -20,5 +20,6 @@ type (
 		LoginUser(context.Context, string, string) (string, error)
 		ChangeProfileVisibility(context.Context, primitive.ObjectID, bool) error
 		SetBio(context.Context, primitive.ObjectID, string) error
+		SetBackgroundPic(context.Context, primitive.ObjectID, string) error
 	}
 )

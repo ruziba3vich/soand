@@ -16,13 +16,18 @@ import (
 )
 
 type UserStorage struct {
-	db     *mongo.Collection
-	secret string
+	db                 *mongo.Collection
+	secret             string
+	background_storage *BackgroundStorage
 }
 
 // NewUserStorage initializes UserStorage
-func NewUserStorage(db *mongo.Collection, config *config.Config) *UserStorage {
-	return &UserStorage{db: db, secret: config.JwtSecret}
+func NewUserStorage(db *mongo.Collection, config *config.Config, background_storage *BackgroundStorage) *UserStorage {
+	return &UserStorage{
+		db:                 db,
+		secret:             config.JwtSecret,
+		background_storage: background_storage,
+	}
 }
 
 // CreateUser inserts a new user into the database and returns a JWT token
@@ -218,6 +223,29 @@ func (s *UserStorage) ChangeProfileVisibility(ctx context.Context, userID primit
 
 	filter := bson.M{"_id": userID}
 	update := bson.M{"$set": bson.M{"profile_hidden": hidden}}
+
+	result, err := s.db.UpdateOne(ctx, filter, update)
+	if err != nil {
+		return err
+	}
+
+	if result.MatchedCount == 0 {
+		return errors.New("user not found")
+	}
+
+	return nil
+}
+
+func (s *UserStorage) SetBackgroundPic(ctx context.Context, userID primitive.ObjectID, pic_id string) error {
+	url, err := s.background_storage.GetBackgroundByID(pic_id)
+	if err != nil {
+		return err
+	}
+	ctx, cancel := context.WithTimeout(ctx, 5*time.Second)
+	defer cancel()
+
+	filter := bson.M{"_id": userID}
+	update := bson.M{"$set": bson.M{"background_pic": url}}
 
 	result, err := s.db.UpdateOne(ctx, filter, update)
 	if err != nil {

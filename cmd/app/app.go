@@ -23,6 +23,28 @@ func Run(ctx context.Context, logger *log.Logger) error {
 
 	router := gin.Default()
 
+	// Initialize MinIO client
+	minio_client, err := minio.New(cfg.MinIO.Endpoint, &minio.Options{
+		Creds:  credentials.NewStaticV4(cfg.MinIO.AccessKey, cfg.MinIO.SecretKey, ""),
+		Secure: false,
+	})
+	if err != nil {
+		return fmt.Errorf("Failed to connect to MinIO: " + err.Error())
+	}
+
+	if err := createBucket(minio_client, cfg.MinIO.Bucket); err != nil {
+		return err
+	}
+
+	file_storage := storage.NewFileStorage(cfg, minio_client)
+	file_store_service := service.NewFileStoreService(file_storage, logger)
+
+	// Background
+	background_collection, err := storage.ConnectMongoDB(ctx, cfg, "background_collection")
+	background_storage := storage.NewBackgroundStorage(file_storage, background_collection)
+
+	background_service := service.NewBackgroundService(logger, background_storage)
+
 	// Redis client
 	redisClient := redis.NewClient(&redis.Options{
 		Addr:     cfg.Redis.Host + ":" + cfg.Redis.Port,
@@ -40,28 +62,12 @@ func Run(ctx context.Context, logger *log.Logger) error {
 
 	rate_limiter := limiter.NewTokenBucketLimiter(redisClient, 15, 0.25, 1*time.Minute)
 
-	user_storage := storage.NewUserStorage(user_collection, cfg)
+	user_storage := storage.NewUserStorage(user_collection, cfg, background_storage)
 	user_service := service.NewUserService(user_storage, logger)
 
 	authMiddleware := middleware.NewAuthHandler(user_service, logger, rate_limiter)
 
 	registerar.RegisterUserRoutes(router, user_service, logger, authMiddleware.AuthMiddleware())
-
-	// Initialize MinIO client
-	minio_client, err := minio.New(cfg.MinIO.Endpoint, &minio.Options{
-		Creds:  credentials.NewStaticV4(cfg.MinIO.AccessKey, cfg.MinIO.SecretKey, ""),
-		Secure: false,
-	})
-	if err != nil {
-		return fmt.Errorf("Failed to connect to MinIO: " + err.Error())
-	}
-
-	if err := createBucket(minio_client, cfg.MinIO.Bucket); err != nil {
-		return err
-	}
-
-	file_storage := storage.NewFileStorage(cfg, minio_client)
-	file_store_service := service.NewFileStoreService(file_storage, logger)
 
 	// posts
 
@@ -104,12 +110,6 @@ func Run(ctx context.Context, logger *log.Logger) error {
 		authMiddleware.AuthMiddleware(),
 		authMiddleware.WebSocketAuthMiddleware(),
 	)
-
-	// Background
-	background_collection, err := storage.ConnectMongoDB(ctx, cfg, "background_collection")
-	background_storage := storage.NewBackgroundStorage(file_storage, background_collection)
-
-	background_service := service.NewBackgroundService(logger, background_storage)
 
 	registerar.RegisterBackgroundHandler(router, background_service, logger)
 

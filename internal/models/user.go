@@ -11,5 +11,6 @@ type User struct {
 	Bio           string             `json:"bio" bson:"bio"`
 	Status        string             `json:"status" bson:"status"`
 	ProfilePics   []string           `json:"profile_pics" bson:"profile_pics"`
+	BackgroundPic string             `json:"background_pic" bson:"background_pic"`
 	HiddenProfile bool               `json:"profile_hidden" bson:"profile_hidden"`
 }

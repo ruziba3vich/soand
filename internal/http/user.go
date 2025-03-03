@@ -381,3 +381,42 @@ func getUserIdFromRequest(c *gin.Context) (primitive.ObjectID, error) {
 	oid, err := primitive.ObjectIDFromHex(userID.(string))
 	return oid, err
 }
+
+// SetBackgroundPic handles setting a user's chat background picture
+// @Summary Set user background picture
+// @Description Sets the authenticated user's background picture
+// @Tags users
+// @Accept json
+// @Security BearerAuth
+// @Produce json
+// @Param background_pic body object{pic_id=string} true "New background picture ID (e.g., UUID or MinIO object key)"
+// @Success 200 {object} map[string]string "Background picture is set successfully"
+// @Failure 400 {object} map[string]string "Invalid request body"
+// @Failure 401 {object} map[string]string "Unauthorized"
+// @Failure 500 {object} map[string]string "Failed to update background picture"
+// @Router /users/background [put]
+func (h *UserHandler) SetBackgroundPic(c *gin.Context) {
+	var request struct {
+		BackgroundPic string `json:"pic_id"`
+	}
+
+	userId, err := getUserIdFromRequest(c)
+	if err != nil {
+		c.JSON(http.StatusUnauthorized, gin.H{"error": "Unauthorized"})
+		return
+	}
+
+	if err := c.ShouldBindJSON(&request); err != nil {
+		h.logger.Printf("Error parsing background picture update request: %v", err)
+		c.JSON(http.StatusBadRequest, gin.H{"error": "Invalid request body"})
+		return
+	}
+
+	if err := h.repo.SetBackgroundPic(c.Request.Context(), userId, request.BackgroundPic); err != nil {
+		h.logger.Printf("Error updating background picture: %v", err)
+		c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to update background picture"})
+		return
+	}
+
+	c.Status(http.StatusOK)
+}
