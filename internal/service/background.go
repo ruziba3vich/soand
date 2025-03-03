@@ -1,19 +1,19 @@
 package service
 
 import (
+	"log"
 	"mime/multipart"
 
 	"github.com/ruziba3vich/soand/internal/models"
 	"github.com/ruziba3vich/soand/internal/storage"
-	"github.com/sirupsen/logrus"
 )
 
 type BackgroundService struct {
-	logger  *logrus.Logger
+	logger  *log.Logger
 	storage *storage.BackgroundStorage
 }
 
-func NewBackgroundService(logger *logrus.Logger, storage *storage.BackgroundStorage) *BackgroundService {
+func NewBackgroundService(logger *log.Logger, storage *storage.BackgroundStorage) *BackgroundService {
 	return &BackgroundService{
 		logger:  logger,
 		storage: storage,
@@ -21,37 +21,37 @@ func NewBackgroundService(logger *logrus.Logger, storage *storage.BackgroundStor
 }
 
 func (s *BackgroundService) CreateBackground(file *multipart.FileHeader) (string, error) {
-	s.logger.Info("Creating new background...")
+	s.logger.Println("Creating new background...")
 
 	filename, err := s.storage.CreateBackground(file)
 	if err != nil {
-		s.logger.Error("Failed to upload background file: ", err)
+		s.logger.Println("Failed to upload background file: ", err)
 		return "", err
 	}
 
-	s.logger.Info("Background created successfully")
+	s.logger.Println("Background created successfully")
 	return filename, nil
 }
 
 func (s *BackgroundService) DeleteBackground(id string) error {
-	s.logger.Infof("Deleting background with ID: %s", id)
+	s.logger.Printf("Deleting background with ID: %s\n", id)
 
 	err := s.storage.DeleteBackground(id)
 	if err != nil {
-		s.logger.Error("Failed to delete background: ", err)
+		s.logger.Println("Failed to delete background: ", err)
 		return err
 	}
 
-	s.logger.Info("Background deleted successfully")
+	s.logger.Println("Background deleted successfully")
 	return nil
 }
 
 func (s *BackgroundService) GetAllBackgrounds(page int64, pageSize int64) ([]models.Background, error) {
-	s.logger.Infof("Fetching backgrounds - Page: %d, PageSize: %d", page, pageSize)
+	s.logger.Println("Fetching backgrounds - Page: %d, PageSize: %d\n", page, pageSize)
 
 	backgrounds, err := s.storage.GetAllBackgrounds(page, pageSize)
 	if err != nil {
-		s.logger.Error("Failed to fetch backgrounds: ", err)
+		s.logger.Println("Failed to fetch backgrounds: ", err)
 		return nil, err
 	}
 
@@ -59,11 +59,11 @@ func (s *BackgroundService) GetAllBackgrounds(page int64, pageSize int64) ([]mod
 }
 
 func (s *BackgroundService) GetBackgroundByID(id string) (*models.Background, error) {
-	s.logger.Infof("Fetching background with ID: %s", id)
+	s.logger.Println("Fetching background with ID: %s\n", id)
 
 	background, err := s.storage.GetBackgroundByID(id)
 	if err != nil {
-		s.logger.Error("Failed to fetch background: ", err)
+		s.logger.Println("Failed to fetch background: ", err)
 		return nil, err
 	}
 

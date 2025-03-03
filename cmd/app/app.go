@@ -105,6 +105,14 @@ func Run(ctx context.Context, logger *log.Logger) error {
 		authMiddleware.WebSocketAuthMiddleware(),
 	)
 
+	// Background
+	background_collection, err := storage.ConnectMongoDB(ctx, cfg, "background_collection")
+	background_storage := storage.NewBackgroundStorage(file_storage, background_collection)
+
+	background_service := service.NewBackgroundService(logger, background_storage)
+
+	registerar.RegisterBackgroundHandler(router, background_service, logger)
+
 	return router.Run(":7777")
 }
 

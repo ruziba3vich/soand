@@ -9,7 +9,6 @@ import (
 	_ "github.com/ruziba3vich/soand/docs"
 	handler "github.com/ruziba3vich/soand/internal/http"
 	"github.com/ruziba3vich/soand/internal/repos"
-	"github.com/ruziba3vich/soand/internal/service"
 	swaggerFiles "github.com/swaggo/files"
 	ginSwagger "github.com/swaggo/gin-swagger"
 )
@@ -54,7 +53,7 @@ func RegisterPostRoutes(
 
 func RegisterCommentRoutes(
 	r *gin.Engine,
-	commentService *service.CommentService,
+	commentService repos.ICommentService,
 	file_service repos.IFIleStoreService,
 	logger *log.Logger,
 	redis *redis.Client,
@@ -70,6 +69,22 @@ func RegisterCommentRoutes(
 		commentRoutes.PATCH("/:comment_id", authMiddleware(commentHandler.UpdateComment))  // Update comment text
 		commentRoutes.DELETE("/:comment_id", authMiddleware(commentHandler.DeleteComment)) // Delete comment
 	}
+}
+
+func RegisterBackgroundHandler(
+	r *gin.Engine,
+	background_service repos.IBackgroundService,
+	logger *log.Logger,
+) {
+
+	background_handler := handler.NewBackgroundHandler(background_service, logger)
+
+	backgroundRoutes := r.Group("/backgrounds")
+
+	backgroundRoutes.POST("/", background_handler.CreateBackground)
+	backgroundRoutes.GET("/", background_handler.GetAllBackgrounds)
+	backgroundRoutes.GET("/:id", background_handler.GetBackgroundByID)
+	backgroundRoutes.DELETE("/:id", background_handler.DeleteBackground)
 }
 
 func CORSMiddleware() gin.HandlerFunc {
