@@ -470,3 +470,5 @@ Key: 'PostRequest.DeleteAfter' Error:Field validation for 'DeleteAfter' failed o
 [MusicLib] 2025/03/03 05:06:23 post.go:72: ObjectID("67c4f248f9ad8b525eba1b99")
 [MusicLib] 2025/03/03 05:06:23 service.go:40: map[content:By Ma'suma id:67c4f27ff9ad8b525eba1b9a]
 [MusicLib] 2025/03/03 05:06:31 service.go:86: map[count:1 page:1 pageSize:10]
+[MusicLib] 2025/03/03 05:10:35 main.go:42: Received signal: interrupt, shutting down...
+[MusicLib] 2025/03/03 05:10:35 main.go:49: Shutdown complete
