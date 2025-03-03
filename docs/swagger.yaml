@@ -1,4 +1,11 @@
 definitions:
+  github_com_ruziba3vich_soand_internal_models.Background:
+    properties:
+      filename:
+        type: string
+      id:
+        type: string
+    type: object
   github_com_ruziba3vich_soand_internal_models.User:
     properties:
       bio:
@@ -38,6 +45,121 @@ info:
   title: Soand API
   version: "1.0"
 paths:
+  /backgrounds:
+    get:
+      description: Retrieves a list of background images with pagination
+      parameters:
+      - description: Page number
+        in: query
+        name: page
+        type: integer
+      - description: Page size
+        in: query
+        name: pageSize
+        type: integer
+      responses:
+        "200":
+          description: OK
+          schema:
+            items:
+              $ref: '#/definitions/github_com_ruziba3vich_soand_internal_models.Background'
+            type: array
+        "400":
+          description: Invalid query parameters
+          schema:
+            type: string
+        "500":
+          description: Internal server error
+          schema:
+            type: string
+      summary: Get all background images
+      tags:
+      - backgrounds
+    post:
+      consumes:
+      - multipart/form-data
+      description: Uploads a new background image and stores it
+      parameters:
+      - description: Background image file
+        in: formData
+        name: file
+        required: true
+        type: file
+      produces:
+      - application/json
+      responses:
+        "201":
+          description: File uploaded successfully
+          schema:
+            type: string
+        "400":
+          description: Bad request
+          schema:
+            type: string
+        "500":
+          description: Internal server error
+          schema:
+            type: string
+      summary: Upload a new background image
+      tags:
+      - backgrounds
+  /backgrounds/{id}:
+    delete:
+      description: Deletes a background image by ID
+      parameters:
+      - description: Background ID
+        in: path
+        name: id
+        required: true
+        type: string
+      responses:
+        "200":
+          description: Background deleted successfully
+          schema:
+            type: string
+        "400":
+          description: Invalid ID
+          schema:
+            type: string
+        "404":
+          description: Background not found
+          schema:
+            type: string
+        "500":
+          description: Internal server error
+          schema:
+            type: string
+      summary: Delete a background image
+      tags:
+      - backgrounds
+    get:
+      description: Retrieves a specific background image by its ID
+      parameters:
+      - description: Background ID
+        in: path
+        name: id
+        required: true
+        type: string
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/github_com_ruziba3vich_soand_internal_models.Background'
+        "400":
+          description: Invalid ID
+          schema:
+            type: string
+        "404":
+          description: Background not found
+          schema:
+            type: string
+        "500":
+          description: Internal server error
+          schema:
+            type: string
+      summary: Get a background image by ID
+      tags:
+      - backgrounds
   /comments/{comment_id}:
     delete:
       description: Deletes a specific comment for the authenticated user

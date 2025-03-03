@@ -6,6 +6,7 @@ import (
 	"strconv"
 
 	"github.com/gin-gonic/gin"
+	_ "github.com/ruziba3vich/soand/internal/models"
 	"github.com/ruziba3vich/soand/internal/repos"
 )
 

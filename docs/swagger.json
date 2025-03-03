@@ -16,6 +16,180 @@
         "version": "1.0"
     },
     "paths": {
+        "/backgrounds": {
+            "get": {
+                "description": "Retrieves a list of background images with pagination",
+                "tags": [
+                    "backgrounds"
+                ],
+                "summary": "Get all background images",
+                "parameters": [
+                    {
+                        "type": "integer",
+                        "description": "Page number",
+                        "name": "page",
+                        "in": "query"
+                    },
+                    {
+                        "type": "integer",
+                        "description": "Page size",
+                        "name": "pageSize",
+                        "in": "query"
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "type": "array",
+                            "items": {
+                                "$ref": "#/definitions/github_com_ruziba3vich_soand_internal_models.Background"
+                            }
+                        }
+                    },
+                    "400": {
+                        "description": "Invalid query parameters",
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal server error",
+                        "schema": {
+                            "type": "string"
+                        }
+                    }
+                }
+            },
+            "post": {
+                "description": "Uploads a new background image and stores it",
+                "consumes": [
+                    "multipart/form-data"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "backgrounds"
+                ],
+                "summary": "Upload a new background image",
+                "parameters": [
+                    {
+                        "type": "file",
+                        "description": "Background image file",
+                        "name": "file",
+                        "in": "formData",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "201": {
+                        "description": "File uploaded successfully",
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
+                    "400": {
+                        "description": "Bad request",
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal server error",
+                        "schema": {
+                            "type": "string"
+                        }
+                    }
+                }
+            }
+        },
+        "/backgrounds/{id}": {
+            "get": {
+                "description": "Retrieves a specific background image by its ID",
+                "tags": [
+                    "backgrounds"
+                ],
+                "summary": "Get a background image by ID",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "Background ID",
+                        "name": "id",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/github_com_ruziba3vich_soand_internal_models.Background"
+                        }
+                    },
+                    "400": {
+                        "description": "Invalid ID",
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
+                    "404": {
+                        "description": "Background not found",
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal server error",
+                        "schema": {
+                            "type": "string"
+                        }
+                    }
+                }
+            },
+            "delete": {
+                "description": "Deletes a background image by ID",
+                "tags": [
+                    "backgrounds"
+                ],
+                "summary": "Delete a background image",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "Background ID",
+                        "name": "id",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Background deleted successfully",
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
+                    "400": {
+                        "description": "Invalid ID",
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
+                    "404": {
+                        "description": "Background not found",
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal server error",
+                        "schema": {
+                            "type": "string"
+                        }
+                    }
+                }
+            }
+        },
         "/comments/{comment_id}": {
             "put": {
                 "security": [
@@ -1110,6 +1284,17 @@
         }
     },
     "definitions": {
+        "github_com_ruziba3vich_soand_internal_models.Background": {
+            "type": "object",
+            "properties": {
+                "filename": {
+                    "type": "string"
+                },
+                "id": {
+                    "type": "string"
+                }
+            }
+        },
         "github_com_ruziba3vich_soand_internal_models.User": {
             "type": "object",
             "required": [
