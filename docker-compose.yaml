@@ -15,6 +15,11 @@ services:
       - MINIO_SECRET_KEY=secretpass
       - MINIO_BUCKET=soandfiles
       - MINIO_USE_SSL=false
+      - MONGO_URI=mongodb://mongo:27017/
+      - MONGO_DB=soand
+      - MONGO_USER=mongo_user
+      - MONGO_PASSWORD=Dost0n1k
+      - JWT_SECRET=prodonik
     ports:
       - "7777:7777"
     restart: always

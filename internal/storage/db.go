@@ -16,9 +16,9 @@ func ConnectMongoDB(ctx context.Context, cfg *config.Config, collectionName stri
 	// Print connection details for debugging (don't include password in production logs)
 	fmt.Printf("Attempting to connect to MongoDB at %s with user %s\n", cfg.MongoDB.URI, cfg.MongoDB.User)
 
-	cfg.MongoDB.URI = "mongodb://mongo:27017/soand"
-	cfg.MongoDB.User = "mongo_user"
-	cfg.MongoDB.Password = "Dost0n1k"
+	// cfg.MongoDB.URI = "mongodb://mongo:27017/soand"
+	// cfg.MongoDB.User = "mongo_user"
+	// cfg.MongoDB.Password = "Dost0n1k"
 
 	// Then in your connection code
 	credential := options.Credential{

@@ -50,9 +50,9 @@ func LoadConfig() *Config {
 	return &Config{
 		JwtSecret: getEnv("JWT_SECRET", "prodonik"),
 		MongoDB: MongoDBConfig{
-			URI:      getEnv("MONGO_URI", "mongodb://localhost:27017"),
+			URI:      getEnv("MONGO_URI", "mongodb://mongo:27017/") + getEnv("MONGO_DB", "mydatabase"),
 			Database: getEnv("MONGO_DB", "mydatabase"),
-			User:     getEnv("MONGO_USER", "mongodb_pro"),
+			User:     getEnv("MONGO_USER", "mongo_user"),
 			Password: getEnv("MONGO_PASSWORD", ""),
 		},
 		MinIO: MinIOConfig{

@@ -104,7 +104,7 @@ func (a *AuthHandler) WebSocketAuthMiddleware() func(gin.HandlerFunc) gin.Handle
 				c.Abort()
 				return
 			}
-			
+
 			token := c.GetHeader("Authorization") // Extract token from WebSocket header
 
 			if token == "" {

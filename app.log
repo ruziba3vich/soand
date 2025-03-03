@@ -343,3 +343,130 @@ Key: 'PostRequest.DeleteAfter' Error:Field validation for 'DeleteAfter' failed o
 [MusicLib] 2025/02/27 13:47:16 comment.go:88: New WebSocket client connected for post: 67bf7062f569e1bde9b3a651
 [MusicLib] 2025/02/27 18:54:54 main.go:42: Received signal: terminated, shutting down...
 [MusicLib] 2025/02/27 18:54:54 main.go:49: Shutdown complete
+[MusicLib] 2025/03/03 04:15:45 app.go:37: Failed to connect to MongoDB: error parsing uri: scheme must be "mongodb" or "mongodb+srv"
+[MusicLib] 2025/03/03 04:15:45 main.go:36: Application failed: Failed to connect to MongoDB: error parsing uri: scheme must be "mongodb" or "mongodb+srv"
+[MusicLib] 2025/03/03 04:16:55 main.go:36: Application failed: listen tcp :7777: bind: address already in use
+[MusicLib] 2025/03/03 04:18:20 middleware.go:39: Rate limiter error: dial tcp: lookup redis: no such host
+[MusicLib] 2025/03/03 04:18:42 service.go:86: map[count:0 page:1 pageSize:10]
+[MusicLib] 2025/03/03 04:19:02 middleware.go:39: Rate limiter error: dial tcp: lookup redis: no such host
+[MusicLib] 2025/03/03 04:20:37 main.go:42: Received signal: interrupt, shutting down...
+[MusicLib] 2025/03/03 04:20:37 main.go:49: Shutdown complete
+[MusicLib] 2025/03/03 04:20:50 user.go:134: Validating JWT token...
+[MusicLib] 2025/03/03 04:20:50 user.go:142: JWT token validated successfully, user ID: 000000000000000000000000
+[MusicLib] 2025/03/03 04:20:50 service.go:40: map[content:Hello world id:67c4e7d2d3e26cfbe1087ce5]
+[MusicLib] 2025/03/03 04:20:59 service.go:78: map[error:mongo: no documents in result page:1 pageSize:10]
+[MusicLib] 2025/03/03 04:25:57 user.go:61: password 8
+[MusicLib] 2025/03/03 04:25:57 user.go:25: Creating new user...
+[MusicLib] 2025/03/03 04:25:57 user.go:33: User created successfully, ID: 000000000000000000000000
+[MusicLib] 2025/03/03 04:26:38 user.go:134: Validating JWT token...
+[MusicLib] 2025/03/03 04:26:38 user.go:142: JWT token validated successfully, user ID: 000000000000000000000000
+[MusicLib] 2025/03/03 04:26:38 service.go:40: map[content:Hello world id:67c4e92ed3e26cfbe1087ce7]
+[MusicLib] 2025/03/03 04:26:57 service.go:78: map[error:mongo: no documents in result page:1 pageSize:10]
+[MusicLib] 2025/03/03 04:27:41 main.go:42: Received signal: interrupt, shutting down...
+[MusicLib] 2025/03/03 04:27:41 main.go:49: Shutdown complete
+[MusicLib] 2025/03/03 04:27:53 service.go:78: map[error:mongo: no documents in result page:1 pageSize:10]
+[MusicLib] 2025/03/03 04:28:26 main.go:42: Received signal: interrupt, shutting down...
+[MusicLib] 2025/03/03 04:28:26 main.go:49: Shutdown complete
+[MusicLib] 2025/03/03 04:28:40 service.go:78: map[error:mongo: no documents in result page:1 pageSize:10]
+[MusicLib] 2025/03/03 04:29:52 main.go:42: Received signal: interrupt, shutting down...
+[MusicLib] 2025/03/03 04:29:52 main.go:49: Shutdown complete
+[MusicLib] 2025/03/03 04:30:01 service.go:78: map[error:mongo: no documents in result page:1 pageSize:10]
+[MusicLib] 2025/03/03 04:33:29 main.go:42: Received signal: interrupt, shutting down...
+[MusicLib] 2025/03/03 04:33:29 main.go:49: Shutdown complete
+[MusicLib] 2025/03/03 04:33:52 user.go:134: Validating JWT token...
+[MusicLib] 2025/03/03 04:33:52 user.go:142: JWT token validated successfully, user ID: 000000000000000000000000
+[MusicLib] 2025/03/03 04:33:52 post.go:72: ObjectID("000000000000000000000000")
+[MusicLib] 2025/03/03 04:33:52 service.go:40: map[content:Hello world 2 id:67c4eae0a8b45396e893cc40]
+[MusicLib] 2025/03/03 04:35:32 main.go:42: Received signal: interrupt, shutting down...
+[MusicLib] 2025/03/03 04:35:32 main.go:49: Shutdown complete
+[MusicLib] 2025/03/03 04:35:52 user.go:134: Validating JWT token...
+[MusicLib] 2025/03/03 04:35:52 user.go:142: JWT token validated successfully, user ID: 000000000000000000000000
+[MusicLib] 2025/03/03 04:35:52 middleware.go:69: 000000000000000000000000
+[MusicLib] 2025/03/03 04:35:52 post.go:72: ObjectID("000000000000000000000000")
+[MusicLib] 2025/03/03 04:35:52 service.go:40: map[content:Hello world 2 id:67c4eb580b6ebf59af13f768]
+[MusicLib] 2025/03/03 04:36:17 user.go:134: Validating JWT token...
+[MusicLib] 2025/03/03 04:36:17 user.go:142: JWT token validated successfully, user ID: 000000000000000000000000
+[MusicLib] 2025/03/03 04:36:17 middleware.go:69: 000000000000000000000000
+[MusicLib] 2025/03/03 04:36:17 post.go:72: ObjectID("000000000000000000000000")
+[MusicLib] 2025/03/03 04:36:17 service.go:40: map[content:Hello world 2 id:67c4eb710b6ebf59af13f769]
+[MusicLib] 2025/03/03 04:36:28 user.go:134: Validating JWT token...
+[MusicLib] 2025/03/03 04:36:28 user.go:138: Invalid JWT token: invalid character '\b' in string literal
+[MusicLib] 2025/03/03 04:36:28 middleware.go:64: Invalid token: invalid character '\b' in string literal
+[MusicLib] 2025/03/03 04:36:35 user.go:134: Validating JWT token...
+[MusicLib] 2025/03/03 04:36:35 user.go:138: Invalid JWT token: signature is invalid
+[MusicLib] 2025/03/03 04:36:35 middleware.go:64: Invalid token: signature is invalid
+[MusicLib] 2025/03/03 04:36:57 user.go:134: Validating JWT token...
+[MusicLib] 2025/03/03 04:36:57 user.go:138: Invalid JWT token: signature is invalid
+[MusicLib] 2025/03/03 04:36:57 middleware.go:64: Invalid token: signature is invalid
+[MusicLib] 2025/03/03 04:37:13 user.go:134: Validating JWT token...
+[MusicLib] 2025/03/03 04:37:13 user.go:138: Invalid JWT token: Token is expired
+[MusicLib] 2025/03/03 04:37:13 middleware.go:64: Invalid token: Token is expired
+[MusicLib] 2025/03/03 04:37:45 user.go:134: Validating JWT token...
+[MusicLib] 2025/03/03 04:37:45 user.go:142: JWT token validated successfully, user ID: 000000000000000000000000
+[MusicLib] 2025/03/03 04:37:45 middleware.go:69: 000000000000000000000000
+[MusicLib] 2025/03/03 04:37:45 post.go:72: ObjectID("000000000000000000000000")
+[MusicLib] 2025/03/03 04:37:45 service.go:40: map[content:Hello world 2 id:67c4ebc90b6ebf59af13f76a]
+[MusicLib] 2025/03/03 04:37:53 user.go:134: Validating JWT token...
+[MusicLib] 2025/03/03 04:37:53 user.go:138: Invalid JWT token: signature is invalid
+[MusicLib] 2025/03/03 04:37:53 middleware.go:64: Invalid token: signature is invalid
+[MusicLib] 2025/03/03 04:37:59 user.go:134: Validating JWT token...
+[MusicLib] 2025/03/03 04:37:59 user.go:138: Invalid JWT token: signature is invalid
+[MusicLib] 2025/03/03 04:37:59 middleware.go:64: Invalid token: signature is invalid
+[MusicLib] 2025/03/03 04:40:35 main.go:42: Received signal: interrupt, shutting down...
+[MusicLib] 2025/03/03 04:40:35 main.go:49: Shutdown complete
+[MusicLib] 2025/03/03 04:40:47 user.go:134: Validating JWT token...
+[MusicLib] 2025/03/03 04:40:47 user.go:138: Invalid JWT token: invalid token signature
+[MusicLib] 2025/03/03 04:40:47 middleware.go:64: Invalid token: invalid token signature
+[MusicLib] 2025/03/03 04:41:24 user.go:134: Validating JWT token...
+[MusicLib] 2025/03/03 04:41:24 user.go:138: Invalid JWT token: invalid token signature
+[MusicLib] 2025/03/03 04:41:24 middleware.go:64: Invalid token: invalid token signature
+[MusicLib] 2025/03/03 04:41:52 user.go:61: password 8
+[MusicLib] 2025/03/03 04:41:52 user.go:25: Creating new user...
+[MusicLib] 2025/03/03 04:41:52 user.go:33: User created successfully, ID: 000000000000000000000000
+[MusicLib] 2025/03/03 04:42:17 user.go:134: Validating JWT token...
+[MusicLib] 2025/03/03 04:42:17 user.go:138: Invalid JWT token: invalid token signature
+[MusicLib] 2025/03/03 04:42:17 middleware.go:64: Invalid token: invalid token signature
+[MusicLib] 2025/03/03 04:43:42 main.go:42: Received signal: interrupt, shutting down...
+[MusicLib] 2025/03/03 04:43:42 main.go:49: Shutdown complete
+[MusicLib] 2025/03/03 04:43:53 user.go:134: Validating JWT token...
+[MusicLib] 2025/03/03 04:43:53 user.go:142: JWT token validated successfully, user ID: 000000000000000000000000
+[MusicLib] 2025/03/03 04:43:53 middleware.go:69: 000000000000000000000000
+[MusicLib] 2025/03/03 04:43:53 post.go:72: ObjectID("000000000000000000000000")
+[MusicLib] 2025/03/03 04:43:53 service.go:40: map[content:Hello world 2 id:67c4ed39488f35435d7b3d69]
+[MusicLib] 2025/03/03 04:51:42 main.go:42: Received signal: interrupt, shutting down...
+[MusicLib] 2025/03/03 04:51:43 main.go:49: Shutdown complete
+[MusicLib] 2025/03/03 04:52:16 user.go:61: password 8
+[MusicLib] 2025/03/03 04:52:16 user.go:25: Creating new user...
+[MusicLib] 2025/03/03 04:52:16 user.go:33: User created successfully, ID: 67c4ef303b4518341e5c29e3
+[MusicLib] 2025/03/03 04:53:02 user.go:134: Validating JWT token...
+[MusicLib] 2025/03/03 04:53:02 user.go:142: JWT token validated successfully, user ID: 67c4ef303b4518341e5c29e3
+[MusicLib] 2025/03/03 04:53:02 middleware.go:69: 67c4ef303b4518341e5c29e3
+[MusicLib] 2025/03/03 04:53:02 post.go:72: ObjectID("67c4ef303b4518341e5c29e3")
+[MusicLib] 2025/03/03 04:53:02 service.go:40: map[content:Hello world 2 id:67c4ef5e3b4518341e5c29e4]
+[MusicLib] 2025/03/03 04:53:10 service.go:78: map[error:mongo: no documents in result page:1 pageSize:10]
+[MusicLib] 2025/03/03 05:01:24 main.go:42: Received signal: interrupt, shutting down...
+[MusicLib] 2025/03/03 05:01:24 main.go:49: Shutdown complete
+[MusicLib] 2025/03/03 05:02:14 user.go:61: password 8
+[MusicLib] 2025/03/03 05:02:14 user.go:25: Creating new user...
+[MusicLib] 2025/03/03 05:02:14 user.go:33: User created successfully, ID: 67c4f186f9ad8b525eba1b96
+[MusicLib] 2025/03/03 05:02:51 user.go:134: Validating JWT token...
+[MusicLib] 2025/03/03 05:02:51 user.go:142: JWT token validated successfully, user ID: 67c4f186f9ad8b525eba1b96
+[MusicLib] 2025/03/03 05:02:51 middleware.go:69: 67c4f186f9ad8b525eba1b96
+[MusicLib] 2025/03/03 05:02:51 post.go:72: ObjectID("67c4f186f9ad8b525eba1b96")
+[MusicLib] 2025/03/03 05:02:51 service.go:40: map[content:By Ma'suma id:67c4f1abf9ad8b525eba1b97]
+[MusicLib] 2025/03/03 05:02:59 service.go:78: map[error:mongo: no documents in result page:1 pageSize:10]
+[MusicLib] 2025/03/03 05:04:38 user.go:134: Validating JWT token...
+[MusicLib] 2025/03/03 05:04:38 user.go:142: JWT token validated successfully, user ID: 67c4f186f9ad8b525eba1b96
+[MusicLib] 2025/03/03 05:04:38 middleware.go:69: 67c4f186f9ad8b525eba1b96
+[MusicLib] 2025/03/03 05:04:38 post.go:72: ObjectID("67c4f186f9ad8b525eba1b96")
+[MusicLib] 2025/03/03 05:04:38 service.go:40: map[content:By Ma'suma id:67c4f216f9ad8b525eba1b98]
+[MusicLib] 2025/03/03 05:04:46 service.go:78: map[error:mongo: no documents in result page:1 pageSize:10]
+[MusicLib] 2025/03/03 05:05:28 user.go:61: password 8
+[MusicLib] 2025/03/03 05:05:28 user.go:25: Creating new user...
+[MusicLib] 2025/03/03 05:05:28 user.go:33: User created successfully, ID: 67c4f248f9ad8b525eba1b99
+[MusicLib] 2025/03/03 05:06:23 user.go:134: Validating JWT token...
+[MusicLib] 2025/03/03 05:06:23 user.go:142: JWT token validated successfully, user ID: 67c4f248f9ad8b525eba1b99
+[MusicLib] 2025/03/03 05:06:23 middleware.go:69: 67c4f248f9ad8b525eba1b99
+[MusicLib] 2025/03/03 05:06:23 post.go:72: ObjectID("67c4f248f9ad8b525eba1b99")
+[MusicLib] 2025/03/03 05:06:23 service.go:40: map[content:By Ma'suma id:67c4f27ff9ad8b525eba1b9a]
+[MusicLib] 2025/03/03 05:06:31 service.go:86: map[count:1 page:1 pageSize:10]

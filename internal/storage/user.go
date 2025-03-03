@@ -36,6 +36,7 @@ func (s *UserStorage) CreateUser(ctx context.Context, user *models.User) (string
 		return "", err
 	}
 	user.Password = hashedPassword
+	user.ID = primitive.NewObjectIDFromTimestamp(time.Now())
 
 	ctx, cancel := context.WithTimeout(ctx, 5*time.Second)
 	defer cancel()
