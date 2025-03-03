@@ -7,6 +7,7 @@ import (
 
 	"github.com/ruziba3vich/soand/internal/models"
 	"go.mongodb.org/mongo-driver/bson"
+	"go.mongodb.org/mongo-driver/bson/primitive"
 	"go.mongodb.org/mongo-driver/mongo"
 	"go.mongodb.org/mongo-driver/mongo/options"
 )
@@ -45,16 +46,15 @@ func (bs *BackgroundStorage) GetAllBackgrounds(page, pageSize int64) ([]models.B
 }
 
 // GetBackgroundByID retrieves a background photo by ID
-func (bs *BackgroundStorage) GetBackgroundByID(id string) (*models.Background, error) {
-	var background models.Background
-	err := bs.db.FindOne(context.TODO(), bson.M{"_id": id}).Decode(&background)
+func (bs *BackgroundStorage) GetBackgroundByID(id string) (string, error) {
+	url, err := bs.storage.GetFile(id)
 	if err != nil {
 		if err == mongo.ErrNoDocuments {
-			return nil, fmt.Errorf("background not found")
+			return "", fmt.Errorf("background not found")
 		}
-		return nil, fmt.Errorf("failed to retrieve background: %w", err)
+		return "", fmt.Errorf("failed to retrieve background: %s", err.Error())
 	}
-	return &background, nil
+	return url, nil
 }
 
 // CreateBackground uploads a new background photo
@@ -64,11 +64,11 @@ func (bs *BackgroundStorage) CreateBackground(file *multipart.FileHeader) (strin
 		return "", err
 	}
 
-	background := models.Background{Filename: filename}
+	background := models.Background{Filename: filename, ID: primitive.NewObjectID()}
 	_, err = bs.db.InsertOne(context.TODO(), background)
 	if err != nil {
 		bs.storage.DeleteFile(filename)
-		return "", fmt.Errorf("failed to save background record: %w", err)
+		return "", fmt.Errorf("failed to save background record: %s", err.Error())
 	}
 
 	return filename, nil

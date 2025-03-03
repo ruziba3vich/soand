@@ -58,13 +58,13 @@ func (s *BackgroundService) GetAllBackgrounds(page int64, pageSize int64) ([]mod
 	return backgrounds, nil
 }
 
-func (s *BackgroundService) GetBackgroundByID(id string) (*models.Background, error) {
+func (s *BackgroundService) GetBackgroundByID(id string) (string, error) {
 	s.logger.Println("Fetching background with ID: %s\n", id)
 
 	background, err := s.storage.GetBackgroundByID(id)
 	if err != nil {
 		s.logger.Println("Failed to fetch background: ", err)
-		return nil, err
+		return "", err
 	}
 
 	return background, nil

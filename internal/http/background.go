@@ -127,5 +127,5 @@ func (h *BackgroundHandler) GetBackgroundByID(c *gin.Context) {
 		return
 	}
 
-	c.JSON(http.StatusOK, background)
+	c.JSON(http.StatusOK, gin.H{"response": background})
 }
