@@ -3,9 +3,12 @@ services:
     build: .
     container_name: my-go-app
     depends_on:
-      - mongo
-      - redis
-      - minio
+      mongo:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+      minio:
+        condition: service_healthy
     environment:
       - MONGO_URI=mongodb://mongo_user:Dost0n1k@mongo:27017/soand?authSource=admin
       - REDIS_HOST=redis
@@ -38,6 +41,11 @@ services:
       - mongo_data:/data/db
     ports:
       - "27017:27017"
+    healthcheck:
+      test: ["CMD", "mongosh", "--eval", "db.adminCommand('ping')"]
+      interval: 10s
+      timeout: 5s
+      retries: 3
     networks:
       - my_network
 
@@ -50,6 +58,11 @@ services:
       - redis_data:/data
     ports:
       - "6379:6379"
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 10s
+      timeout: 5s
+      retries: 3
     networks:
       - my_network
 
