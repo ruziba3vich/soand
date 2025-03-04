@@ -290,7 +290,7 @@ func (h *UserHandler) UpdateUsername(c *gin.Context) {
 		return
 	}
 
-	c.Status(http.StatusOK)
+	c.JSON(http.StatusOK, gin.H{"response": "username updated successfully"})
 }
 
 // ChangeProfileVisibility handles changing a user's profile visibility
