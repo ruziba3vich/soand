@@ -46,6 +46,15 @@ func (s *UserStorage) CreateUser(ctx context.Context, user *models.User) (string
 	ctx, cancel := context.WithTimeout(ctx, 5*time.Second)
 	defer cancel()
 
+	exists, err := s.isUsernameTaken(ctx, user.Username, user.ID)
+	if err != nil {
+		return "", fmt.Errorf("failed to check username availability: %s", err.Error())
+	}
+
+	if exists {
+		return "", fmt.Errorf("this username is already taken")
+	}
+
 	_, err = s.db.InsertOne(ctx, user)
 	if err != nil {
 		return "", err
@@ -155,13 +164,27 @@ func (s *UserStorage) DeleteUser(ctx context.Context, userID primitive.ObjectID)
 	return err
 }
 
-// UpdateUsername updates a user's username
+// UpdateUsername updates a user's username after checking if it's available
 func (s *UserStorage) UpdateUsername(ctx context.Context, userID primitive.ObjectID, newUsername string) error {
 	ctx, cancel := context.WithTimeout(ctx, 5*time.Second)
 	defer cancel()
 
-	_, err := s.db.UpdateOne(ctx, bson.M{"_id": userID}, bson.M{"$set": bson.M{"username": newUsername}})
-	return err
+	// Check if the username is already taken by another user
+	isTaken, err := s.isUsernameTaken(ctx, newUsername, userID)
+	if err != nil {
+		return fmt.Errorf("username check failed: %v", err)
+	}
+	if isTaken {
+		return fmt.Errorf("username '%s' is already taken by another user", newUsername)
+	}
+
+	// Update the username in the database
+	_, err = s.db.UpdateOne(ctx, bson.M{"_id": userID}, bson.M{"$set": bson.M{"username": newUsername}})
+	if err != nil {
+		return fmt.Errorf("failed to update username: %v", err)
+	}
+
+	return nil
 }
 
 // UpdatePassword updates a user's password after verifying the old password
@@ -257,4 +280,23 @@ func (s *UserStorage) SetBackgroundPic(ctx context.Context, userID primitive.Obj
 	}
 
 	return nil
+}
+
+// IsUsernameTaken checks if the given username is already taken by another user (excluding the user with the given userID).
+func (s *UserStorage) isUsernameTaken(ctx context.Context, username string, userID primitive.ObjectID) (bool, error) {
+	ctx, cancel := context.WithTimeout(ctx, 5*time.Second)
+	defer cancel()
+
+	// Query the database to find a user with the given username, excluding the current user
+	filter := bson.M{
+		"username": username,
+		"_id":      bson.M{"$ne": userID}, // Exclude the current user
+	}
+
+	count, err := s.db.CountDocuments(ctx, filter)
+	if err != nil {
+		return false, fmt.Errorf("failed to check username availability: %v", err)
+	}
+
+	return count > 0, nil
 }
