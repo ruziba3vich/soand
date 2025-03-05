@@ -46,13 +46,15 @@ func (s *UserStorage) CreateUser(ctx context.Context, user *models.User) (string
 	ctx, cancel := context.WithTimeout(ctx, 5*time.Second)
 	defer cancel()
 
-	exists, err := s.isUsernameTaken(ctx, user.Username, user.ID)
-	if err != nil {
-		return "", fmt.Errorf("failed to check username availability: %s", err.Error())
-	}
+	if user.Username != nil {
+		exists, err := s.isUsernameTaken(ctx, *user.Username, user.ID)
+		if err != nil {
+			return "", fmt.Errorf("failed to check username availability: %s", err.Error())
+		}
 
-	if exists {
-		return "", fmt.Errorf("this username is already taken")
+		if exists {
+			return "", fmt.Errorf("this username is already taken")
+		}
 	}
 
 	_, err = s.db.InsertOne(ctx, user)
