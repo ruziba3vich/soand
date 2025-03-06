@@ -17,6 +17,7 @@ func RegisterUserRoutes(r *gin.Engine, userRepo repos.UserRepo, logger *log.Logg
 	r.Use(CORSMiddleware())
 	r.GET("/swagger/*any", ginSwagger.WrapHandler(swaggerFiles.Handler))
 	userHandler := handler.NewUserHandler(userRepo, logger)
+	r.GET("/", userHandler.Home)
 
 	userRoutes := r.Group("/users")
 	{
