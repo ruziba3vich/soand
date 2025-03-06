@@ -24,6 +24,46 @@ const docTemplate = `{
     "host": "{{.Host}}",
     "basePath": "{{.BasePath}}",
     "paths": {
+        "/": {
+            "get": {
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
+                "description": "Returns a successful response if the user is authenticated with a valid JWT token",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "users"
+                ],
+                "summary": "Get home endpoint",
+                "responses": {
+                    "200": {
+                        "description": "User authenticated successfully",
+                        "headers": {
+                            "Authorization": {
+                                "type": "string",
+                                "description": "Bearer \u003ctoken\u003e\" \"Required JWT token for authentication"
+                            }
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthorized or invalid token",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": {
+                                "type": "string"
+                            }
+                        }
+                    }
+                }
+            }
+        },
         "/backgrounds": {
             "get": {
                 "description": "Retrieves a list of background images with pagination",
@@ -1380,8 +1420,8 @@ const docTemplate = `{
         "github_com_ruziba3vich_soand_internal_models.User": {
             "type": "object",
             "required": [
-                "phone",
-                "username"
+                "full_name",
+                "password"
             ],
             "properties": {
                 "background_pic": {

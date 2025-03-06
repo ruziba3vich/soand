@@ -20,6 +20,7 @@ import (
 	"fmt"
 	"log"
 	"net/http"
+	"strings"
 
 	"github.com/gin-gonic/gin"
 	"github.com/ruziba3vich/soand/internal/models"
@@ -415,6 +416,38 @@ func (h *UserHandler) SetBackgroundPic(c *gin.Context) {
 	if err := h.repo.SetBackgroundPic(c.Request.Context(), userId, request.BackgroundPic); err != nil {
 		h.logger.Printf("Error updating background picture: %v", err)
 		c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to update background picture"})
+		return
+	}
+
+	c.Status(http.StatusOK)
+}
+
+// Home handles the home endpoint requiring a valid JWT token
+// @Summary Get home endpoint
+// @Description Returns a successful response if the user is authenticated with a valid JWT token
+// @Tags users
+// @Accept json
+// @Produce json
+// @Security BearerAuth
+// @Success 200 "User authenticated successfully"
+// @Failure 401 {object} map[string]string "Unauthorized or invalid token"
+// @Header 200 {string} Authorization "Bearer <token>" "Required JWT token for authentication"
+// @Router / [get]
+func (h *UserHandler) Home(c *gin.Context) {
+	tokenString := c.GetHeader("Authorization")
+	if tokenString == "" {
+		h.logger.Println("Missing authorization token")
+		c.JSON(http.StatusUnauthorized, gin.H{"error": "Unauthorized"})
+		c.Abort()
+		return
+	}
+
+	parts := strings.Split(tokenString, " ")
+
+	_, err := h.repo.ValidateJWT(parts[1])
+	if err != nil {
+		c.JSON(http.StatusUnauthorized, gin.H{"error": "Invalid token"})
+		c.Abort()
 		return
 	}
 

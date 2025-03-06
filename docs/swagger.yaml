@@ -31,8 +31,8 @@ definitions:
       username:
         type: string
     required:
-    - phone
-    - username
+    - full_name
+    - password
     type: object
 info:
   contact:
@@ -47,6 +47,32 @@ info:
   title: Soand API
   version: "1.0"
 paths:
+  /:
+    get:
+      consumes:
+      - application/json
+      description: Returns a successful response if the user is authenticated with
+        a valid JWT token
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: User authenticated successfully
+          headers:
+            Authorization:
+              description: Bearer <token>" "Required JWT token for authentication
+              type: string
+        "401":
+          description: Unauthorized or invalid token
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+      security:
+      - BearerAuth: []
+      summary: Get home endpoint
+      tags:
+      - users
   /backgrounds:
     get:
       description: Retrieves a list of background images with pagination

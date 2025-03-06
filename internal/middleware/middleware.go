@@ -31,10 +31,9 @@ func NewAuthHandler(userRepo repos.UserRepo, logger *log.Logger, limiter *limite
 func (a *AuthHandler) AuthMiddleware() func(gin.HandlerFunc) gin.HandlerFunc {
 	return func(handler gin.HandlerFunc) gin.HandlerFunc {
 		return func(c *gin.Context) {
-			ctx := context.Background()
 			ip := c.ClientIP() // Get user IP for rate limiting
 
-			allowed, err := a.limiter.AllowRequest(ctx, ip)
+			allowed, err := a.limiter.AllowRequest(c, ip)
 			if err != nil {
 				a.logger.Println("Rate limiter error:", err)
 				c.JSON(http.StatusInternalServerError, gin.H{"error": "Internal server error"})
