@@ -31,6 +31,16 @@ func (s *FileStoreService) UploadFile(file *multipart.FileHeader) (string, error
 	return path, nil
 }
 
+func (s *FileStoreService) UploadFileFromBytes(data []byte, contentType string) (string, error) {
+	response, err := s.storage.UploadFileFromBytes(data, contentType)
+	if err != nil {
+		s.logger.Println("Error uploading file:", err)
+		return "", err
+	}
+	s.logger.Println("File uploaded successfully to:", response)
+	return response, nil
+}
+
 func (s *FileStoreService) GetFile(fileID string) (string, error) {
 	path, err := s.storage.GetFile(fileID)
 	if err != nil {

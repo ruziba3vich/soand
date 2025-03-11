@@ -7,5 +7,6 @@ type (
 		DeleteFile(string) error
 		GetFile(string) (string, error)
 		UploadFile(*multipart.FileHeader) (string, error)
+		UploadFileFromBytes([]byte, string) (string, error)
 	}
 )

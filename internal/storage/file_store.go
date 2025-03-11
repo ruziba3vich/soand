@@ -1,6 +1,7 @@
 package storage
 
 import (
+	"bytes"
 	"context"
 	"fmt"
 	"mime/multipart"
@@ -35,7 +36,7 @@ func (s *FileStorage) UploadFile(file *multipart.FileHeader) (string, error) {
 
 	// Generate unique filename
 	filename := fmt.Sprintf("%d", time.Now().UnixMilli())
-	
+
 	// Upload file to MinIO
 	_, err = s.minio_client.PutObject(
 		context.Background(),
@@ -47,6 +48,27 @@ func (s *FileStorage) UploadFile(file *multipart.FileHeader) (string, error) {
 	)
 	if err != nil {
 		return "", fmt.Errorf("Failed to upload file: " + err.Error())
+	}
+
+	return filename, nil
+}
+
+func (s *FileStorage) UploadFileFromBytes(data []byte, contentType string) (string, error) {
+	// Create a reader from the raw bytes
+	reader := bytes.NewReader(data)
+	filename := fmt.Sprintf("%d", time.Now().UnixMilli())
+
+	// Upload file to MinIO
+	_, err := s.minio_client.PutObject(
+		context.Background(),
+		s.cfg.MinIO.Bucket,
+		filename,
+		reader,
+		int64(len(data)),
+		minio.PutObjectOptions{ContentType: contentType},
+	)
+	if err != nil {
+		return "", fmt.Errorf("Failed to upload file from bytes: %v", err)
 	}
 
 	return filename, nil

@@ -167,7 +167,7 @@ func (h *CommentHandler) HandleWebSocket(c *gin.Context) {
 			}
 
 			// Upload file with binary data
-			fileURL, err := h.file_service.UploadFile(fileHeader)
+			fileURL, err := h.file_service.UploadFileFromBytes(msg, mimeType)
 			if err != nil {
 				h.logger.Println("Error uploading file:", err)
 				conn.WriteMessage(websocket.TextMessage, []byte(`{"error": "file upload failed"}`))
