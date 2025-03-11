@@ -367,11 +367,36 @@ func (h *CommentHandler) DeleteComment(c *gin.Context) {
 		return
 	}
 
+	// Fetch the comment to get the post_id before deletion (if needed)
+	comment, err := h.service.GetCommentByID(c.Request.Context(), commentID) // New service method
+	if err != nil {
+		h.logger.Println("Failed to fetch comment for deletion:", err)
+		c.JSON(http.StatusInternalServerError, gin.H{"error": "could not delete comment"})
+		return
+	}
+
+	// Delete the comment
 	err = h.service.DeleteComment(c.Request.Context(), commentID, userObjectID)
 	if err != nil {
 		h.logger.Println("Failed to delete comment:", err)
 		c.JSON(http.StatusInternalServerError, gin.H{"error": "could not delete comment"})
 		return
+	}
+
+	// Publish the deletion to Redis
+	deleteMessage := map[string]interface{}{
+		"action":     "delete",
+		"comment_id": commentID.Hex(),
+		"deleted_at": time.Now(),
+	}
+	messageJSON, err := json.Marshal(deleteMessage)
+	if err != nil {
+		h.logger.Println("Error marshaling delete message:", err)
+		// Don't fail the request, just log the error
+	} else {
+		postID := comment.PostID.Hex() // From fetched comment
+		h.redis.Publish(c.Request.Context(), "comments:"+postID, string(messageJSON))
+		h.logger.Println("Published comment deletion for comment", commentID.Hex(), "to post", postID)
 	}
 
 	c.JSON(http.StatusOK, gin.H{"message": "comment deleted successfully"})

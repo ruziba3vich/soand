@@ -98,3 +98,5 @@ func (s *CommentService) SubscribeToComments(ctx context.Context, postID primiti
 		handleMessage(&comment)
 	}
 }
+
+func (s *CommentService) GetCommentByID(ctx context.Context, commentID primitive.ObjectID) (*models.Comment, error)
