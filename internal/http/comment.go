@@ -280,7 +280,7 @@ func (h *CommentHandler) UpdateComment(c *gin.Context) {
 		c.JSON(http.StatusBadRequest, gin.H{"error": "invalid comment ID"})
 		return
 	}
-
+	postIdStr := c.Param("post_id")
 	// Extract user ID from context (Assuming AuthMiddleware sets user_id)
 	userID, exists := c.Get("user_id")
 	if !exists {
@@ -305,11 +305,28 @@ func (h *CommentHandler) UpdateComment(c *gin.Context) {
 		return
 	}
 
+	// Update the comment and retrieve the associated post_id
 	err = h.service.UpdateCommentText(c.Request.Context(), commentID, userObjectID, req.NewText)
 	if err != nil {
 		h.logger.Println("Failed to update comment:", err)
 		c.JSON(http.StatusInternalServerError, gin.H{"error": "could not update comment"})
 		return
+	}
+
+	// Publish the update to Redis
+	updateMessage := map[string]string{
+		"action":     "update",
+		"comment_id": commentID.Hex(),
+		"new_text":   req.NewText,
+		"updated_at": time.Now().String(),
+	}
+	messageJSON, err := json.Marshal(updateMessage)
+	if err != nil {
+		h.logger.Println("Error marshaling update message:", err)
+		// Don't fail the request, just log the error
+	} else {
+		h.redis.Publish(c.Request.Context(), "comments:"+postIdStr, string(messageJSON))
+		h.logger.Println("Published comment update for comment", commentID.Hex(), "to post", postIdStr)
 	}
 
 	c.JSON(http.StatusOK, gin.H{"message": "comment updated successfully"})
