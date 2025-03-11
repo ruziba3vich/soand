@@ -107,6 +107,40 @@ func (s *CommentStorage) UpdateCommentText(ctx context.Context, commentID primit
 	return nil
 }
 
+// GetCommentByID retrieves a comment by its ID, hiding UserID if the user's profile is private
+func (s *CommentStorage) GetCommentByID(ctx context.Context, commentID primitive.ObjectID) (*models.Comment, error) {
+	var comment models.Comment
+
+	// Find the comment by ID
+	err := s.db.FindOne(ctx, bson.M{"_id": commentID}).Decode(&comment)
+	if err != nil {
+		if errors.Is(err, mongo.ErrNoDocuments) {
+			return nil, errors.New("comment not found")
+		}
+		return nil, err
+	}
+
+	// Check if the user's profile is hidden
+	var user struct {
+		IsPrivate bool `bson:"is_private"`
+	}
+	err = s.db.FindOne(ctx, bson.M{"_id": comment.UserID}).Decode(&user)
+	if err != nil {
+		if errors.Is(err, mongo.ErrNoDocuments) {
+			// If user not found, assume public profile (or handle differently based on your logic)
+			return &comment, nil
+		}
+		return nil, err
+	}
+
+	// If the user's profile is private, clear the UserID
+	if user.IsPrivate {
+		comment.UserID = primitive.NilObjectID // Set to zero value to hide it
+	}
+
+	return &comment, nil
+}
+
 // GetCommentsByUserID retrieves all comments made by a user
 // func (s *CommentStorage) GetCommentsByUserID(ctx context.Context, userID primitive.ObjectID) ([]models.Comment, error) {
 // 	var comments []models.Comment
