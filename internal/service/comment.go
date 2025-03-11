@@ -99,4 +99,13 @@ func (s *CommentService) SubscribeToComments(ctx context.Context, postID primiti
 	}
 }
 
-func (s *CommentService) GetCommentByID(ctx context.Context, commentID primitive.ObjectID) (*models.Comment, error)
+func (s *CommentService) GetCommentByID(ctx context.Context, commentID primitive.ObjectID) (*models.Comment, error) {
+	comment, err := s.GetCommentByID(ctx, commentID)
+	if err != nil {
+		s.logger.Println("Error getting comment by id:", err)
+		return nil, err
+	}
+
+	s.logger.Println("Comment updated successfully:", comment.ID.Hex())
+	return comment, nil
+}
