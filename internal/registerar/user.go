@@ -103,7 +103,7 @@ func RegisterChatHandler(
 	chat_handler_routes := r.Group("/chat")
 
 	chat_handler_routes.GET("direct", wsMiddleware(chat_handler.HandleChatWebSocket))
-	// chat_handler_routes.GET("direct/messages", authMiddleware(chat_handler.))
+	chat_handler_routes.GET("direct/messages", authMiddleware(chat_handler.GetMessages))
 	chat_handler_routes.PATCH("update", wsMiddleware(chat_handler.UpdateMessage))
 	chat_handler_routes.DELETE("dlete", wsMiddleware(chat_handler.DeleteMessage))
 }
