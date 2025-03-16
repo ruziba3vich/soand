@@ -6,6 +6,7 @@ import (
 	"fmt"
 	"log"
 	"net/http"
+	"strconv"
 	"time"
 
 	"github.com/gin-gonic/gin"
@@ -158,6 +159,65 @@ func (h *ChatHandler) HandleChatWebSocket(c *gin.Context) {
 			delete(pending, conn)
 		}
 	}
+}
+
+// GetMessages retrieves paginated messages between the authenticated user and another user
+func (h *ChatHandler) GetMessages(c *gin.Context) {
+	// Extract sender ID (authenticated user) from request
+	senderID, err := getUserIdFromRequest(c)
+	if err != nil {
+		h.logger.Println("Failed to extract sender ID:", err)
+		c.JSON(http.StatusUnauthorized, gin.H{"error": "unauthorized"})
+		return
+	}
+
+	// Extract recipient ID from query parameter
+	recipientIDStr := c.Query("recipient_id")
+	if recipientIDStr == "" {
+		h.logger.Println("Missing recipient ID in request")
+		c.JSON(http.StatusBadRequest, gin.H{"error": "recipient_id is required"})
+		return
+	}
+	recipientID, err := primitive.ObjectIDFromHex(recipientIDStr)
+	if err != nil {
+		h.logger.Println("Invalid recipient ID:", err)
+		c.JSON(http.StatusBadRequest, gin.H{"error": "invalid recipient_id"})
+		return
+	}
+
+	// Extract pagination parameters
+	pageStr := c.DefaultQuery("page", "1")
+	pageSizeStr := c.DefaultQuery("page_size", "10")
+
+	page, err := strconv.ParseInt(pageStr, 10, 64)
+	if err != nil || page < 1 {
+		h.logger.Println("Invalid page number:", pageStr)
+		c.JSON(http.StatusBadRequest, gin.H{"error": "invalid page number"})
+		return
+	}
+
+	pageSize, err := strconv.ParseInt(pageSizeStr, 10, 64)
+	if err != nil || pageSize < 1 {
+		h.logger.Println("Invalid page size:", pageSizeStr)
+		c.JSON(http.StatusBadRequest, gin.H{"error": "invalid page size"})
+		return
+	}
+
+	// Fetch messages using the service layer
+	messages, err := h.service.GetMessagesBetweenUsers(c.Request.Context(), senderID, recipientID, page, pageSize)
+	if err != nil {
+		h.logger.Println("Error fetching messages:", err)
+		c.JSON(http.StatusInternalServerError, gin.H{"error": "could not fetch messages"})
+		return
+	}
+
+	// Return the messages as JSON
+	c.JSON(http.StatusOK, gin.H{
+		"messages":  messages,
+		"page":      page,
+		"page_size": pageSize,
+		"total":     len(messages),
+	})
 }
 
 func (h *ChatHandler) UpdateMessage(c *gin.Context) {
