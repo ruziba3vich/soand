@@ -2,7 +2,10 @@ package storage
 
 import (
 	"context"
+	"encoding/json"
+	"fmt"
 
+	"github.com/redis/go-redis/v9"
 	"github.com/ruziba3vich/soand/internal/models"
 	"go.mongodb.org/mongo-driver/bson"
 	"go.mongodb.org/mongo-driver/bson/primitive"
@@ -11,16 +14,35 @@ import (
 )
 
 type ChatStorage struct {
-	db *mongo.Collection
+	db    *mongo.Collection
+	redis *redis.Client
 }
 
-func NewChatStorage(db *mongo.Collection) *ChatStorage {
-	return &ChatStorage{db: db}
+func NewChatStorage(db *mongo.Collection, redis *redis.Client) *ChatStorage {
+	return &ChatStorage{
+		db:    db,
+		redis: redis,
+	}
 }
 
 func (s *ChatStorage) CreateMessage(ctx context.Context, message *models.Message) error {
 	_, err := s.db.InsertOne(ctx, message)
-	return err
+	if err != nil {
+		return fmt.Errorf("failed to save message to MongoDB: %v", err)
+	}
+
+	chatChannel := fmt.Sprintf("chat:%s:%s", min(message.SenderID.Hex(), message.RecipientID.Hex()), max(message.SenderID.Hex(), message.RecipientID.Hex()))
+
+	messageJSON, err := json.Marshal(message)
+	if err != nil {
+		return fmt.Errorf("failed to marshal message: %v", err)
+	}
+	err = s.redis.Publish(ctx, chatChannel, string(messageJSON)).Err()
+	if err != nil {
+		return fmt.Errorf("failed to publish message to Redis: %v", err)
+	}
+
+	return nil
 }
 
 func (s *ChatStorage) GetMessagesBetweenUsers(ctx context.Context, userID, otherUserID primitive.ObjectID, page, pageSize int64) ([]*models.Message, error) {
