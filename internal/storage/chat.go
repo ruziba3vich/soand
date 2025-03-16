@@ -79,14 +79,65 @@ func (s *ChatStorage) GetMessagesBetweenUsers(ctx context.Context, userID, other
 }
 
 func (s *ChatStorage) UpdateMessageText(ctx context.Context, messageID primitive.ObjectID, newText string) error {
+	var message models.Message
+	err := s.db.FindOne(ctx, bson.M{"_id": messageID}).Decode(&message)
+	if err != nil {
+		return fmt.Errorf("failed to fetch message for update: %v", err)
+	}
+
 	filter := bson.M{"_id": messageID}
 	update := bson.M{"$set": bson.M{"content": newText}}
-	_, err := s.db.UpdateOne(ctx, filter, update)
-	return err
+	_, err = s.db.UpdateOne(ctx, filter, update)
+	if err != nil {
+		return fmt.Errorf("failed to update message in MongoDB: %v", err)
+	}
+
+	updateEvent := map[string]string{
+		"action":     "update",
+		"message_id": messageID.Hex(),
+		"content":    newText,
+	}
+	eventJSON, err := json.Marshal(updateEvent)
+	if err != nil {
+		return fmt.Errorf("failed to marshal update event: %v", err)
+	}
+
+	chatChannel := fmt.Sprintf("chat:%s:%s", min(message.SenderID.Hex(), message.RecipientID.Hex()), max(message.SenderID.Hex(), message.RecipientID.Hex()))
+	err = s.redis.Publish(ctx, chatChannel, string(eventJSON)).Err()
+	if err != nil {
+		return fmt.Errorf("failed to publish update event to Redis: %v", err)
+	}
+
+	return nil
 }
 
 func (s *ChatStorage) DeleteMessage(ctx context.Context, messageID primitive.ObjectID) error {
+	var message models.Message
+	err := s.db.FindOne(ctx, bson.M{"_id": messageID}).Decode(&message)
+	if err != nil {
+		return fmt.Errorf("failed to fetch message for deletion: %v", err)
+	}
+
 	filter := bson.M{"_id": messageID}
-	_, err := s.db.DeleteOne(ctx, filter)
-	return err
+	_, err = s.db.DeleteOne(ctx, filter)
+	if err != nil {
+		return fmt.Errorf("failed to delete message from MongoDB: %v", err)
+	}
+
+	deleteEvent := map[string]string{
+		"action":     "delete",
+		"message_id": messageID.Hex(),
+	}
+	eventJSON, err := json.Marshal(deleteEvent)
+	if err != nil {
+		return fmt.Errorf("failed to marshal delete event: %v", err)
+	}
+
+	chatChannel := fmt.Sprintf("chat:%s:%s", min(message.SenderID.Hex(), message.RecipientID.Hex()), max(message.SenderID.Hex(), message.RecipientID.Hex()))
+	err = s.redis.Publish(ctx, chatChannel, string(eventJSON)).Err()
+	if err != nil {
+		return fmt.Errorf("failed to publish delete event to Redis: %v", err)
+	}
+
+	return nil
 }
