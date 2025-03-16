@@ -12,4 +12,5 @@ type IChatService interface {
 	GetMessagesBetweenUsers(ctx context.Context, userID, otherUserID primitive.ObjectID, page, pageSize int64) ([]*models.Message, error)
 	UpdateMessageText(ctx context.Context, messageID primitive.ObjectID, newText string) error
 	DeleteMessage(ctx context.Context, messageID primitive.ObjectID) error
+	GetMessageByID(ctx context.Context, messageID primitive.ObjectID) (*models.Message, error)
 }
