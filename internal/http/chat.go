@@ -221,6 +221,15 @@ func (h *ChatHandler) GetMessages(c *gin.Context) {
 }
 
 func (h *ChatHandler) UpdateMessage(c *gin.Context) {
+	// Extract authenticated user ID
+	userID, err := getUserIdFromRequest(c)
+	if err != nil {
+		h.logger.Println("Failed to extract user ID:", err)
+		c.JSON(http.StatusUnauthorized, gin.H{"error": "unauthorized"})
+		return
+	}
+
+	// Extract message ID from URL parameter
 	messageIDStr := c.Param("message_id")
 	messageID, err := primitive.ObjectIDFromHex(messageIDStr)
 	if err != nil {
@@ -229,6 +238,20 @@ func (h *ChatHandler) UpdateMessage(c *gin.Context) {
 		return
 	}
 
+	// Fetch message to validate ownership
+	message, err := h.service.GetMessageByID(c.Request.Context(), messageID)
+	if err != nil {
+		h.logger.Println("Failed to fetch message:", err)
+		c.JSON(http.StatusNotFound, gin.H{"error": "message not found"})
+		return
+	}
+	if message.SenderID != userID {
+		h.logger.Println("User", userID.Hex(), "not authorized to update message", messageID.Hex())
+		c.JSON(http.StatusForbidden, gin.H{"error": "not authorized to update this message"})
+		return
+	}
+
+	// Parse request body
 	var req struct {
 		NewText string `json:"new_text" binding:"required"`
 	}
@@ -238,6 +261,7 @@ func (h *ChatHandler) UpdateMessage(c *gin.Context) {
 		return
 	}
 
+	// Update the message via service layer
 	err = h.service.UpdateMessageText(c.Request.Context(), messageID, req.NewText)
 	if err != nil {
 		h.logger.Println("Error updating message:", err)
@@ -245,10 +269,20 @@ func (h *ChatHandler) UpdateMessage(c *gin.Context) {
 		return
 	}
 
+	// ChatStorage publishes the update event to Redis, notifying WebSocket clients
 	c.JSON(http.StatusOK, gin.H{"message": "message updated successfully"})
 }
 
 func (h *ChatHandler) DeleteMessage(c *gin.Context) {
+	// Extract authenticated user ID
+	userID, err := getUserIdFromRequest(c)
+	if err != nil {
+		h.logger.Println("Failed to extract user ID:", err)
+		c.JSON(http.StatusUnauthorized, gin.H{"error": "unauthorized"})
+		return
+	}
+
+	// Extract message ID from URL parameter
 	messageIDStr := c.Param("message_id")
 	messageID, err := primitive.ObjectIDFromHex(messageIDStr)
 	if err != nil {
@@ -257,6 +291,20 @@ func (h *ChatHandler) DeleteMessage(c *gin.Context) {
 		return
 	}
 
+	// Fetch message to validate ownership
+	message, err := h.service.GetMessageByID(c.Request.Context(), messageID)
+	if err != nil {
+		h.logger.Println("Failed to fetch message:", err)
+		c.JSON(http.StatusNotFound, gin.H{"error": "message not found"})
+		return
+	}
+	if message.SenderID != userID {
+		h.logger.Println("User", userID.Hex(), "not authorized to delete message", messageID.Hex())
+		c.JSON(http.StatusForbidden, gin.H{"error": "not authorized to delete this message"})
+		return
+	}
+
+	// Delete the message via service layer
 	err = h.service.DeleteMessage(c.Request.Context(), messageID)
 	if err != nil {
 		h.logger.Println("Error deleting message:", err)
@@ -264,5 +312,6 @@ func (h *ChatHandler) DeleteMessage(c *gin.Context) {
 		return
 	}
 
+	// ChatStorage publishes the delete event to Redis, notifying WebSocket clients
 	c.JSON(http.StatusOK, gin.H{"message": "message deleted successfully"})
 }
