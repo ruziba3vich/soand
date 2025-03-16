@@ -89,6 +89,25 @@ func RegisterBackgroundHandler(
 	backgroundRoutes.DELETE("/:id", background_handler.DeleteBackground)
 }
 
+func RegisterChatHandler(
+	r *gin.Engine,
+	service repos.IChatService,
+	fileService repos.IFIleStoreService,
+	logger *log.Logger,
+	redis *redis.Client,
+	authMiddleware func(gin.HandlerFunc) gin.HandlerFunc,
+	wsMiddleware func(gin.HandlerFunc) gin.HandlerFunc,
+) {
+	chat_handler := handler.NewChatHandler(service, fileService, logger, redis)
+
+	chat_handler_routes := r.Group("/chat")
+
+	chat_handler_routes.GET("direct", wsMiddleware(chat_handler.HandleChatWebSocket))
+	// chat_handler_routes.GET("direct/messages", authMiddleware(chat_handler.))
+	chat_handler_routes.PATCH("update", wsMiddleware(chat_handler.UpdateMessage))
+	chat_handler_routes.DELETE("dlete", wsMiddleware(chat_handler.DeleteMessage))
+}
+
 func CORSMiddleware() gin.HandlerFunc {
 	return func(c *gin.Context) {
 		c.Writer.Header().Set("Access-Control-Allow-Origin", "http://45.130.164.130:7777") // Replace with your origin

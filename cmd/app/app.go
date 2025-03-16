@@ -113,6 +113,21 @@ func Run(ctx context.Context, logger *log.Logger) error {
 
 	registerar.RegisterBackgroundHandler(router, background_service, logger)
 
+	// direct messages
+
+	chat_collection, err := storage.ConnectMongoDB(ctx, cfg, "chat_collection")
+	chat_storage := storage.NewChatStorage(chat_collection, redisClient)
+	chat_service := service.NewChatService(chat_storage, logger)
+	registerar.RegisterChatHandler(
+		router,
+		chat_service,
+		file_store_service,
+		logger,
+		redisClient,
+		authMiddleware.AuthMiddleware(),
+		authMiddleware.WebSocketAuthMiddleware(),
+	)
+
 	return router.Run(":7777")
 }
 
