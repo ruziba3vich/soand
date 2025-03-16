@@ -141,3 +141,15 @@ func (s *ChatStorage) DeleteMessage(ctx context.Context, messageID primitive.Obj
 
 	return nil
 }
+
+func (s *ChatStorage) GetMessageByID(ctx context.Context, messageID primitive.ObjectID) (*models.Message, error) {
+	var message models.Message
+	err := s.db.FindOne(ctx, bson.M{"_id": messageID}).Decode(&message)
+	if err != nil {
+		if err == mongo.ErrNoDocuments {
+			return nil, fmt.Errorf("message not found")
+		}
+		return nil, fmt.Errorf("failed to fetch message: %v", err)
+	}
+	return &message, nil
+}
