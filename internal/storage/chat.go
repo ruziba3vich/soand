@@ -55,3 +55,16 @@ func (s *ChatStorage) GetMessagesBetweenUsers(ctx context.Context, userID, other
 	}
 	return messages, nil
 }
+
+func (s *ChatStorage) UpdateMessageText(ctx context.Context, messageID primitive.ObjectID, newText string) error {
+	filter := bson.M{"_id": messageID}
+	update := bson.M{"$set": bson.M{"content": newText}}
+	_, err := s.db.UpdateOne(ctx, filter, update)
+	return err
+}
+
+func (s *ChatStorage) DeleteMessage(ctx context.Context, messageID primitive.ObjectID) error {
+	filter := bson.M{"_id": messageID}
+	_, err := s.db.DeleteOne(ctx, filter)
+	return err
+}
