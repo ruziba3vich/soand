@@ -75,7 +75,7 @@ func (h *BackgroundHandler) DeleteBackground(c *gin.Context) {
 		return
 	}
 
-	c.JSON(http.StatusOK, gin.H{"message": "Background deleted successfully"})
+	c.JSON(http.StatusOK, gin.H{"data": "Background deleted successfully"})
 }
 
 // GetAllBackgrounds godoc
@@ -99,7 +99,7 @@ func (h *BackgroundHandler) GetAllBackgrounds(c *gin.Context) {
 		return
 	}
 
-	c.JSON(http.StatusOK, backgrounds)
+	c.JSON(http.StatusOK, gin.H{"data": backgrounds})
 }
 
 // GetBackgroundByID godoc
@@ -127,5 +127,5 @@ func (h *BackgroundHandler) GetBackgroundByID(c *gin.Context) {
 		return
 	}
 
-	c.JSON(http.StatusOK, gin.H{"response": background})
+	c.JSON(http.StatusOK, gin.H{"data": background})
 }

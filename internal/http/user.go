@@ -127,7 +127,7 @@ func (h *UserHandler) DeleteUser(c *gin.Context) {
 		return
 	}
 
-	c.Status(http.StatusNoContent)
+	c.JSON(http.StatusOK, gin.H{"data": "user has successfully been deleted"})
 }
 
 // GetUserByID handles retrieving a user by ID
@@ -153,7 +153,7 @@ func (h *UserHandler) GetUserByID(c *gin.Context) {
 		return
 	}
 
-	c.JSON(http.StatusOK, user)
+	c.JSON(http.StatusOK, gin.H{"data": user})
 }
 
 // GetUserByUsername handles retrieving a user by username
@@ -175,7 +175,7 @@ func (h *UserHandler) GetUserByUsername(c *gin.Context) {
 		return
 	}
 
-	c.JSON(http.StatusOK, user)
+	c.JSON(http.StatusOK, gin.H{"data": user})
 }
 
 // UpdateFullname handles updating a user's full name
@@ -213,7 +213,7 @@ func (h *UserHandler) UpdateFullname(c *gin.Context) {
 		return
 	}
 
-	c.Status(http.StatusOK)
+	c.JSON(http.StatusOK, gin.H{"data": "success"})
 }
 
 // UpdatePassword handles updating a user's password
@@ -252,7 +252,7 @@ func (h *UserHandler) UpdatePassword(c *gin.Context) {
 		return
 	}
 
-	c.Status(http.StatusOK)
+	c.JSON(http.StatusOK, gin.H{"data": "success"})
 }
 
 // UpdateUsername handles updating a user's username
@@ -291,7 +291,7 @@ func (h *UserHandler) UpdateUsername(c *gin.Context) {
 		return
 	}
 
-	c.JSON(http.StatusOK, gin.H{"response": "username updated successfully"})
+	c.JSON(http.StatusOK, gin.H{"data": "username updated successfully"})
 }
 
 // ChangeProfileVisibility handles changing a user's profile visibility
@@ -331,7 +331,7 @@ func (h *UserHandler) ChangeProfileVisibility(c *gin.Context) {
 	}
 
 	h.logger.Printf("Successfully changed profile visibility for user %s", userId.Hex())
-	c.JSON(http.StatusOK, gin.H{"message": "profile visibility updated"})
+	c.JSON(http.StatusOK, gin.H{"data": "profile visibility updated"})
 }
 
 // SetBio handles updating a user's bio
@@ -370,7 +370,7 @@ func (h *UserHandler) SetBio(c *gin.Context) {
 		return
 	}
 
-	c.Status(http.StatusOK)
+	c.JSON(http.StatusOK, gin.H{"data": "success"})
 }
 
 func getUserIdFromRequest(c *gin.Context) (primitive.ObjectID, error) {
@@ -419,7 +419,7 @@ func (h *UserHandler) SetBackgroundPic(c *gin.Context) {
 		return
 	}
 
-	c.Status(http.StatusOK)
+	c.JSON(http.StatusOK, gin.H{"data": "success"})
 }
 
 // Home handles the home endpoint requiring a valid JWT token

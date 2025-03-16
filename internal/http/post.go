@@ -181,7 +181,7 @@ func (h *PostHandler) UpdatePost(c *gin.Context) {
 		return
 	}
 
-	c.JSON(http.StatusOK, gin.H{"message": "Post updated successfully"})
+	c.JSON(http.StatusOK, gin.H{"data": "Post updated successfully"})
 }
 
 // DeletePost deletes a post by its ID
@@ -210,7 +210,7 @@ func (h *PostHandler) DeletePost(c *gin.Context) {
 		return
 	}
 
-	c.JSON(http.StatusOK, gin.H{"message": "Post deleted successfully"})
+	c.JSON(http.StatusOK, gin.H{"data": "Post deleted successfully"})
 }
 
 // Helper function to convert string to int64
