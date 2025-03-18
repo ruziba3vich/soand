@@ -304,20 +304,20 @@ func (s *UserStorage) isUsernameTaken(ctx context.Context, username string, user
 	return count > 0, nil
 }
 
-func (s *UserStorage) AddNewProfilePicture(ctx context.Context, userID primitive.ObjectID, fileURL string, contentType string) (string, error) {
+func (s *UserStorage) AddNewProfilePicture(ctx context.Context, userID primitive.ObjectID, fileURL string) error {
 	// Fetch the user
 	var user models.User
 	err := s.db.FindOne(ctx, bson.M{"_id": userID}).Decode(&user)
 	if err != nil {
 		if err == mongo.ErrNoDocuments {
-			return "", fmt.Errorf("user not found")
+			return fmt.Errorf("user not found")
 		}
-		return "", fmt.Errorf("failed to fetch user: %v", err)
+		return fmt.Errorf("failed to fetch user: %v", err)
 	}
 
 	// Check profile picture limit
-	if len(user.ProfilePics) >= 30 {
-		return "", fmt.Errorf("profile picture limit reached (30)")
+	if len(user.ProfilePics) > 29 {
+		return fmt.Errorf("profile picture limit reached (30)")
 	}
 
 	// Create a new ProfilePic entry
@@ -332,10 +332,10 @@ func (s *UserStorage) AddNewProfilePicture(ctx context.Context, userID primitive
 	_, err = s.db.UpdateOne(ctx, filter, update)
 	if err != nil {
 		// Note: We’re not deleting from MinIO here as per your request
-		return "", fmt.Errorf("failed to update user profile pictures: %v", err)
+		return fmt.Errorf("failed to update user profile pictures: %v", err)
 	}
 
-	return fileURL, nil
+	return nil
 }
 
 func (s *UserStorage) DeleteProfilePicture(ctx context.Context, userID primitive.ObjectID, fileURL string) error {

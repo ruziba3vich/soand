@@ -21,5 +21,8 @@ type (
 		ChangeProfileVisibility(context.Context, primitive.ObjectID, bool) error
 		SetBio(context.Context, primitive.ObjectID, string) error
 		SetBackgroundPic(context.Context, primitive.ObjectID, string) error
+		AddNewProfilePicture(context.Context, primitive.ObjectID, string) error
+		DeleteProfilePicture(context.Context, primitive.ObjectID, string) error
+		GetProfilePictures(context.Context, primitive.ObjectID) ([]models.ProfilePic, error)
 	}
 )

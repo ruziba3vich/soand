@@ -171,9 +171,33 @@ func (s *UserService) SetBio(ctx context.Context, userId primitive.ObjectID, bio
 
 func (s *UserService) SetBackgroundPic(ctx context.Context, userID primitive.ObjectID, pic_id string) error {
 	s.logger.Printf("Changing background_pic for user %s", userID.Hex())
-	if err := s.SetBackgroundPic(ctx, userID, pic_id); err != nil {
+	if err := s.storage.SetBackgroundPic(ctx, userID, pic_id); err != nil {
 		return err
 	}
 	s.logger.Printf("Changed background_pic for user %s successfully", userID.Hex())
 	return nil
+}
+
+func (s *UserService) AddNewProfilePicture(ctx context.Context, userID primitive.ObjectID, fileURL string) error {
+	s.logger.Printf("Adding profile pic for user %s", userID.Hex())
+	err := s.storage.AddNewProfilePicture(ctx, userID, fileURL)
+	if err != nil {
+		return err
+	}
+	s.logger.Printf("Added profile pic for user %s successfully", userID.Hex())
+	return nil
+}
+
+func (s *UserService) DeleteProfilePicture(ctx context.Context, userID primitive.ObjectID, fileURL string) error {
+	s.logger.Printf("Deletig profile pic for user %s", userID.Hex())
+	err := s.storage.DeleteProfilePicture(ctx, userID, fileURL)
+	if err != nil {
+		return err
+	}
+	s.logger.Printf("Deleted profile pic for user %s successfully", userID.Hex())
+	return nil
+}
+
+func (s *UserService) GetProfilePictures(ctx context.Context, userID primitive.ObjectID) ([]models.ProfilePic, error) {
+	return s.storage.GetProfilePictures(ctx, userID)
 }
