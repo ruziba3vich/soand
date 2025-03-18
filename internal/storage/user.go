@@ -4,6 +4,7 @@ import (
 	"context"
 	"errors"
 	"fmt"
+	"sort"
 	"time"
 
 	"github.com/golang-jwt/jwt/v4"
@@ -301,4 +302,91 @@ func (s *UserStorage) isUsernameTaken(ctx context.Context, username string, user
 	}
 
 	return count > 0, nil
+}
+
+func (s *UserStorage) AddNewProfilePicture(ctx context.Context, userID primitive.ObjectID, fileURL string, contentType string) (string, error) {
+	// Fetch the user
+	var user models.User
+	err := s.db.FindOne(ctx, bson.M{"_id": userID}).Decode(&user)
+	if err != nil {
+		if err == mongo.ErrNoDocuments {
+			return "", fmt.Errorf("user not found")
+		}
+		return "", fmt.Errorf("failed to fetch user: %v", err)
+	}
+
+	// Check profile picture limit
+	if len(user.ProfilePics) >= 30 {
+		return "", fmt.Errorf("profile picture limit reached (30)")
+	}
+
+	// Create a new ProfilePic entry
+	newPic := models.ProfilePic{
+		Url:      fileURL,
+		PostedAt: time.Now(),
+	}
+
+	// Update user's profile pictures in MongoDB
+	filter := bson.M{"_id": userID}
+	update := bson.M{"$push": bson.M{"profile_pics": newPic}}
+	_, err = s.db.UpdateOne(ctx, filter, update)
+	if err != nil {
+		// Note: We’re not deleting from MinIO here as per your request
+		return "", fmt.Errorf("failed to update user profile pictures: %v", err)
+	}
+
+	return fileURL, nil
+}
+
+func (s *UserStorage) DeleteProfilePicture(ctx context.Context, userID primitive.ObjectID, fileURL string) error {
+	// Fetch the user
+	var user models.User
+	err := s.db.FindOne(ctx, bson.M{"_id": userID}).Decode(&user)
+	if err != nil {
+		if err == mongo.ErrNoDocuments {
+			return fmt.Errorf("user not found")
+		}
+		return fmt.Errorf("failed to fetch user: %v", err)
+	}
+
+	// Check if the fileURL exists in ProfilePics
+	found := false
+	for _, pic := range user.ProfilePics {
+		if pic.Url == fileURL {
+			found = true
+			break
+		}
+	}
+	if !found {
+		return fmt.Errorf("profile picture %s not found for user %s", fileURL, userID.Hex())
+	}
+
+	// Remove from MongoDB only (no MinIO deletion here)
+	filter := bson.M{"_id": userID}
+	update := bson.M{"$pull": bson.M{"profile_pics": bson.M{"url": fileURL}}}
+	_, err = s.db.UpdateOne(ctx, filter, update)
+	if err != nil {
+		return fmt.Errorf("failed to remove profile picture from MongoDB: %v", err)
+	}
+
+	return nil
+}
+
+func (s *UserStorage) GetProfilePictures(ctx context.Context, userID primitive.ObjectID) ([]models.ProfilePic, error) {
+	// Fetch the user
+	var user models.User
+	err := s.db.FindOne(ctx, bson.M{"_id": userID}).Decode(&user)
+	if err != nil {
+		if err == mongo.ErrNoDocuments {
+			return nil, fmt.Errorf("user not found")
+		}
+		return nil, fmt.Errorf("failed to fetch user: %v", err)
+	}
+
+	// Sort profile pictures by PostedAt (newest to oldest)
+	sort.Slice(user.ProfilePics, func(i, j int) bool {
+		return user.ProfilePics[i].PostedAt.After(user.ProfilePics[j].PostedAt)
+	})
+
+	return user.ProfilePics, nil
 }
