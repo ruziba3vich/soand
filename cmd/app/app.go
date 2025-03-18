@@ -67,7 +67,7 @@ func Run(ctx context.Context, logger *log.Logger) error {
 
 	authMiddleware := middleware.NewAuthHandler(user_service, logger, rate_limiter)
 
-	registerar.RegisterUserRoutes(router, user_service, logger, authMiddleware.AuthMiddleware())
+	registerar.RegisterUserRoutes(router, user_service, file_store_service, logger, authMiddleware.AuthMiddleware())
 
 	// posts
 

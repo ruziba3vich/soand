@@ -30,13 +30,14 @@ import (
 
 // UserHandler handles user-related API requests
 type UserHandler struct {
-	repo   repos.UserRepo
-	logger *log.Logger
+	repo       repos.UserRepo
+	file_store repos.IFIleStoreService
+	logger     *log.Logger
 }
 
 // NewUserHandler initializes a new UserHandler
-func NewUserHandler(repo repos.UserRepo, logger *log.Logger) *UserHandler {
-	return &UserHandler{repo: repo, logger: logger}
+func NewUserHandler(repo repos.UserRepo, file_store repos.IFIleStoreService, logger *log.Logger) *UserHandler {
+	return &UserHandler{repo: repo, logger: logger, file_store: file_store}
 }
 
 // CreateUser handles user creation requests
@@ -452,4 +453,139 @@ func (h *UserHandler) Home(c *gin.Context) {
 	}
 
 	c.Status(http.StatusOK)
+}
+
+// AddProfilePicture godoc
+// @Summary      Add a new profile picture
+// @Description  Uploads a single profile picture for the authenticated user. The file is stored in MinIO, then added to the user's profile in MongoDB if successful.
+// @Tags         Profile
+// @Accept       multipart/form-data
+// @Produce      json
+// @Param        Authorization  header    string  true  "Bearer token for authentication"
+// @Param        picture        formData  file    true  "Profile picture file (Supported formats: JPEG, PNG, GIF, WEBP. Max size: 5MB recommended)"
+// @Success      200  {object}  map[string]interface{}  "Returns the uploaded file URL"
+// @Failure      400  {object}  map[string]interface{}  "Invalid file upload or request format"
+// @Failure      401  {object}  map[string]interface{}  "Unauthorized - missing or invalid token"
+// @Failure      500  {object}  map[string]interface{}  "Server error during file upload or database update"
+// @Router       /profile/picture [post]
+// @Note        For frontend devs: Send the file in a multipart/form-data request with the key 'picture'. Example in JS: `formData.append('picture', fileInput.files[0])`. Ensure the file is an image (e.g., .jpg, .png) and keep it under 5MB to avoid timeouts.
+func (h *UserHandler) AddProfilePicture(c *gin.Context) {
+	userID, err := getUserIdFromRequest(c)
+	if err != nil {
+		h.logger.Println("Failed to extract user ID:", err)
+		c.JSON(http.StatusUnauthorized, gin.H{"error": "unauthorized"})
+		return
+	}
+
+	file, err := c.FormFile("picture")
+	if err != nil {
+		h.logger.Println("Invalid file upload:", err)
+		c.JSON(http.StatusBadRequest, gin.H{"error": "invalid file upload"})
+		return
+	}
+
+	fileURL, err := h.file_store.UploadFile(file)
+	if err != nil {
+		h.logger.Println("Failed to upload file to MinIO:", err)
+		c.JSON(http.StatusInternalServerError, gin.H{"error": "failed to upload file"})
+		return
+	}
+
+	f, err := file.Open()
+	if err != nil {
+		h.logger.Println("Failed to open file:", err)
+		if delErr := h.file_store.DeleteFile(fileURL); delErr != nil {
+			h.logger.Printf("Failed to clean up file %s from MinIO: %v", fileURL, delErr)
+		}
+		c.JSON(http.StatusInternalServerError, gin.H{"error": "could not process file"})
+		return
+	}
+	defer f.Close()
+
+	err = h.repo.AddNewProfilePicture(c.Request.Context(), userID, fileURL)
+	if err != nil {
+		h.logger.Println("Failed to add profile picture to MongoDB:", err)
+		if delErr := h.file_store.DeleteFile(fileURL); delErr != nil {
+			h.logger.Printf("Failed to clean up file %s from MinIO: %v", fileURL, delErr)
+		}
+		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+		return
+	}
+
+	c.JSON(http.StatusOK, gin.H{
+		"data": fileURL,
+	})
+}
+
+// DeleteProfilePicture godoc
+// @Summary      Delete a profile picture
+// @Description  Removes a profile picture from the user's profile in MongoDB, then deletes it from MinIO. Requires the file URL as a query parameter.
+// @Tags         Profile
+// @Produce      json
+// @Param        Authorization  header    string  true  "Bearer token for authentication"
+// @Param        file_url       query     string  true  "URL of the profile picture to delete (e.g., '123456789.jpg')"
+// @Success      200  {object}  map[string]interface{}  "Confirmation of deletion"
+// @Failure      400  {object}  map[string]interface{}  "Missing or invalid file_url"
+// @Failure      401  {object}  map[string]interface{}  "Unauthorized - missing or invalid token"
+// @Failure      500  {object}  map[string]interface{}  "Server error during deletion"
+// @Router       /profile/picture [delete]
+// @Note        For frontend devs: Pass the file URL (returned from AddProfilePicture) as a query param, e.g., `/profile/picture?file_url=123456789.jpg`. If MinIO deletion fails, the response still succeeds since MongoDB is updated.
+func (h *UserHandler) DeleteProfilePicture(c *gin.Context) {
+	userID, err := getUserIdFromRequest(c)
+	if err != nil {
+		h.logger.Println("Failed to extract user ID:", err)
+		c.JSON(http.StatusUnauthorized, gin.H{"error": "unauthorized"})
+		return
+	}
+
+	fileURL := c.Query("file_url")
+	if fileURL == "" {
+		h.logger.Println("Missing file_url parameter")
+		c.JSON(http.StatusBadRequest, gin.H{"error": "file_url is required"})
+		return
+	}
+
+	if err := h.file_store.DeleteFile(fileURL); err != nil {
+		h.logger.Printf("Failed to delete file %s from MinIO, but removed from MongoDB: %v", fileURL, err)
+		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+		return
+	}
+
+	err = h.repo.DeleteProfilePicture(c.Request.Context(), userID, fileURL)
+	if err != nil {
+		h.logger.Println("Failed to delete profile picture from MongoDB:", err)
+		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+		return
+	}
+
+	c.JSON(http.StatusOK, gin.H{"data": "profile picture deleted"})
+}
+
+// GetProfilePictures godoc
+// @Summary      Get all profile pictures
+// @Description  Retrieves all profile pictures for the authenticated user, sorted by posted date (newest to oldest).
+// @Tags         Profile
+// @Produce      json
+// @Param        Authorization  header    string  true  "Bearer token for authentication"
+// @Success      200  {object}  map[string]interface{}  "List of profile pictures with URLs and posted dates"
+// @Failure      401  {object}  map[string]interface{}  "Unauthorized - missing or invalid token"
+// @Failure      500  {object}  map[string]interface{}  "Server error fetching pictures"
+// @Router       /profile/pictures [get]
+// @Note        For frontend devs: Response includes an array of objects with 'url' (string) and 'posted_at' (ISO 8601 timestamp, e.g., '2025-03-18T12:00:00Z'). Use this to display pics in chronological order.
+func (h *UserHandler) GetProfilePictures(c *gin.Context) {
+	userID, err := getUserIdFromRequest(c)
+	if err != nil {
+		h.logger.Println("Failed to extract user ID:", err)
+		c.JSON(http.StatusUnauthorized, gin.H{"error": "unauthorized"})
+		return
+	}
+
+	pics, err := h.repo.GetProfilePictures(c.Request.Context(), userID)
+	if err != nil {
+		h.logger.Println("Failed to fetch profile pictures:", err)
+		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+		return
+	}
+
+	c.JSON(http.StatusOK, gin.H{"data": pics})
 }

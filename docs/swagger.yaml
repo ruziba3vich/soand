@@ -6,6 +6,13 @@ definitions:
       id:
         type: string
     type: object
+  github_com_ruziba3vich_soand_internal_models.ProfilePic:
+    properties:
+      posted_at:
+        type: string
+      url:
+        type: string
+    type: object
   github_com_ruziba3vich_soand_internal_models.User:
     properties:
       background_pic:
@@ -24,7 +31,7 @@ definitions:
         type: boolean
       profile_pics:
         items:
-          type: string
+          $ref: '#/definitions/github_com_ruziba3vich_soand_internal_models.ProfilePic'
         type: array
       status:
         type: string
@@ -522,6 +529,121 @@ paths:
       summary: Get all posts
       tags:
       - posts
+  /profile/picture:
+    delete:
+      description: Removes a profile picture from the user's profile in MongoDB, then
+        deletes it from MinIO. Requires the file URL as a query parameter.
+      parameters:
+      - description: Bearer token for authentication
+        in: header
+        name: Authorization
+        required: true
+        type: string
+      - description: URL of the profile picture to delete (e.g., '123456789.jpg')
+        in: query
+        name: file_url
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Confirmation of deletion
+          schema:
+            additionalProperties: true
+            type: object
+        "400":
+          description: Missing or invalid file_url
+          schema:
+            additionalProperties: true
+            type: object
+        "401":
+          description: Unauthorized - missing or invalid token
+          schema:
+            additionalProperties: true
+            type: object
+        "500":
+          description: Server error during deletion
+          schema:
+            additionalProperties: true
+            type: object
+      summary: Delete a profile picture
+      tags:
+      - Profile
+    post:
+      consumes:
+      - multipart/form-data
+      description: Uploads a single profile picture for the authenticated user. The
+        file is stored in MinIO, then added to the user's profile in MongoDB if successful.
+      parameters:
+      - description: Bearer token for authentication
+        in: header
+        name: Authorization
+        required: true
+        type: string
+      - description: 'Profile picture file (Supported formats: JPEG, PNG, GIF, WEBP.
+          Max size: 5MB recommended)'
+        in: formData
+        name: picture
+        required: true
+        type: file
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Returns the uploaded file URL
+          schema:
+            additionalProperties: true
+            type: object
+        "400":
+          description: Invalid file upload or request format
+          schema:
+            additionalProperties: true
+            type: object
+        "401":
+          description: Unauthorized - missing or invalid token
+          schema:
+            additionalProperties: true
+            type: object
+        "500":
+          description: Server error during file upload or database update
+          schema:
+            additionalProperties: true
+            type: object
+      summary: Add a new profile picture
+      tags:
+      - Profile
+  /profile/pictures:
+    get:
+      description: Retrieves all profile pictures for the authenticated user, sorted
+        by posted date (newest to oldest).
+      parameters:
+      - description: Bearer token for authentication
+        in: header
+        name: Authorization
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: List of profile pictures with URLs and posted dates
+          schema:
+            additionalProperties: true
+            type: object
+        "401":
+          description: Unauthorized - missing or invalid token
+          schema:
+            additionalProperties: true
+            type: object
+        "500":
+          description: Server error fetching pictures
+          schema:
+            additionalProperties: true
+            type: object
+      summary: Get all profile pictures
+      tags:
+      - Profile
   /users:
     delete:
       description: Deletes the authenticated user's account

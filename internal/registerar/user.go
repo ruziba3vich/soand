@@ -13,19 +13,22 @@ import (
 	ginSwagger "github.com/swaggo/gin-swagger"
 )
 
-func RegisterUserRoutes(r *gin.Engine, userRepo repos.UserRepo, logger *log.Logger, authMiddleware func(gin.HandlerFunc) gin.HandlerFunc) {
+func RegisterUserRoutes(r *gin.Engine, userRepo repos.UserRepo, file_store repos.IFIleStoreService, logger *log.Logger, authMiddleware func(gin.HandlerFunc) gin.HandlerFunc) {
 	r.Use(CORSMiddleware())
 	r.GET("/swagger/*any", ginSwagger.WrapHandler(swaggerFiles.Handler))
-	userHandler := handler.NewUserHandler(userRepo, logger)
+	userHandler := handler.NewUserHandler(userRepo, file_store, logger)
 	r.GET("/", userHandler.Home)
 
 	userRoutes := r.Group("/users")
 	{
 		userRoutes.POST("/", userHandler.CreateUser)
 		userRoutes.POST("/login", userHandler.LoginUser)
+		userRoutes.POST("profile/pic", authMiddleware(userHandler.AddProfilePicture))
+		userRoutes.POST("profile/pic", authMiddleware(userHandler.DeleteProfilePicture))
 		userRoutes.DELETE("/:id", authMiddleware(userHandler.DeleteUser))
 		userRoutes.GET("/:id", authMiddleware(userHandler.GetUserByID))
 		userRoutes.GET("/username/:username", authMiddleware(userHandler.GetUserByUsername))
+		userRoutes.POST("profile/pic", userHandler.GetProfilePictures)
 		userRoutes.PATCH("/fullname", authMiddleware(userHandler.UpdateFullname))
 		userRoutes.PATCH("/password", authMiddleware(userHandler.UpdatePassword))
 		userRoutes.PATCH("/username", authMiddleware(userHandler.UpdateUsername))
