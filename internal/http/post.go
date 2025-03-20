@@ -142,7 +142,7 @@ func (h *PostHandler) GetAllPosts(c *gin.Context) {
 		return
 	}
 
-	c.JSON(http.StatusOK, posts)
+	c.JSON(http.StatusOK, gin.H{"data": posts})
 }
 
 // UpdatePost updates an existing post
