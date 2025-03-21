@@ -326,12 +326,24 @@ func (s *UserStorage) AddNewProfilePicture(ctx context.Context, userID primitive
 		PostedAt: time.Now(),
 	}
 
-	// Update user's profile pictures in MongoDB
+	// Ensure profile_pics is an array (initialize if null or missing)
 	filter := bson.M{"_id": userID}
-	update := bson.M{"$push": bson.M{"profile_pics": newPic}}
+	update := bson.M{
+		"$set": bson.M{
+			"profile_pics": bson.M{
+				"$ifNull": []any{"$profile_pics", []any{}},
+			},
+		},
+	}
 	_, err = s.db.UpdateOne(ctx, filter, update)
 	if err != nil {
-		// Note: We’re not deleting from MinIO here as per your request
+		return fmt.Errorf("failed to initialize profile_pics: %v", err)
+	}
+
+	// Now push the new profile picture
+	update = bson.M{"$push": bson.M{"profile_pics": newPic}}
+	_, err = s.db.UpdateOne(ctx, filter, update)
+	if err != nil {
 		return fmt.Errorf("failed to update user profile pictures: %v", err)
 	}
 

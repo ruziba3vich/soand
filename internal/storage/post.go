@@ -116,6 +116,9 @@ func (s *Storage) GetAllPosts(ctx context.Context, page, pageSize int64) ([]mode
 	if err := cursor.Err(); err != nil {
 		return nil, err
 	}
+	if posts != nil {
+		return posts, nil
+	}
 
-	return posts, nil
+	return []models.Post{}, nil
 }
