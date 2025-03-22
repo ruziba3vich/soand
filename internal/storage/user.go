@@ -326,15 +326,12 @@ func (s *UserStorage) AddNewProfilePicture(ctx context.Context, userID primitive
 		PostedAt: time.Now(),
 	}
 
+	new_profile_pics := []models.ProfilePic{newPic}
+	new_profile_pics = append(new_profile_pics, user.ProfilePics...)
+
 	// Ensure profile_pics is an array (initialize if null or missing)
 	filter := bson.M{"_id": userID}
-	update := bson.M{
-		"$set": bson.M{
-			"profile_pics": bson.M{
-				"$ifNull": []any{"$profile_pics", []any{}},
-			},
-		},
-	}
+	update := bson.M{"$set": bson.M{"profile_pics": new_profile_pics}}
 	_, err = s.db.UpdateOne(ctx, filter, update)
 	if err != nil {
 		return fmt.Errorf("failed to initialize profile_pics: %v", err)

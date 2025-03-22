@@ -472,3 +472,67 @@ Key: 'PostRequest.DeleteAfter' Error:Field validation for 'DeleteAfter' failed o
 [MusicLib] 2025/03/03 05:06:31 service.go:86: map[count:1 page:1 pageSize:10]
 [MusicLib] 2025/03/03 05:10:35 main.go:42: Received signal: interrupt, shutting down...
 [MusicLib] 2025/03/03 05:10:35 main.go:49: Shutdown complete
+[MusicLib] 2025/03/22 04:12:24 user.go:134: Validating JWT token...
+[MusicLib] 2025/03/22 04:12:24 user.go:142: JWT token validated successfully, user ID: 67ddef0ade169dab41c895a6
+[MusicLib] 2025/03/22 04:12:24 file_store.go:30: File uploaded successfully to: 1742598744769
+[MusicLib] 2025/03/22 04:12:24 user.go:182: Adding profile pic for user 67ddef0ade169dab41c895a6
+[MusicLib] 2025/03/22 04:12:24 user.go:507: Failed to add profile picture to MongoDB: failed to fetch user: error decoding key profile_pics: cannot decode document into []models.ProfilePic
+[MusicLib] 2025/03/22 04:12:24 file_store.go:60: File deleted successfully: 1742598744769
+[MusicLib] 2025/03/22 04:19:33 main.go:42: Received signal: interrupt, shutting down...
+[MusicLib] 2025/03/22 04:19:33 main.go:49: Shutdown complete
+[MusicLib] 2025/03/22 04:20:10 user.go:134: Validating JWT token...
+[MusicLib] 2025/03/22 04:20:10 user.go:142: JWT token validated successfully, user ID: 67ddef0ade169dab41c895a6
+[MusicLib] 2025/03/22 04:20:10 file_store.go:30: File uploaded successfully to: 1742599210412
+[MusicLib] 2025/03/22 04:20:10 user.go:182: Adding profile pic for user 67ddef0ade169dab41c895a6
+[MusicLib] 2025/03/22 04:20:10 user.go:507: Failed to add profile picture to MongoDB: failed to fetch user: error decoding key profile_pics: cannot decode document into []models.ProfilePic
+[MusicLib] 2025/03/22 04:20:10 file_store.go:60: File deleted successfully: 1742599210412
+[MusicLib] 2025/03/22 04:21:50 main.go:42: Received signal: interrupt, shutting down...
+[MusicLib] 2025/03/22 04:21:50 main.go:49: Shutdown complete
+[MusicLib] 2025/03/22 04:21:59 user.go:134: Validating JWT token...
+[MusicLib] 2025/03/22 04:21:59 user.go:142: JWT token validated successfully, user ID: 67ddef0ade169dab41c895a6
+[MusicLib] 2025/03/22 04:21:59 file_store.go:30: File uploaded successfully to: 1742599319509
+[MusicLib] 2025/03/22 04:21:59 user.go:182: Adding profile pic for user 67ddef0ade169dab41c895a6
+[MusicLib] 2025/03/22 04:21:59 user.go:507: Failed to add profile picture to MongoDB: profile_pics is not an array
+[MusicLib] 2025/03/22 04:21:59 file_store.go:60: File deleted successfully: 1742599319509
+[MusicLib] 2025/03/22 04:22:33 main.go:42: Received signal: interrupt, shutting down...
+[MusicLib] 2025/03/22 04:22:33 main.go:49: Shutdown complete
+[MusicLib] 2025/03/22 04:22:49 user.go:134: Validating JWT token...
+[MusicLib] 2025/03/22 04:22:49 user.go:142: JWT token validated successfully, user ID: 67ddef0ade169dab41c895a6
+[MusicLib] 2025/03/22 04:22:49 file_store.go:30: File uploaded successfully to: 1742599369312
+[MusicLib] 2025/03/22 04:22:49 user.go:182: Adding profile pic for user 67ddef0ade169dab41c895a6
+[MusicLib] 2025/03/22 04:22:49 user.go:507: Failed to add profile picture to MongoDB: profile_pics is not an array
+[MusicLib] 2025/03/22 04:22:49 file_store.go:60: File deleted successfully: 1742599369312
+[MusicLib] 2025/03/22 04:24:32 main.go:42: Received signal: interrupt, shutting down...
+[MusicLib] 2025/03/22 04:24:32 main.go:49: Shutdown complete
+[MusicLib] 2025/03/22 04:24:42 user.go:134: Validating JWT token...
+[MusicLib] 2025/03/22 04:24:42 user.go:142: JWT token validated successfully, user ID: 67ddef0ade169dab41c895a6
+[MusicLib] 2025/03/22 04:24:42 file_store.go:30: File uploaded successfully to: 1742599482992
+[MusicLib] 2025/03/22 04:24:42 user.go:182: Adding profile pic for user 67ddef0ade169dab41c895a6
+[MusicLib] 2025/03/22 04:24:43 user.go:507: Failed to add profile picture to MongoDB: failed to update user profile pictures: write exception: write errors: [The field 'profile_pics' must be an array but is of type object in document {_id: ObjectId('67ddef0ade169dab41c895a6')}]
+[MusicLib] 2025/03/22 04:24:43 file_store.go:60: File deleted successfully: 1742599482992
+[MusicLib] 2025/03/22 04:26:31 main.go:42: Received signal: interrupt, shutting down...
+[MusicLib] 2025/03/22 04:26:31 main.go:49: Shutdown complete
+[MusicLib] 2025/03/22 04:26:39 user.go:134: Validating JWT token...
+[MusicLib] 2025/03/22 04:26:39 user.go:142: JWT token validated successfully, user ID: 67ddef0ade169dab41c895a6
+[MusicLib] 2025/03/22 04:26:39 file_store.go:30: File uploaded successfully to: 1742599599295
+[MusicLib] 2025/03/22 04:26:39 user.go:182: Adding profile pic for user 67ddef0ade169dab41c895a6
+[MusicLib] 2025/03/22 04:26:39 user.go:507: Failed to add profile picture to MongoDB: failed to fetch user: error decoding key profile_pics: cannot decode document into []models.ProfilePic
+[MusicLib] 2025/03/22 04:26:39 file_store.go:60: File deleted successfully: 1742599599295
+[MusicLib] 2025/03/22 04:27:36 user.go:578: Failed to extract user ID:  
+[MusicLib] 2025/03/22 04:28:20 user.go:63: password 8
+[MusicLib] 2025/03/22 04:28:20 user.go:25: Creating new user...
+[MusicLib] 2025/03/22 04:28:20 user.go:33: User created successfully, ID: 67ddf614a03d93b7131ff8bb
+[MusicLib] 2025/03/22 04:28:39 user.go:578: Failed to extract user ID:  
+[MusicLib] 2025/03/22 04:28:51 user.go:134: Validating JWT token...
+[MusicLib] 2025/03/22 04:28:51 user.go:142: JWT token validated successfully, user ID: 67ddf614a03d93b7131ff8bb
+[MusicLib] 2025/03/22 04:28:51 file_store.go:30: File uploaded successfully to: 1742599731907
+[MusicLib] 2025/03/22 04:28:51 user.go:182: Adding profile pic for user 67ddf614a03d93b7131ff8bb
+[MusicLib] 2025/03/22 04:28:51 user.go:187: Added profile pic for user 67ddf614a03d93b7131ff8bb successfully
+[MusicLib] 2025/03/22 04:29:03 user.go:578: Failed to extract user ID:  
+[MusicLib] 2025/03/22 04:31:54 main.go:42: Received signal: interrupt, shutting down...
+[MusicLib] 2025/03/22 04:31:54 main.go:49: Shutdown complete
+[MusicLib] 2025/03/22 04:35:59 user.go:134: Validating JWT token...
+[MusicLib] 2025/03/22 04:35:59 user.go:142: JWT token validated successfully, user ID: 67ddf614a03d93b7131ff8bb
+[MusicLib] 2025/03/22 04:35:59 file_store.go:30: File uploaded successfully to: 1742600159508
+[MusicLib] 2025/03/22 04:35:59 user.go:182: Adding profile pic for user 67ddf614a03d93b7131ff8bb
+[MusicLib] 2025/03/22 04:35:59 user.go:187: Added profile pic for user 67ddf614a03d93b7131ff8bb successfully

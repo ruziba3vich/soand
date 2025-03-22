@@ -573,11 +573,15 @@ func (h *UserHandler) DeleteProfilePicture(c *gin.Context) {
 // @Router       /profile/pictures [get]
 // @Note        For frontend devs: Response includes an array of objects with 'url' (string) and 'posted_at' (ISO 8601 timestamp, e.g., '2025-03-18T12:00:00Z'). Use this to display pics in chronological order.
 func (h *UserHandler) GetProfilePictures(c *gin.Context) {
-	userID, err := getUserIdFromRequest(c)
-	if err != nil {
-		h.logger.Println("Failed to extract user ID:", err)
-		c.JSON(http.StatusUnauthorized, gin.H{"error": "unauthorized"})
+	userIDstr := c.Query("id")
+	if len(userIDstr) == 0 {
+		c.JSON(http.StatusBadRequest, gin.H{"error": "no user id provided"})
 		return
+	}
+
+	userID, err := primitive.ObjectIDFromHex(userIDstr)
+	if err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"error": "invalid user id provided"})
 	}
 
 	pics, err := h.repo.GetProfilePictures(c.Request.Context(), userID)
