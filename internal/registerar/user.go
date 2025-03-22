@@ -111,6 +111,12 @@ func RegisterChatHandler(
 	chat_handler_routes.DELETE("dlete", wsMiddleware(chat_handler.DeleteMessage))
 }
 
+func RegisterFileGetterHandler(r *gin.Engine, file_service repos.IFIleStoreService, logger *log.Logger) {
+	file_getter_handler := handler.NewFIleGetterHandler(file_service, logger)
+
+	r.GET("get/file/by/query", file_getter_handler.GetFileById)
+}
+
 func CORSMiddleware() gin.HandlerFunc {
 	return func(c *gin.Context) {
 		c.Writer.Header().Set("Access-Control-Allow-Origin", "http://45.130.164.130:7777") // Replace with your origin
