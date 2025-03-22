@@ -39,6 +39,10 @@ func Run(ctx context.Context, logger *log.Logger) error {
 	file_storage := storage.NewFileStorage(cfg, minio_client)
 	file_store_service := service.NewFileStoreService(file_storage, logger)
 
+	// file getter
+
+	registerar.RegisterFileGetterHandler(router, file_store_service, logger)
+
 	// Background
 	background_collection, err := storage.ConnectMongoDB(ctx, cfg, "background_collection")
 	background_storage := storage.NewBackgroundStorage(file_storage, background_collection)
