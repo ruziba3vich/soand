@@ -538,3 +538,27 @@ Key: 'PostRequest.DeleteAfter' Error:Field validation for 'DeleteAfter' failed o
 [MusicLib] 2025/03/22 04:35:59 user.go:187: Added profile pic for user 67ddf614a03d93b7131ff8bb successfully
 [MusicLib] 2025/03/22 16:54:41 main.go:42: Received signal: interrupt, shutting down...
 [MusicLib] 2025/03/22 16:54:41 main.go:49: Shutdown complete
+[MusicLib] 2025/03/23 04:28:22 user.go:42: Error creating user: user not found
+[MusicLib] 2025/03/23 04:28:22 user.go:100: Error logging in user: user not found
+[MusicLib] 2025/03/23 04:28:42 user.go:63: password 8
+[MusicLib] 2025/03/23 04:28:42 user.go:25: Creating new user...
+[MusicLib] 2025/03/23 04:28:42 user.go:33: User created successfully, ID: 67df47aa949e4eef5025414e
+[MusicLib] 2025/03/23 04:29:22 user.go:134: Validating JWT token...
+[MusicLib] 2025/03/23 04:29:22 user.go:142: JWT token validated successfully, user ID: 67df47aa949e4eef5025414e
+[MusicLib] 2025/03/23 04:29:22 user.go:120: Updating username for user ID: 67df47aa949e4eef5025414e
+[MusicLib] 2025/03/23 04:29:22 user.go:128: User username updated successfully
+[MusicLib] 2025/03/23 04:29:51 user.go:134: Validating JWT token...
+[MusicLib] 2025/03/23 04:29:51 user.go:142: JWT token validated successfully, user ID: 67df47aa949e4eef5025414e
+[MusicLib] 2025/03/23 04:29:51 file_store.go:30: File uploaded successfully to: 1742686191214
+[MusicLib] 2025/03/23 04:29:51 user.go:182: Adding profile pic for user 67df47aa949e4eef5025414e
+[MusicLib] 2025/03/23 04:29:51 user.go:187: Added profile pic for user 67df47aa949e4eef5025414e successfully
+[MusicLib] 2025/03/23 04:30:53 main.go:42: Received signal: interrupt, shutting down...
+[MusicLib] 2025/03/23 04:30:53 main.go:49: Shutdown complete
+[MusicLib] 2025/03/23 04:31:07 user.go:134: Validating JWT token...
+[MusicLib] 2025/03/23 04:31:07 user.go:142: JWT token validated successfully, user ID: 67df47aa949e4eef5025414e
+[MusicLib] 2025/03/23 04:31:07 file_store.go:30: File uploaded successfully to: 1742686267514
+[MusicLib] 2025/03/23 04:31:07 user.go:182: Adding profile pic for user 67df47aa949e4eef5025414e
+[MusicLib] 2025/03/23 04:31:07 user.go:187: Added profile pic for user 67df47aa949e4eef5025414e successfully
+[MusicLib] 2025/03/23 04:31:49 user.go:134: Validating JWT token...
+[MusicLib] 2025/03/23 04:31:49 user.go:142: JWT token validated successfully, user ID: 67df47aa949e4eef5025414e
+[MusicLib] 2025/03/23 04:31:49 user.go:79: Fetching user by username: prodonik
