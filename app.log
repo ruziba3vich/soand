@@ -562,3 +562,10 @@ Key: 'PostRequest.DeleteAfter' Error:Field validation for 'DeleteAfter' failed o
 [MusicLib] 2025/03/23 04:31:49 user.go:134: Validating JWT token...
 [MusicLib] 2025/03/23 04:31:49 user.go:142: JWT token validated successfully, user ID: 67df47aa949e4eef5025414e
 [MusicLib] 2025/03/23 04:31:49 user.go:79: Fetching user by username: prodonik
+[MusicLib] 2025/03/23 04:36:44 main.go:42: Received signal: interrupt, shutting down...
+[MusicLib] 2025/03/23 04:36:44 main.go:49: Shutdown complete
+[MusicLib] 2025/03/23 04:37:04 user.go:134: Validating JWT token...
+[MusicLib] 2025/03/23 04:37:04 user.go:142: JWT token validated successfully, user ID: 67df47aa949e4eef5025414e
+[MusicLib] 2025/03/23 04:37:04 file_store.go:30: File uploaded successfully to: http://localhost:9000/soandfiles/1742686624158?X-Amz-Algorithm=AWS4-HMAC-SHA256&X-Amz-Credential=admin%2F20250322%2Fus-east-1%2Fs3%2Faws4_request&X-Amz-Date=20250322T233704Z&X-Amz-Expires=86400&X-Amz-SignedHeaders=host&X-Amz-Signature=ad52970666041d01c7dcb57aa040aa5c0d12d3b6d552967b7b4e7a53df876754
+[MusicLib] 2025/03/23 04:37:04 user.go:182: Adding profile pic for user 67df47aa949e4eef5025414e
+[MusicLib] 2025/03/23 04:37:04 user.go:187: Added profile pic for user 67df47aa949e4eef5025414e successfully
