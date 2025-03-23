@@ -569,3 +569,273 @@ Key: 'PostRequest.DeleteAfter' Error:Field validation for 'DeleteAfter' failed o
 [MusicLib] 2025/03/23 04:37:04 file_store.go:30: File uploaded successfully to: http://localhost:9000/soandfiles/1742686624158?X-Amz-Algorithm=AWS4-HMAC-SHA256&X-Amz-Credential=admin%2F20250322%2Fus-east-1%2Fs3%2Faws4_request&X-Amz-Date=20250322T233704Z&X-Amz-Expires=86400&X-Amz-SignedHeaders=host&X-Amz-Signature=ad52970666041d01c7dcb57aa040aa5c0d12d3b6d552967b7b4e7a53df876754
 [MusicLib] 2025/03/23 04:37:04 user.go:182: Adding profile pic for user 67df47aa949e4eef5025414e
 [MusicLib] 2025/03/23 04:37:04 user.go:187: Added profile pic for user 67df47aa949e4eef5025414e successfully
+[MusicLib] 2025/03/24 01:20:40 middleware.go:53: Missing authorization token
+[MusicLib] 2025/03/24 01:21:11 user.go:46: User logged in successfully, ID: prodonik
+[MusicLib] 2025/03/24 01:22:09 user.go:63: password 8
+[MusicLib] 2025/03/24 01:22:09 user.go:25: Creating new user...
+[MusicLib] 2025/03/24 01:22:09 user.go:33: User created successfully, ID: 67e06d713bb596e6a6b88a6d
+[MusicLib] 2025/03/24 01:22:33 main.go:42: Received signal: terminated, shutting down...
+[MusicLib] 2025/03/24 01:22:33 main.go:49: Shutdown complete
+[MusicLib] 2025/03/24 01:36:04 user.go:46: User logged in successfully, ID: prodonik
+[MusicLib] 2025/03/24 01:36:19 service.go:86: map[count:0 page:1 pageSize:10]
+[MusicLib] 2025/03/24 01:37:21 post.go:110: error the provided hex string is not a valid ObjectID the provided hex string is not a valid ObjectID
+[MusicLib] 2025/03/24 01:37:39 service.go:86: map[count:0 page:1 pageSize:10]
+[MusicLib] 2025/03/24 01:37:46 user.go:134: Validating JWT token...
+[MusicLib] 2025/03/24 01:37:46 user.go:142: JWT token validated successfully, user ID: 67df47aa949e4eef5025414e
+[MusicLib] 2025/03/24 01:37:46 file_store.go:30: File uploaded successfully to: http://localhost:9000/soandfiles/1742762266441?X-Amz-Algorithm=AWS4-HMAC-SHA256&X-Amz-Credential=admin%2F20250323%2Fus-east-1%2Fs3%2Faws4_request&X-Amz-Date=20250323T203746Z&X-Amz-Expires=86400&X-Amz-SignedHeaders=host&X-Amz-Signature=07349f4abd698bc1138537f76524f2bde96f44bff07e01d59d04e166a5ef5c90
+[MusicLib] 2025/03/24 01:37:46 service.go:40: map[content:Hello, This is a test post id:67e0711a0ace6f6494b82dce]
+[MusicLib] 2025/03/24 01:37:56 service.go:86: map[count:1 page:1 pageSize:10]
+[MusicLib] 2025/03/24 01:38:56 user.go:134: Validating JWT token...
+[MusicLib] 2025/03/24 01:38:56 user.go:142: JWT token validated successfully, user ID: 67e06d713bb596e6a6b88a6d
+[MusicLib] 2025/03/24 01:38:56 comment.go:102: New WebSocket client connected for post: 67e0711a0ace6f6494b82dce
+[MusicLib] 2025/03/24 01:39:05 comment.go:49: Comment published to Redis on channel: comments:67e0711a0ace6f6494b82dce
+[MusicLib] 2025/03/24 01:39:05 comment.go:238: New comment published to post 67e0711a0ace6f6494b82dce ID: 67e071690ace6f6494b82dd0
+[MusicLib] 2025/03/24 01:42:12 main.go:42: Received signal: interrupt, shutting down...
+[MusicLib] 2025/03/24 01:42:12 main.go:49: Shutdown complete
+[MusicLib] 2025/03/24 01:43:19 main.go:42: Received signal: interrupt, shutting down...
+[MusicLib] 2025/03/24 01:43:19 main.go:49: Shutdown complete
+[MusicLib] 2025/03/24 01:45:28 main.go:42: Received signal: interrupt, shutting down...
+[MusicLib] 2025/03/24 01:45:28 main.go:49: Shutdown complete
+[MusicLib] 2025/03/24 01:48:22 user.go:134: Validating JWT token...
+[MusicLib] 2025/03/24 01:48:22 user.go:142: JWT token validated successfully, user ID: 67df47aa949e4eef5025414e
+[MusicLib] 2025/03/24 01:48:22 user.go:66: Fetching user by ID: 67df47aa949e4eef5025414e
+[MusicLib] 2025/03/24 01:49:18 service.go:86: map[count:1 page:1 pageSize:10]
+[MusicLib] 2025/03/24 01:50:48 middleware.go:53: Missing authorization token
+[MusicLib] 2025/03/24 01:51:00 user.go:134: Validating JWT token...
+[MusicLib] 2025/03/24 01:51:00 user.go:142: JWT token validated successfully, user ID: 67df47aa949e4eef5025414e
+[MusicLib] 2025/03/24 01:51:00 user.go:79: Fetching user by username: prodonik
+[MusicLib] 2025/03/24 01:52:07 user.go:134: Validating JWT token...
+[MusicLib] 2025/03/24 01:52:07 user.go:142: JWT token validated successfully, user ID: 67df47aa949e4eef5025414e
+[MusicLib] 2025/03/24 01:52:07 user.go:66: Fetching user by ID: 67df47aa949e4eef5025414e
+[MusicLib] 2025/03/24 01:52:19 user.go:134: Validating JWT token...
+[MusicLib] 2025/03/24 01:52:19 user.go:142: JWT token validated successfully, user ID: 67df47aa949e4eef5025414e
+[MusicLib] 2025/03/24 01:52:19 user.go:66: Fetching user by ID: 67df47aa949e4eef5025414e
+[MusicLib] 2025/03/24 01:52:39 user.go:134: Validating JWT token...
+[MusicLib] 2025/03/24 01:52:39 user.go:142: JWT token validated successfully, user ID: 67df47aa949e4eef5025414e
+[MusicLib] 2025/03/24 01:52:39 user.go:66: Fetching user by ID: 67df47aa949e4eef5025414e
+[MusicLib] 2025/03/24 01:52:53 middleware.go:53: Missing authorization token
+[MusicLib] 2025/03/24 01:53:04 user.go:134: Validating JWT token...
+[MusicLib] 2025/03/24 01:53:04 user.go:142: JWT token validated successfully, user ID: 67df47aa949e4eef5025414e
+[MusicLib] 2025/03/24 01:53:04 user.go:66: Fetching user by ID: 67df47aa949e4eef5025414e
+[MusicLib] 2025/03/24 01:53:29 user.go:134: Validating JWT token...
+[MusicLib] 2025/03/24 01:53:29 user.go:142: JWT token validated successfully, user ID: 67df47aa949e4eef5025414e
+[MusicLib] 2025/03/24 01:53:29 user.go:66: Fetching user by ID: 67df47aa949e4eef5025414e
+[MusicLib] 2025/03/24 01:53:45 middleware.go:53: Missing authorization token
+[MusicLib] 2025/03/24 01:54:14 middleware.go:53: Missing authorization token
+[MusicLib] 2025/03/24 01:54:26 user.go:134: Validating JWT token...
+[MusicLib] 2025/03/24 01:54:26 user.go:142: JWT token validated successfully, user ID: 67df47aa949e4eef5025414e
+[MusicLib] 2025/03/24 01:54:26 user.go:66: Fetching user by ID: 67df47aa949e4eef5025414e
+[MusicLib] 2025/03/24 01:54:34 user.go:134: Validating JWT token...
+[MusicLib] 2025/03/24 01:54:34 user.go:142: JWT token validated successfully, user ID: 67df47aa949e4eef5025414e
+[MusicLib] 2025/03/24 01:54:34 user.go:66: Fetching user by ID: 67df47aa949e4eef5025414e
+[MusicLib] 2025/03/24 01:54:39 user.go:134: Validating JWT token...
+[MusicLib] 2025/03/24 01:54:39 user.go:142: JWT token validated successfully, user ID: 67df47aa949e4eef5025414e
+[MusicLib] 2025/03/24 01:54:39 user.go:66: Fetching user by ID: 67df47aa949e4eef5025414e
+[MusicLib] 2025/03/24 01:55:41 user.go:63: password 8
+[MusicLib] 2025/03/24 01:55:41 user.go:25: Creating new user...
+[MusicLib] 2025/03/24 01:55:41 user.go:33: User created successfully, ID: 67e0754d0095c2b9ca426d2f
+[MusicLib] 2025/03/24 01:56:15 user.go:134: Validating JWT token...
+[MusicLib] 2025/03/24 01:56:15 user.go:142: JWT token validated successfully, user ID: 67e0754d0095c2b9ca426d2f
+[MusicLib] 2025/03/24 01:56:15 user.go:120: Updating username for user ID: 67e0754d0095c2b9ca426d2f
+[MusicLib] 2025/03/24 01:56:15 user.go:124: Error updating username: username 'prodonik' is already taken by another user
+[MusicLib] 2025/03/24 01:56:15 user.go:290: Error updating username: username 'prodonik' is already taken by another user
+[MusicLib] 2025/03/24 01:56:26 user.go:134: Validating JWT token...
+[MusicLib] 2025/03/24 01:56:26 user.go:142: JWT token validated successfully, user ID: 67e0754d0095c2b9ca426d2f
+[MusicLib] 2025/03/24 01:56:26 user.go:120: Updating username for user ID: 67e0754d0095c2b9ca426d2f
+[MusicLib] 2025/03/24 01:56:26 user.go:124: Error updating username: username 'hello_world' is already taken by another user
+[MusicLib] 2025/03/24 01:56:26 user.go:290: Error updating username: username 'hello_world' is already taken by another user
+[MusicLib] 2025/03/24 01:56:55 user.go:134: Validating JWT token...
+[MusicLib] 2025/03/24 01:56:55 user.go:142: JWT token validated successfully, user ID: 67e0754d0095c2b9ca426d2f
+[MusicLib] 2025/03/24 01:56:55 user.go:120: Updating username for user ID: 67e0754d0095c2b9ca426d2f
+[MusicLib] 2025/03/24 01:56:55 user.go:128: User username updated successfully
+[MusicLib] 2025/03/24 01:57:06 user.go:134: Validating JWT token...
+[MusicLib] 2025/03/24 01:57:06 user.go:142: JWT token validated successfully, user ID: 67e0754d0095c2b9ca426d2f
+[MusicLib] 2025/03/24 01:57:06 user.go:79: Fetching user by username: bonu_jk
+[MusicLib] 2025/03/24 01:57:19 user.go:134: Validating JWT token...
+[MusicLib] 2025/03/24 01:57:19 user.go:142: JWT token validated successfully, user ID: 67e0754d0095c2b9ca426d2f
+[MusicLib] 2025/03/24 01:57:19 user.go:66: Fetching user by ID: 67e0754d0095c2b9ca426d2f
+[MusicLib] 2025/03/24 01:57:25 user.go:134: Validating JWT token...
+[MusicLib] 2025/03/24 01:57:25 user.go:142: JWT token validated successfully, user ID: 67e0754d0095c2b9ca426d2f
+[MusicLib] 2025/03/24 01:57:25 user.go:66: Fetching user by ID: 67e0754d0095c2b9ca426d2f
+[MusicLib] 2025/03/24 01:57:37 user.go:134: Validating JWT token...
+[MusicLib] 2025/03/24 01:57:37 user.go:142: JWT token validated successfully, user ID: 67e0754d0095c2b9ca426d2f
+[MusicLib] 2025/03/24 01:57:37 user.go:79: Fetching user by username: prodonik
+[MusicLib] 2025/03/24 01:57:46 user.go:134: Validating JWT token...
+[MusicLib] 2025/03/24 01:57:46 user.go:142: JWT token validated successfully, user ID: 67e0754d0095c2b9ca426d2f
+[MusicLib] 2025/03/24 01:57:46 user.go:66: Fetching user by ID: 67e0754d0095c2b9ca426d2f
+[MusicLib] 2025/03/24 02:00:52 main.go:42: Received signal: interrupt, shutting down...
+[MusicLib] 2025/03/24 02:00:52 main.go:49: Shutdown complete
+[MusicLib] 2025/03/24 02:01:04 user.go:134: Validating JWT token...
+[MusicLib] 2025/03/24 02:01:04 user.go:142: JWT token validated successfully, user ID: 67e0754d0095c2b9ca426d2f
+[MusicLib] 2025/03/24 02:01:04 user.go:66: Fetching user by ID: 67df47aa949e4eef5025414e
+[MusicLib] 2025/03/24 02:01:09 user.go:134: Validating JWT token...
+[MusicLib] 2025/03/24 02:01:09 user.go:142: JWT token validated successfully, user ID: 67e0754d0095c2b9ca426d2f
+[MusicLib] 2025/03/24 02:01:18 main.go:42: Received signal: interrupt, shutting down...
+[MusicLib] 2025/03/24 02:01:18 main.go:49: Shutdown complete
+[MusicLib] 2025/03/24 02:02:05 user.go:134: Validating JWT token...
+[MusicLib] 2025/03/24 02:02:05 user.go:142: JWT token validated successfully, user ID: 67e06d713bb596e6a6b88a6d
+[MusicLib] 2025/03/24 02:02:05 comment.go:102: New WebSocket client connected for post: 67e0711a0ace6f6494b82dce
+[MusicLib] 2025/03/24 02:02:08 comment.go:49: Comment published to Redis on channel: comments:67e0711a0ace6f6494b82dce
+[MusicLib] 2025/03/24 02:02:08 comment.go:238: New comment published to post 67e0711a0ace6f6494b82dce ID: 67e076d045ba68703c9598e5
+[MusicLib] 2025/03/24 02:02:30 service.go:86: map[count:1 page:1 pageSize:10]
+[MusicLib] 2025/03/24 02:03:09 main.go:42: Received signal: interrupt, shutting down...
+[MusicLib] 2025/03/24 02:03:09 main.go:49: Shutdown complete
+[MusicLib] 2025/03/24 02:03:56 user.go:134: Validating JWT token...
+[MusicLib] 2025/03/24 02:03:56 user.go:142: JWT token validated successfully, user ID: 67df47aa949e4eef5025414e
+[MusicLib] 2025/03/24 02:05:08 main.go:42: Received signal: interrupt, shutting down...
+[MusicLib] 2025/03/24 02:05:08 main.go:49: Shutdown complete
+[MusicLib] 2025/03/24 02:05:32 user.go:66: Fetching user by ID: 67ded09b0093ef6a7a9a725a
+[MusicLib] 2025/03/24 02:05:32 user.go:70: Error fetching user: mongo: no documents in result
+[MusicLib] 2025/03/24 02:05:32 user.go:158: Error fetching user: mongo: no documents in result
+[MusicLib] 2025/03/24 02:05:45 user.go:134: Validating JWT token...
+[MusicLib] 2025/03/24 02:05:45 user.go:142: JWT token validated successfully, user ID: 67df47aa949e4eef5025414e
+[MusicLib] 2025/03/24 02:05:45 user.go:79: Fetching user by username: bonu_jk
+[MusicLib] 2025/03/24 02:05:53 user.go:66: Fetching user by ID: 67e0754d0095c2b9ca426d2f
+[MusicLib] 2025/03/24 02:07:36 user.go:66: Fetching user by ID: 67e0754d0095c2b9ca426d2f
+[MusicLib] 2025/03/24 02:09:30 main.go:42: Received signal: interrupt, shutting down...
+[MusicLib] 2025/03/24 02:09:30 main.go:49: Shutdown complete
+[MusicLib] 2025/03/24 02:10:31 main.go:42: Received signal: interrupt, shutting down...
+[MusicLib] 2025/03/24 02:10:31 main.go:49: Shutdown complete
+[MusicLib] 2025/03/24 02:11:22 main.go:42: Received signal: interrupt, shutting down...
+[MusicLib] 2025/03/24 02:11:22 main.go:49: Shutdown complete
+[MusicLib] 2025/03/24 02:11:48 user.go:66: Fetching user by ID: 67e0754d0095c2b9ca426d2f
+[MusicLib] 2025/03/24 02:11:58 user.go:66: Fetching user by ID: 67e06d713bb596e6a6b88a6d
+[MusicLib] 2025/03/24 02:14:59 main.go:42: Received signal: interrupt, shutting down...
+[MusicLib] 2025/03/24 02:14:59 main.go:49: Shutdown complete
+[MusicLib] 2025/03/24 02:15:09 user.go:66: Fetching user by ID: 67e06d713bb596e6a6b88a6d
+[MusicLib] 2025/03/24 02:15:20 middleware.go:53: Missing authorization token
+[MusicLib] 2025/03/24 02:17:12 main.go:42: Received signal: interrupt, shutting down...
+[MusicLib] 2025/03/24 02:17:12 main.go:49: Shutdown complete
+[MusicLib] 2025/03/24 02:18:11 comment.go:71: Fetched 2 comments for post 67e0711a0ace6f6494b82dce
+[MusicLib] 2025/03/24 02:18:23 user.go:134: Validating JWT token...
+[MusicLib] 2025/03/24 02:18:23 user.go:142: JWT token validated successfully, user ID: 67e06d713bb596e6a6b88a6d
+[MusicLib] 2025/03/24 02:18:23 comment.go:102: New WebSocket client connected for post: 67e0711a0ace6f6494b82dce
+[MusicLib] 2025/03/24 02:18:29 comment.go:49: Comment published to Redis on channel: comments:67e0711a0ace6f6494b82dce
+[MusicLib] 2025/03/24 02:18:29 comment.go:238: New comment published to post 67e0711a0ace6f6494b82dce ID: 67e07aa5fee67bbc5fb9e53e
+[MusicLib] 2025/03/24 02:18:33 comment.go:71: Fetched 3 comments for post 67e0711a0ace6f6494b82dce
+[MusicLib] 2025/03/24 02:19:00 comment.go:49: Comment published to Redis on channel: comments:67e0711a0ace6f6494b82dce
+[MusicLib] 2025/03/24 02:19:00 comment.go:238: New comment published to post 67e0711a0ace6f6494b82dce ID: 67e07ac4fee67bbc5fb9e540
+[MusicLib] 2025/03/24 02:24:37 main.go:42: Received signal: terminated, shutting down...
+[MusicLib] 2025/03/24 02:24:37 main.go:49: Shutdown complete
+[MusicLib] 2025/03/24 02:26:33 service.go:86: map[count:1 page:1 pageSize:10]
+[MusicLib] 2025/03/24 02:27:15 middleware.go:101: Missing authorization token
+[MusicLib] 2025/03/24 02:27:49 user.go:134: Validating JWT token...
+[MusicLib] 2025/03/24 02:27:49 user.go:142: JWT token validated successfully, user ID: 67e0754d0095c2b9ca426d2f
+[MusicLib] 2025/03/24 02:27:49 comment.go:102: New WebSocket client connected for post: 67e0711a0ace6f6494b82dce
+[MusicLib] 2025/03/24 02:28:09 comment.go:49: Comment published to Redis on channel: comments:67e0711a0ace6f6494b82dce
+[MusicLib] 2025/03/24 02:28:09 comment.go:238: New comment published to post 67e0711a0ace6f6494b82dce ID: 67e07ce9bda4da2c5032d239
+[MusicLib] 2025/03/24 02:28:14 comment.go:141: WebSocket connection closed: websocket: close 1000 (normal)
+[MusicLib] 2025/03/24 02:28:14 comment.go:120: Redis subscription error: read tcp [::1]:51894->[::1]:6379: use of closed network connection
+[MusicLib] 2025/03/24 02:29:41 user.go:134: Validating JWT token...
+[MusicLib] 2025/03/24 02:29:41 user.go:142: JWT token validated successfully, user ID: 67e0754d0095c2b9ca426d2f
+[MusicLib] 2025/03/24 02:29:41 comment.go:102: New WebSocket client connected for post: 67e0711a0ace6f6494b82dce
+[MusicLib] 2025/03/24 02:30:16 user.go:134: Validating JWT token...
+[MusicLib] 2025/03/24 02:30:16 user.go:142: JWT token validated successfully, user ID: 67e0754d0095c2b9ca426d2f
+[MusicLib] 2025/03/24 02:30:16 comment.go:102: New WebSocket client connected for post: 67e0711a0ace6f6494b82dce
+[MusicLib] 2025/03/24 02:30:18 comment.go:49: Comment published to Redis on channel: comments:67e0711a0ace6f6494b82dce
+[MusicLib] 2025/03/24 02:30:18 comment.go:238: New comment published to post 67e0711a0ace6f6494b82dce ID: 67e07d6abda4da2c5032d23b
+[MusicLib] 2025/03/24 02:30:58 service.go:86: map[count:1 page:1 pageSize:10]
+[MusicLib] 2025/03/24 02:31:29 comment.go:49: Comment published to Redis on channel: comments:67e0711a0ace6f6494b82dce
+[MusicLib] 2025/03/24 02:31:29 comment.go:238: New comment published to post 67e0711a0ace6f6494b82dce ID: 67e07db1bda4da2c5032d23d
+[MusicLib] 2025/03/24 02:33:11 comment.go:141: WebSocket connection closed: websocket: close 1006 (abnormal closure): unexpected EOF
+[MusicLib] 2025/03/24 02:33:11 comment.go:120: Redis subscription error: read tcp [::1]:43690->[::1]:6379: use of closed network connection
+[MusicLib] 2025/03/24 02:33:13 user.go:134: Validating JWT token...
+[MusicLib] 2025/03/24 02:33:13 user.go:142: JWT token validated successfully, user ID: 67e0754d0095c2b9ca426d2f
+[MusicLib] 2025/03/24 02:33:13 comment.go:102: New WebSocket client connected for post: 67e0711a0ace6f6494b82dce
+[MusicLib] 2025/03/24 02:33:19 comment.go:49: Comment published to Redis on channel: comments:67e0711a0ace6f6494b82dce
+[MusicLib] 2025/03/24 02:33:19 comment.go:238: New comment published to post 67e0711a0ace6f6494b82dce ID: 67e07e1fbda4da2c5032d23f
+[MusicLib] 2025/03/24 02:33:25 comment.go:49: Comment published to Redis on channel: comments:67e0711a0ace6f6494b82dce
+[MusicLib] 2025/03/24 02:33:25 comment.go:238: New comment published to post 67e0711a0ace6f6494b82dce ID: 67e07e25bda4da2c5032d241
+[MusicLib] 2025/03/24 02:34:38 comment.go:141: WebSocket connection closed: websocket: close 1006 (abnormal closure): unexpected EOF
+[MusicLib] 2025/03/24 02:34:38 comment.go:120: Redis subscription error: read tcp [::1]:60320->[::1]:6379: use of closed network connection
+[MusicLib] 2025/03/24 02:34:40 user.go:134: Validating JWT token...
+[MusicLib] 2025/03/24 02:34:40 user.go:142: JWT token validated successfully, user ID: 67e0754d0095c2b9ca426d2f
+[MusicLib] 2025/03/24 02:34:40 comment.go:102: New WebSocket client connected for post: 67e0711a0ace6f6494b82dce
+[MusicLib] 2025/03/24 02:34:49 comment.go:49: Comment published to Redis on channel: comments:67e0711a0ace6f6494b82dce
+[MusicLib] 2025/03/24 02:34:49 comment.go:238: New comment published to post 67e0711a0ace6f6494b82dce ID: 67e07e79bda4da2c5032d243
+[MusicLib] 2025/03/24 02:34:59 comment.go:141: WebSocket connection closed: websocket: close 1006 (abnormal closure): unexpected EOF
+[MusicLib] 2025/03/24 02:34:59 comment.go:120: Redis subscription error: read tcp [::1]:40572->[::1]:6379: use of closed network connection
+[MusicLib] 2025/03/24 02:35:45 user.go:134: Validating JWT token...
+[MusicLib] 2025/03/24 02:35:45 user.go:142: JWT token validated successfully, user ID: 67e0754d0095c2b9ca426d2f
+[MusicLib] 2025/03/24 02:35:45 comment.go:102: New WebSocket client connected for post: 67e0711a0ace6f6494b82dce
+[MusicLib] 2025/03/24 02:35:53 comment.go:49: Comment published to Redis on channel: comments:67e0711a0ace6f6494b82dce
+[MusicLib] 2025/03/24 02:35:53 comment.go:238: New comment published to post 67e0711a0ace6f6494b82dce ID: 67e07eb9bda4da2c5032d245
+[MusicLib] 2025/03/24 02:36:45 comment.go:141: WebSocket connection closed: websocket: close 1006 (abnormal closure): unexpected EOF
+[MusicLib] 2025/03/24 02:36:45 comment.go:120: Redis subscription error: read tcp [::1]:33228->[::1]:6379: use of closed network connection
+[MusicLib] 2025/03/24 02:36:56 user.go:134: Validating JWT token...
+[MusicLib] 2025/03/24 02:36:56 user.go:142: JWT token validated successfully, user ID: 67e0754d0095c2b9ca426d2f
+[MusicLib] 2025/03/24 02:36:56 comment.go:102: New WebSocket client connected for post: 67e0711a0ace6f6494b82dce
+[MusicLib] 2025/03/24 02:37:10 comment.go:49: Comment published to Redis on channel: comments:67e0711a0ace6f6494b82dce
+[MusicLib] 2025/03/24 02:37:10 comment.go:238: New comment published to post 67e0711a0ace6f6494b82dce ID: 67e07f06bda4da2c5032d247
+[MusicLib] 2025/03/24 02:41:45 main.go:42: Received signal: interrupt, shutting down...
+[MusicLib] 2025/03/24 02:41:45 main.go:49: Shutdown complete
+[MusicLib] 2025/03/24 02:42:01 user.go:134: Validating JWT token...
+[MusicLib] 2025/03/24 02:42:01 user.go:142: JWT token validated successfully, user ID: 67e0754d0095c2b9ca426d2f
+[MusicLib] 2025/03/24 02:42:01 comment.go:102: New WebSocket client connected for post: 67e0711a0ace6f6494b82dce
+[MusicLib] 2025/03/24 02:42:05 comment.go:238: New comment published to post 67e0711a0ace6f6494b82dce ID: 67e0802d1d6594c373c1bcbd
+[MusicLib] 2025/03/24 02:42:29 user.go:134: Validating JWT token...
+[MusicLib] 2025/03/24 02:42:29 user.go:142: JWT token validated successfully, user ID: 67e0754d0095c2b9ca426d2f
+[MusicLib] 2025/03/24 02:42:29 comment.go:102: New WebSocket client connected for post: 67e0711a0ace6f6494b82dce
+[MusicLib] 2025/03/24 02:42:44 comment.go:238: New comment published to post 67e0711a0ace6f6494b82dce ID: 67e080541d6594c373c1bcbf
+[MusicLib] 2025/03/24 02:48:38 user.go:134: Validating JWT token...
+[MusicLib] 2025/03/24 02:48:38 user.go:138: Invalid JWT token: token contains an invalid number of segments
+[MusicLib] 2025/03/24 02:48:38 middleware.go:118: Invalid WebSocket token: token contains an invalid number of segments
+[MusicLib] 2025/03/24 02:52:33 user.go:134: Validating JWT token...
+[MusicLib] 2025/03/24 02:52:33 user.go:138: Invalid JWT token: tokenstring should not contain 'bearer '
+[MusicLib] 2025/03/24 02:52:33 middleware.go:118: Invalid WebSocket token: tokenstring should not contain 'bearer '
+[MusicLib] 2025/03/24 02:53:14 user.go:134: Validating JWT token...
+[MusicLib] 2025/03/24 02:53:14 user.go:142: JWT token validated successfully, user ID: 67e0754d0095c2b9ca426d2f
+[MusicLib] 2025/03/24 02:53:14 comment.go:102: New WebSocket client connected for post: 67e0711a0ace6f6494b82dce
+[MusicLib] 2025/03/24 02:53:14 comment.go:238: New comment published to post 67e0711a0ace6f6494b82dce ID: 67e082ca1d6594c373c1bcc1
+[MusicLib] 2025/03/24 02:55:26 comment.go:141: WebSocket connection closed: websocket: close 1006 (abnormal closure): unexpected EOF
+[MusicLib] 2025/03/24 02:55:26 comment.go:120: Redis subscription error: read tcp [::1]:43992->[::1]:6379: use of closed network connection
+[MusicLib] 2025/03/24 02:55:56 user.go:134: Validating JWT token...
+[MusicLib] 2025/03/24 02:55:56 user.go:142: JWT token validated successfully, user ID: 67e0754d0095c2b9ca426d2f
+[MusicLib] 2025/03/24 02:55:56 comment.go:102: New WebSocket client connected for post: 67e0711a0ace6f6494b82dce
+[MusicLib] 2025/03/24 02:55:56 comment.go:238: New comment published to post 67e0711a0ace6f6494b82dce ID: 67e0836c1d6594c373c1bcc3
+[MusicLib] 2025/03/24 02:55:56 file_store.go:40: File uploaded successfully to: http://localhost:9000/soandfiles/1742766956383?X-Amz-Algorithm=AWS4-HMAC-SHA256&X-Amz-Credential=admin%2F20250323%2Fus-east-1%2Fs3%2Faws4_request&X-Amz-Date=20250323T215556Z&X-Amz-Expires=86400&X-Amz-SignedHeaders=host&X-Amz-Signature=c1cfd86b532c84471e5d783279d980d05cd3126973dd2026c1f07973342c1d95
+[MusicLib] 2025/03/24 02:55:56 comment.go:238: New comment published to post 67e0711a0ace6f6494b82dce ID: 67e0836c1d6594c373c1bcc5
+[MusicLib] 2025/03/24 02:55:56 file_store.go:40: File uploaded successfully to: http://localhost:9000/soandfiles/1742766956469?X-Amz-Algorithm=AWS4-HMAC-SHA256&X-Amz-Credential=admin%2F20250323%2Fus-east-1%2Fs3%2Faws4_request&X-Amz-Date=20250323T215556Z&X-Amz-Expires=86400&X-Amz-SignedHeaders=host&X-Amz-Signature=c95c56e2096584cced29b7dfb77784f4be69a10bf4474728c4dce32135739efb
+[MusicLib] 2025/03/24 02:55:56 comment.go:238: New comment published to post 67e0711a0ace6f6494b82dce ID: 67e0836c1d6594c373c1bcc7
+[MusicLib] 2025/03/24 02:58:10 comment.go:141: WebSocket connection closed: websocket: close 1006 (abnormal closure): unexpected EOF
+[MusicLib] 2025/03/24 02:58:10 comment.go:120: Redis subscription error: read tcp [::1]:44286->[::1]:6379: use of closed network connection
+[MusicLib] 2025/03/24 02:58:13 user.go:134: Validating JWT token...
+[MusicLib] 2025/03/24 02:58:13 user.go:142: JWT token validated successfully, user ID: 67e0754d0095c2b9ca426d2f
+[MusicLib] 2025/03/24 02:58:13 comment.go:102: New WebSocket client connected for post: 67e0711a0ace6f6494b82dce
+[MusicLib] 2025/03/24 02:58:13 comment.go:238: New comment published to post 67e0711a0ace6f6494b82dce ID: 67e083f51d6594c373c1bcc9
+[MusicLib] 2025/03/24 02:58:14 file_store.go:40: File uploaded successfully to: http://localhost:9000/soandfiles/1742767093989?X-Amz-Algorithm=AWS4-HMAC-SHA256&X-Amz-Credential=admin%2F20250323%2Fus-east-1%2Fs3%2Faws4_request&X-Amz-Date=20250323T215814Z&X-Amz-Expires=86400&X-Amz-SignedHeaders=host&X-Amz-Signature=cb3dd5eb6435b27dd1a5350852ef317d4b0fda74953103cbbd8ec3e11471f918
+[MusicLib] 2025/03/24 02:58:14 comment.go:238: New comment published to post 67e0711a0ace6f6494b82dce ID: 67e083f61d6594c373c1bccb
+[MusicLib] 2025/03/24 02:58:14 file_store.go:40: File uploaded successfully to: http://localhost:9000/soandfiles/1742767094038?X-Amz-Algorithm=AWS4-HMAC-SHA256&X-Amz-Credential=admin%2F20250323%2Fus-east-1%2Fs3%2Faws4_request&X-Amz-Date=20250323T215814Z&X-Amz-Expires=86400&X-Amz-SignedHeaders=host&X-Amz-Signature=ca30818572800243054a3abb45fbbd9bfe78125d21fcf48a41a1ef50fad6c07a
+[MusicLib] 2025/03/24 02:58:14 comment.go:238: New comment published to post 67e0711a0ace6f6494b82dce ID: 67e083f61d6594c373c1bccd
+[MusicLib] 2025/03/24 02:58:52 service.go:86: map[count:0 page:1 pageSize:10]
+[MusicLib] 2025/03/24 02:59:47 middleware.go:53: Missing authorization token
+[MusicLib] 2025/03/24 02:59:59 comment.go:141: WebSocket connection closed: websocket: close 1000 (normal)
+[MusicLib] 2025/03/24 02:59:59 comment.go:120: Redis subscription error: read tcp [::1]:38984->[::1]:6379: use of closed network connection
+[MusicLib] 2025/03/24 03:00:12 user.go:134: Validating JWT token...
+[MusicLib] 2025/03/24 03:00:12 user.go:142: JWT token validated successfully, user ID: 67e0754d0095c2b9ca426d2f
+[MusicLib] 2025/03/24 03:00:13 service.go:40: map[content:Hello, this is a post for 10 days id:67e0846c1d6594c373c1bcce]
+[MusicLib] 2025/03/24 03:00:28 user.go:134: Validating JWT token...
+[MusicLib] 2025/03/24 03:00:28 user.go:142: JWT token validated successfully, user ID: 67e0754d0095c2b9ca426d2f
+[MusicLib] 2025/03/24 03:00:28 comment.go:102: New WebSocket client connected for post: 67e0846c1d6594c373c1bcce
+[MusicLib] 2025/03/24 03:00:47 comment.go:141: WebSocket connection closed: websocket: close 1006 (abnormal closure): unexpected EOF
+[MusicLib] 2025/03/24 03:00:47 comment.go:120: Redis subscription error: read tcp [::1]:60042->[::1]:6379: use of closed network connection
+[MusicLib] 2025/03/24 03:00:49 user.go:134: Validating JWT token...
+[MusicLib] 2025/03/24 03:00:49 user.go:142: JWT token validated successfully, user ID: 67e0754d0095c2b9ca426d2f
+[MusicLib] 2025/03/24 03:00:49 comment.go:102: New WebSocket client connected for post: 67e0846c1d6594c373c1bcce
+[MusicLib] 2025/03/24 03:00:49 comment.go:238: New comment published to post 67e0846c1d6594c373c1bcce ID: 67e084911d6594c373c1bcd0
+[MusicLib] 2025/03/24 03:00:49 file_store.go:40: File uploaded successfully to: http://localhost:9000/soandfiles/1742767249747?X-Amz-Algorithm=AWS4-HMAC-SHA256&X-Amz-Credential=admin%2F20250323%2Fus-east-1%2Fs3%2Faws4_request&X-Amz-Date=20250323T220049Z&X-Amz-Expires=86400&X-Amz-SignedHeaders=host&X-Amz-Signature=9c031c04cc7a3e74dd358f88d5898a4a22017c89d82056c3283e5792859baf56
+[MusicLib] 2025/03/24 03:00:49 comment.go:238: New comment published to post 67e0846c1d6594c373c1bcce ID: 67e084911d6594c373c1bcd2
+[MusicLib] 2025/03/24 03:00:49 file_store.go:40: File uploaded successfully to: http://localhost:9000/soandfiles/1742767249833?X-Amz-Algorithm=AWS4-HMAC-SHA256&X-Amz-Credential=admin%2F20250323%2Fus-east-1%2Fs3%2Faws4_request&X-Amz-Date=20250323T220049Z&X-Amz-Expires=86400&X-Amz-SignedHeaders=host&X-Amz-Signature=8296d08db44d96dc77141631191cbc9ce47467ebfc03c811d478fc346f9c7957
+[MusicLib] 2025/03/24 03:00:49 comment.go:238: New comment published to post 67e0846c1d6594c373c1bcce ID: 67e084911d6594c373c1bcd4
+[MusicLib] 2025/03/24 03:04:26 comment.go:141: WebSocket connection closed: websocket: close 1006 (abnormal closure): unexpected EOF
+[MusicLib] 2025/03/24 03:04:26 comment.go:120: Redis subscription error: read tcp [::1]:40348->[::1]:6379: use of closed network connection
+[MusicLib] 2025/03/24 03:04:29 user.go:134: Validating JWT token...
+[MusicLib] 2025/03/24 03:04:29 user.go:142: JWT token validated successfully, user ID: 67e0754d0095c2b9ca426d2f
+[MusicLib] 2025/03/24 03:04:29 comment.go:102: New WebSocket client connected for post: 67e0846c1d6594c373c1bcce
+[MusicLib] 2025/03/24 03:04:29 comment.go:238: New comment published to post 67e0846c1d6594c373c1bcce ID: 67e0856d1d6594c373c1bcd6
+[MusicLib] 2025/03/24 03:04:29 file_store.go:40: File uploaded successfully to: http://localhost:9000/soandfiles/1742767469681?X-Amz-Algorithm=AWS4-HMAC-SHA256&X-Amz-Credential=admin%2F20250323%2Fus-east-1%2Fs3%2Faws4_request&X-Amz-Date=20250323T220429Z&X-Amz-Expires=86400&X-Amz-SignedHeaders=host&X-Amz-Signature=282a1843e468b79c358ac9bb1b174794b0a1fce7fcda7627e0af9eb38cec41a1
+[MusicLib] 2025/03/24 03:04:29 comment.go:238: New comment published to post 67e0846c1d6594c373c1bcce ID: 67e0856d1d6594c373c1bcd8
+[MusicLib] 2025/03/24 03:04:29 file_store.go:40: File uploaded successfully to: http://localhost:9000/soandfiles/1742767469759?X-Amz-Algorithm=AWS4-HMAC-SHA256&X-Amz-Credential=admin%2F20250323%2Fus-east-1%2Fs3%2Faws4_request&X-Amz-Date=20250323T220429Z&X-Amz-Expires=86400&X-Amz-SignedHeaders=host&X-Amz-Signature=5ac21d5c2f1de7530870d2507d18dc3250aace60914fe6fb46fbc1d2059eb6d3
+[MusicLib] 2025/03/24 03:04:29 comment.go:238: New comment published to post 67e0846c1d6594c373c1bcce ID: 67e0856d1d6594c373c1bcda
+[MusicLib] 2025/03/24 03:12:30 main.go:42: Received signal: interrupt, shutting down...
+[MusicLib] 2025/03/24 03:12:30 main.go:49: Shutdown complete

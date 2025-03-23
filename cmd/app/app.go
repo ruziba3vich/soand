@@ -102,7 +102,7 @@ func Run(ctx context.Context, logger *log.Logger) error {
 		return err
 	}
 
-	comments_storage := storage.NewCommentStorage(comments_collection)
+	comments_storage := storage.NewCommentStorage(comments_collection, user_storage)
 	comments_service := service.NewCommentService(comments_storage, redisClient, logger)
 
 	registerar.RegisterCommentRoutes(

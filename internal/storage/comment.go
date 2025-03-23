@@ -19,9 +19,10 @@ type CommentStorage struct {
 }
 
 // NewCommentStorage initializes the comment storage
-func NewCommentStorage(db *mongo.Collection) *CommentStorage {
+func NewCommentStorage(db *mongo.Collection, user_storage *UserStorage) *CommentStorage {
 	return &CommentStorage{
-		db: db,
+		db:           db,
+		user_storage: user_storage,
 	}
 }
 

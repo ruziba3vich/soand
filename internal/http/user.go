@@ -141,13 +141,19 @@ func (h *UserHandler) DeleteUser(c *gin.Context) {
 // @Failure 404 {object} map[string]string "User not found"
 // @Router /users/me [get]
 func (h *UserHandler) GetUserByID(c *gin.Context) {
-	userId, err := getUserIdFromRequest(c)
-	if err != nil {
-		c.JSON(http.StatusUnauthorized, gin.H{"error": "Unauthorized"})
+	userId := c.Param("id")
+	if len(userId) == 0 {
+		c.JSON(http.StatusBadRequest, gin.H{"error": "no valid user id provided"})
 		return
 	}
 
-	user, err := h.repo.GetUserByID(c.Request.Context(), userId)
+	userID, err := primitive.ObjectIDFromHex(userId)
+	if err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"error": "no valid user id provided"})
+		return
+	}
+
+	user, err := h.repo.GetUserByID(c.Request.Context(), userID)
 	if err != nil {
 		h.logger.Printf("Error fetching user: %v", err)
 		c.JSON(http.StatusNotFound, gin.H{"error": "User not found"})

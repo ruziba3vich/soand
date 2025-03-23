@@ -33,20 +33,6 @@ func (s *CommentService) CreateComment(ctx context.Context, comment *models.Comm
 		return err
 	}
 
-	// Publish to Redis Pub/Sub
-	commentData, err := json.Marshal(comment)
-	if err != nil {
-		s.logger.Println("Error marshalling comment for Redis:", err)
-		return err
-	}
-
-	channel := "comments:" + comment.PostID.Hex()
-	if err := s.redis.Publish(ctx, channel, commentData).Err(); err != nil {
-		s.logger.Println("Error publishing comment to Redis:", err)
-		return err
-	}
-
-	s.logger.Println("Comment published to Redis on channel:", channel)
 	return nil
 }
 
