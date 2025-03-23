@@ -109,11 +109,17 @@ func (s *Storage) GetAllPosts(ctx context.Context, page, pageSize int64) ([]mode
 		// Fetch owner details
 		owner, err := s.users_storage.GetUserByID(ctx, post.CreatorId)
 		if err != nil {
-			return nil, err
+			if errors.Is(err, mongo.ErrNoDocuments) {
+				post.OwnerFullname = "Deleted Account"
+				post.CreatorId = primitive.NilObjectID
+			} else {
+				return nil, err
+			}
 		}
 
 		// Check if the owner's profile is hidden
 		if owner.HiddenProfile {
+			post.OwnerFullname = "Anonim user"
 			post.CreatorId = primitive.NilObjectID // Set to "00000" equivalent
 		} else {
 			post.OwnerFullname = owner.Fullname

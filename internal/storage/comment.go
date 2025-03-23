@@ -14,7 +14,8 @@ import (
 )
 
 type CommentStorage struct {
-	db *mongo.Collection
+	db           *mongo.Collection
+	user_storage *UserStorage
 }
 
 // NewCommentStorage initializes the comment storage
@@ -56,8 +57,6 @@ func (s *CommentStorage) DeleteComment(ctx context.Context, commentID primitive.
 
 // GetCommentsByPostID retrieves paginated comments for a specific post
 func (s *CommentStorage) GetCommentsByPostID(ctx context.Context, postID primitive.ObjectID, page, pageSize int64) ([]models.Comment, error) {
-	var comments []models.Comment
-
 	// Ensure page and pageSize have valid values
 	if page < 1 {
 		page = 1
@@ -68,6 +67,7 @@ func (s *CommentStorage) GetCommentsByPostID(ctx context.Context, postID primiti
 
 	skip := (page - 1) * pageSize
 
+	// Find comments with pagination and sorting
 	cursor, err := s.db.Find(ctx, bson.M{"post_id": postID}, &options.FindOptions{
 		Limit: &pageSize,
 		Skip:  &skip,
@@ -78,9 +78,41 @@ func (s *CommentStorage) GetCommentsByPostID(ctx context.Context, postID primiti
 	}
 	defer cursor.Close(ctx)
 
-	if err := cursor.All(ctx, &comments); err != nil {
+	// Initialize an empty slice to store comments
+	var comments []models.Comment
+
+	// Iterate over the cursor and process each comment
+	for cursor.Next(ctx) {
+		var comment models.Comment
+		if err := cursor.Decode(&comment); err != nil {
+			return nil, err
+		}
+		owner, err := s.user_storage.GetUserByID(ctx, comment.UserID)
+		if err != nil {
+			if errors.Is(err, mongo.ErrNoDocuments) {
+				comment.UserID = primitive.NilObjectID
+				comment.OwnerFullname = "Deleted Account"
+			} else {
+				return nil, err
+			}
+		}
+		if owner.HiddenProfile {
+			comment.UserID = primitive.NilObjectID
+			comment.OwnerFullname = "Anonim user"
+		} else {
+			comment.OwnerFullname = owner.Fullname
+			if len(owner.ProfilePics) > 0 {
+				comment.OwnerProfilePic = owner.ProfilePics[0].Url
+			}
+		}
+		comments = append(comments, comment)
+	}
+
+	// Check for any errors that occurred during iteration
+	if err := cursor.Err(); err != nil {
 		return nil, err
 	}
+
 	return comments, nil
 }
 
@@ -121,20 +153,19 @@ func (s *CommentStorage) GetCommentByID(ctx context.Context, commentID primitive
 	}
 
 	// Check if the user's profile is hidden
-	var user struct {
-		IsPrivate bool `bson:"is_private"`
-	}
-	err = s.db.FindOne(ctx, bson.M{"_id": comment.UserID}).Decode(&user)
+	user, err := s.user_storage.GetUserByID(ctx, comment.UserID)
 	if err != nil {
 		if errors.Is(err, mongo.ErrNoDocuments) {
-			// If user not found, assume public profile (or handle differently based on your logic)
-			return &comment, nil
+			comment.UserID = primitive.NilObjectID
+			comment.OwnerFullname = "Deleted Account"
+			return &comment, bson.ErrDecodeToNil
 		}
 		return nil, err
 	}
 
 	// If the user's profile is private, clear the UserID
-	if user.IsPrivate {
+	if user.HiddenProfile {
+		comment.OwnerFullname = "Anonim user"
 		comment.UserID = primitive.NilObjectID // Set to zero value to hide it
 	}
 
