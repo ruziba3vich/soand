@@ -33,6 +33,14 @@ func (s *Storage) GetPost(ctx context.Context, id primitive.ObjectID) (*models.P
 	if err == mongo.ErrNoDocuments {
 		return nil, errors.New("post not found")
 	}
+	owner, err := s.users_storage.GetUserByID(ctx, post.CreatorId)
+	if err != nil {
+		return nil, err
+	}
+	post.OwnerFullname = owner.Fullname
+	if len(owner.ProfilePics) > 0 {
+		post.OwnerProfilePic = owner.ProfilePics[0].Url
+	}
 	return &post, err
 }
 
@@ -107,6 +115,11 @@ func (s *Storage) GetAllPosts(ctx context.Context, page, pageSize int64) ([]mode
 		// Check if the owner's profile is hidden
 		if owner.HiddenProfile {
 			post.CreatorId = primitive.NilObjectID // Set to "00000" equivalent
+		} else {
+			post.OwnerFullname = owner.Fullname
+			if len(owner.ProfilePics) > 0 {
+				post.OwnerProfilePic = owner.ProfilePics[0].Url
+			}
 		}
 
 		posts = append(posts, post)
