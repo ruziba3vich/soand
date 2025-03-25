@@ -22,9 +22,9 @@ jobs:
         run: |
           ssh -T -o StrictHostKeyChecking=no ${{ secrets.SSH_USER }}@${{ secrets.SERVER_IP }} "mkdir -p /home/${{ secrets.SSH_USER }}/app"
 
-      - name: Copy files to server
+      - name: Synchronize files to server with rsync
         run: |
-          scp -o StrictHostKeyChecking=no -r . ${{ secrets.SSH_USER }}@${{ secrets.SERVER_IP }}:/home/${{ secrets.SSH_USER }}/app
+          rsync -avz --delete -e "ssh -o StrictHostKeyChecking=no" --exclude '.git' ./ ${{ secrets.SSH_USER }}@${{ secrets.SERVER_IP }}:/home/${{ secrets.SSH_USER }}/app/
 
       - name: Verify Docker Compose is installed
         run: |
