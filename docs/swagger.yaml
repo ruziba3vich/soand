@@ -287,6 +287,40 @@ paths:
       summary: Update a comment
       tags:
       - comments
+  /files:
+    post:
+      consumes:
+      - multipart/form-data
+      description: Uploads a single file to the storage service (MinIO). The file
+        is sent as form data and stored, returning the file URL on success.
+      parameters:
+      - description: 'File to upload (Supported formats: any file type supported by
+          MinIO, e.g., images, PDFs, audio. Max size: 10MB recommended)'
+        in: formData
+        name: file
+        required: true
+        type: file
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Returns the uploaded file URL
+          schema:
+            additionalProperties: true
+            type: object
+        "400":
+          description: Invalid file upload or request format
+          schema:
+            additionalProperties: true
+            type: object
+        "500":
+          description: Server error during file upload
+          schema:
+            additionalProperties: true
+            type: object
+      summary: Upload a file
+      tags:
+      - Files
   /posts:
     get:
       consumes:

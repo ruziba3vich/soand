@@ -112,9 +112,10 @@ func RegisterChatHandler(
 	chat_handler_routes.DELETE("dlete", wsMiddleware(chat_handler.DeleteMessage))
 }
 
-func RegisterFileGetterHandler(r *gin.Engine, file_service repos.IFIleStoreService, logger *log.Logger) {
+func RegisterFileStorageHandler(r *gin.Engine, file_service repos.IFIleStoreService, logger *log.Logger) {
 	file_getter_handler := handler.NewFIleGetterHandler(file_service, logger)
 
+	r.POST("/upload/file/soand/secure", file_getter_handler.UploadFile)
 	r.GET("get/file/by/query", file_getter_handler.GetFileById)
 }
 

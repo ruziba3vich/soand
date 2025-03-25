@@ -41,7 +41,7 @@ func Run(ctx context.Context, logger *log.Logger) error {
 
 	// file getter
 
-	registerar.RegisterFileGetterHandler(router, file_store_service, logger)
+	registerar.RegisterFileStorageHandler(router, file_store_service, logger)
 
 	// Background
 	background_collection, err := storage.ConnectMongoDB(ctx, cfg, "background_collection")
