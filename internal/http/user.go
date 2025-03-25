@@ -599,3 +599,17 @@ func (h *UserHandler) GetProfilePictures(c *gin.Context) {
 
 	c.JSON(http.StatusOK, gin.H{"data": pics})
 }
+
+func (h *UserHandler) GetUserMe(c *gin.Context) {
+	userId, err := getUserIdFromRequest(c)
+	if err != nil {
+		c.JSON(http.StatusUnauthorized, gin.H{"error": "Unauthorized"})
+		return
+	}
+	user, err := h.repo.GetUserByID(c, userId)
+	if err != nil {
+		c.JSON(http.StatusNotFound, gin.H{"error": err.Error()})
+		return
+	}
+	c.JSON(http.StatusOK, gin.H{"data": user})
+}
