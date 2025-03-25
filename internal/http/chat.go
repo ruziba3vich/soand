@@ -37,7 +37,9 @@ type pendingMessage struct {
 	Message models.Message
 }
 
+// HandleChatWebSocket handles WebSocket connections for real-time chat
 func (h *ChatHandler) HandleChatWebSocket(c *gin.Context) {
+	// Extract recipient ID from query parameters
 	recipientIDStr := c.Query("recipient_id")
 	if recipientIDStr == "" {
 		h.logger.Println("Missing recipient ID in WebSocket request")
@@ -51,6 +53,7 @@ func (h *ChatHandler) HandleChatWebSocket(c *gin.Context) {
 		return
 	}
 
+	// Upgrade HTTP to WebSocket connection
 	conn, err := upgrader.Upgrade(c.Writer, c.Request, nil)
 	if err != nil {
 		h.logger.Println("WebSocket upgrade failed:", err)
@@ -59,6 +62,7 @@ func (h *ChatHandler) HandleChatWebSocket(c *gin.Context) {
 	}
 	defer conn.Close()
 
+	// Extract sender ID from request
 	senderID, err := getUserIdFromRequest(c)
 	if err != nil {
 		h.logger.Println("Failed to extract sender ID:", err)
@@ -71,10 +75,12 @@ func (h *ChatHandler) HandleChatWebSocket(c *gin.Context) {
 	ctx, cancel := context.WithCancel(context.Background())
 	defer cancel()
 
+	// Create a unique chat channel for the two users (order-independent)
 	chatChannel := fmt.Sprintf("chat:%s:%s", min(senderID.Hex(), recipientID.Hex()), max(senderID.Hex(), recipientID.Hex()))
 	pubsub := h.redis.Subscribe(ctx, chatChannel)
 	defer pubsub.Close()
 
+	// Goroutine to listen for messages from Redis and send to WebSocket client
 	go func() {
 		for {
 			select {
@@ -96,8 +102,11 @@ func (h *ChatHandler) HandleChatWebSocket(c *gin.Context) {
 		}
 	}()
 
+	// Store pending messages per connection
 	pending := make(map[*websocket.Conn]pendingMessage)
 	defer delete(pending, conn)
+
+	// Listen for messages from WebSocket client
 	for {
 		messageType, msg, err := conn.ReadMessage()
 		if err != nil {
@@ -105,6 +114,14 @@ func (h *ChatHandler) HandleChatWebSocket(c *gin.Context) {
 			break
 		}
 
+		// Only handle text messages (JSON)
+		if messageType != websocket.TextMessage {
+			h.logger.Println("Unsupported message type:", messageType)
+			conn.WriteMessage(websocket.TextMessage, []byte(`{"error": "only JSON messages are supported"}`))
+			continue
+		}
+
+		// Get or initialize the pending message for this connection
 		current, exists := pending[conn]
 		if !exists {
 			current = pendingMessage{
@@ -117,47 +134,49 @@ func (h *ChatHandler) HandleChatWebSocket(c *gin.Context) {
 			}
 		}
 
-		if messageType == websocket.TextMessage {
-			var incoming struct {
-				Content string `json:"content"`
-			}
-			if err := json.Unmarshal(msg, &incoming); err != nil {
-				h.logger.Println("Invalid message format:", err)
-				conn.WriteMessage(websocket.TextMessage, []byte(`{"error": "invalid message format"}`))
-				continue
-			}
-			current.Message.Content = incoming.Content
-			pending[conn] = current
-		} else if messageType == websocket.BinaryMessage {
-			mimeType := http.DetectContentType(msg)
-			fileURL, err := h.fileService.UploadFileFromBytes(msg, mimeType)
-			if err != nil {
-				h.logger.Println("Error uploading file:", err)
-				conn.WriteMessage(websocket.TextMessage, []byte(`{"error": "file upload failed"}`))
-				continue
-			}
+		// Parse the JSON message
+		var incoming struct {
+			Content string `json:"content"`
+		}
+		if err := json.Unmarshal(msg, &incoming); err != nil {
+			h.logger.Println("Invalid message format:", err)
+			conn.WriteMessage(websocket.TextMessage, []byte(`{"error": "invalid message format"}`))
+			continue
+		}
+		current.Message.Content = incoming.Content
+		pending[conn] = current
 
-			if !supportedMimeTypes[mimeType] {
-				h.logger.Println("Unsupported file type:", mimeType)
-				conn.WriteMessage(websocket.TextMessage, []byte(`{"error": "unsupported file type"}`))
-				continue
-			}
-
-			current.Message.Pictures = append(current.Message.Pictures, fileURL)
-			pending[conn] = current
+		// Validate and save the message if it has content
+		if current.Message.Content == "" {
+			h.logger.Println("Empty message received")
+			conn.WriteMessage(websocket.TextMessage, []byte(`{"error": "message content is required"}`))
+			continue
 		}
 
-		if current.Message.Content != "" || len(current.Message.Pictures) > 0 {
-			if err := h.service.CreateMessage(ctx, &current.Message); err != nil {
-				h.logger.Println("Error creating message:", err)
-				conn.WriteMessage(websocket.TextMessage, []byte(`{"error": "could not send message"}`))
-				continue
-			}
-
-			h.logger.Println("Message sent from", senderID.Hex(), "to", recipientID.Hex(), "with", len(current.Message.Pictures), "files")
-
-			delete(pending, conn)
+		// Save the message to the database
+		if err := h.service.CreateMessage(ctx, &current.Message); err != nil {
+			h.logger.Println("Error creating message:", err)
+			conn.WriteMessage(websocket.TextMessage, []byte(`{"error": "could not send message"}`))
+			continue
 		}
+
+		h.logger.Println("Message sent from", senderID.Hex(), "to", recipientID.Hex())
+
+		// Publish the message to Redis
+		messageJSON, err := json.Marshal(current.Message)
+		if err != nil {
+			h.logger.Println("Error marshaling message:", err)
+			conn.WriteMessage(websocket.TextMessage, []byte(`{"error": "internal server error"}`))
+			continue
+		}
+		if err := h.redis.Publish(ctx, chatChannel, string(messageJSON)).Err(); err != nil {
+			h.logger.Println("Error publishing message to Redis:", err)
+			conn.WriteMessage(websocket.TextMessage, []byte(`{"error": "could not publish message"}`))
+			continue
+		}
+
+		// Reset pending message after saving
+		delete(pending, conn)
 	}
 }
 
