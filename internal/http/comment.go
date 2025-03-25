@@ -3,13 +3,9 @@ package handler
 import (
 	"context"
 	"encoding/json"
-	"fmt"
 	"log"
-	"mime/multipart"
 	"net/http"
-	"path/filepath"
 	"strconv"
-	"strings"
 	"time"
 
 	"github.com/gin-gonic/gin"
@@ -72,7 +68,7 @@ type pendingComment struct {
 	Comment models.Comment
 }
 
-// HandleWebSocket handles real-time commenting with support for text and multiple files
+// HandleWebSocket handles WebSocket connections for real-time comments
 func (h *CommentHandler) HandleWebSocket(c *gin.Context) {
 	// Extract post ID from query parameters
 	postID := c.Query("post_id")
@@ -142,104 +138,67 @@ func (h *CommentHandler) HandleWebSocket(c *gin.Context) {
 			break
 		}
 
+		// Only handle text messages (JSON)
+		if messageType != websocket.TextMessage {
+			h.logger.Println("Unsupported message type:", messageType)
+			conn.WriteMessage(websocket.TextMessage, []byte(`{"error": "only JSON messages are supported"}`))
+			continue
+		}
+
 		// Get or initialize the pending comment for this connection
 		current, exists := pending[conn]
 		if !exists {
 			current = pendingComment{Comment: models.Comment{}}
 		}
 
-		// Handle message types
-		if messageType == websocket.TextMessage {
-			// Handle JSON comment message (text)
-			if err := json.Unmarshal(msg, &current.Comment); err != nil {
-				h.logger.Println("Invalid comment format:", err)
-				conn.WriteMessage(websocket.TextMessage, []byte(`{"error": "invalid comment format"}`))
-				continue
-			}
-			pending[conn] = current // Update pending comment
-		} else if messageType == websocket.BinaryMessage {
-			// Handle binary messages (images or voice messages)
-			mimeType := http.DetectContentType(msg)
-			ext := extFromMime(mimeType)
-			fileHeader := &multipart.FileHeader{
-				Filename: fmt.Sprintf("%d%s", time.Now().UnixMilli(), ext),
-				Size:     int64(len(msg)),
-			}
-
-			// Upload file with binary data
-			fileURL, err := h.file_service.UploadFileFromBytes(msg, mimeType)
-			if err != nil {
-				h.logger.Println("Error uploading file:", err)
-				conn.WriteMessage(websocket.TextMessage, []byte(`{"error": "file upload failed"}`))
-				continue
-			}
-
-			// Validate file extension
-			ext = strings.ToLower(filepath.Ext(fileHeader.Filename))
-			if !supportedImageExtensions[ext] && ext != ".mp3" && ext != ".wav" {
-				h.logger.Println("Unsupported file type:", ext)
-				conn.WriteMessage(websocket.TextMessage, []byte(`{"error": "unsupported file type"}`))
-				continue
-			}
-
-			// Validate MIME type
-			if !supportedMimeTypes[mimeType] && mimeType != "audio/mpeg" && mimeType != "audio/wav" {
-				h.logger.Println("Unsupported MIME type:", mimeType)
-				conn.WriteMessage(websocket.TextMessage, []byte(`{"error": "unsupported MIME type"}`))
-				continue
-			}
-
-			// Attach file to comment
-			if supportedImageExtensions[ext] {
-				current.Comment.Pictures = append(current.Comment.Pictures, fileURL)
-			} else if ext == ".mp3" || ext == ".wav" {
-				if current.Comment.VoiceMessage == "" {
-					current.Comment.VoiceMessage = fileURL
-				} else {
-					h.logger.Println("Multiple voice messages detected. Only one is allowed.")
-					conn.WriteMessage(websocket.TextMessage, []byte(`{"error": "only one voice message allowed"}`))
-					continue
-				}
-			}
-			pending[conn] = current // Update pending comment
+		// Parse the JSON comment message
+		if err := json.Unmarshal(msg, &current.Comment); err != nil {
+			h.logger.Println("Invalid comment format:", err)
+			conn.WriteMessage(websocket.TextMessage, []byte(`{"error": "invalid comment format"}`))
+			continue
 		}
 
-		// Save and publish when the comment is "complete" (e.g., has text or files)
-		if current.Comment.Text != "" || len(current.Comment.Pictures) > 0 || current.Comment.VoiceMessage != "" {
-			// Validate and set required fields
-			postObjectID, err := primitive.ObjectIDFromHex(postID)
-			if err != nil || current.Comment.PostID.IsZero() {
-				current.Comment.PostID = postObjectID
-			} else if current.Comment.PostID.Hex() != postID {
-				h.logger.Println("Comment post ID mismatch:", current.Comment.PostID.Hex(), "Expected:", postID)
-				conn.WriteMessage(websocket.TextMessage, []byte(`{"error": "invalid post ID"}`))
-				continue
-			}
-
-			current.Comment.ID = primitive.NewObjectID()
-			current.Comment.UserID = userID
-			current.Comment.CreatedAt = time.Now()
-
-			// Save to database
-			if err := h.service.CreateComment(ctx, &current.Comment); err != nil {
-				h.logger.Println("Error saving comment:", err)
-				conn.WriteMessage(websocket.TextMessage, []byte(`{"error": "could not save comment"}`))
-				continue
-			}
-
-			// Publish to Redis
-			commentJSON, err := json.Marshal(current.Comment)
-			if err != nil {
-				h.logger.Println("Error marshaling comment:", err)
-				conn.WriteMessage(websocket.TextMessage, []byte(`{"error": "internal server error"}`))
-				continue
-			}
-			h.redis.Publish(ctx, "comments:"+postID, string(commentJSON))
-			h.logger.Println("New comment published to post", postID, "ID:", current.Comment.ID.Hex())
-
-			// Reset pending comment after saving
-			delete(pending, conn)
+		// Validate and set required fields
+		postObjectID, err := primitive.ObjectIDFromHex(postID)
+		if err != nil || current.Comment.PostID.IsZero() {
+			current.Comment.PostID = postObjectID
+		} else if current.Comment.PostID.Hex() != postID {
+			h.logger.Println("Comment post ID mismatch:", current.Comment.PostID.Hex(), "Expected:", postID)
+			conn.WriteMessage(websocket.TextMessage, []byte(`{"error": "invalid post ID"}`))
+			continue
 		}
+
+		// Ensure the comment has at least some content
+		if current.Comment.Text == "" {
+			h.logger.Println("Empty comment received")
+			conn.WriteMessage(websocket.TextMessage, []byte(`{"error": "comment text is required"}`))
+			continue
+		}
+
+		// Set metadata
+		current.Comment.ID = primitive.NewObjectID()
+		current.Comment.UserID = userID
+		current.Comment.CreatedAt = time.Now()
+
+		// Save to database
+		if err := h.service.CreateComment(ctx, &current.Comment); err != nil {
+			h.logger.Println("Error saving comment:", err)
+			conn.WriteMessage(websocket.TextMessage, []byte(`{"error": "could not save comment"}`))
+			continue
+		}
+
+		// Publish to Redis
+		commentJSON, err := json.Marshal(current.Comment)
+		if err != nil {
+			h.logger.Println("Error marshaling comment:", err)
+			conn.WriteMessage(websocket.TextMessage, []byte(`{"error": "internal server error"}`))
+			continue
+		}
+		h.redis.Publish(ctx, "comments:"+postID, string(commentJSON))
+		h.logger.Println("New comment published to post", postID, "ID:", current.Comment.ID.Hex())
+
+		// Reset pending comment after saving
+		delete(pending, conn)
 	}
 }
 
