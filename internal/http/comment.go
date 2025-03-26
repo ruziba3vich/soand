@@ -215,6 +215,7 @@ func (h *CommentHandler) HandleWebSocket(c *gin.Context) {
 // @Failure 500 {object} map[string]string "Could not fetch comments"
 // @Router /posts/{post_id}/comments [get]
 func (h *CommentHandler) GetCommentsByPostID(c *gin.Context) {
+	userId, _ := getUserIdFromRequest(c)
 	postIDStr := c.Param("post_id")
 	postID, err := primitive.ObjectIDFromHex(postIDStr)
 	if err != nil {
@@ -234,7 +235,10 @@ func (h *CommentHandler) GetCommentsByPostID(c *gin.Context) {
 		return
 	}
 
-	c.JSON(http.StatusOK, gin.H{"data": comments})
+	c.JSON(http.StatusOK, gin.H{"data": map[string]any{
+		"comments": comments,
+		"user_id":  userId,
+	}})
 }
 
 // UpdateComment updates the text of a comment
