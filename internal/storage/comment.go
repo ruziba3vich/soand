@@ -41,6 +41,21 @@ func (s *CommentStorage) CreateComment(ctx context.Context, comment *models.Comm
 	}
 
 	_, err := s.db.InsertOne(ctx, comment)
+	if err != nil {
+		return err
+	}
+	user, err := s.user_storage.GetUserByID(ctx, comment.UserID)
+	if err != nil {
+		if errors.Is(err, mongo.ErrNoDocuments) {
+			comment.OwnerFullname = "Deleted Account"
+			return nil
+		}
+		return err
+	}
+	comment.OwnerFullname = user.Fullname
+	if len(user.ProfilePics) > 0 {
+		comment.OwnerProfilePic = user.ProfilePics[0].Url
+	}
 	return err
 }
 
