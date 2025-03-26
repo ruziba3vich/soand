@@ -28,7 +28,7 @@ func RegisterUserRoutes(r *gin.Engine, userRepo repos.UserRepo, file_store repos
 		userRoutes.DELETE("/:id", authMiddleware(userHandler.DeleteUser))
 		userRoutes.GET("/me", authMiddleware(userHandler.GetUserMe))
 		userRoutes.GET("/:id", userHandler.GetUserByID)
-		userRoutes.GET("/username/:username", authMiddleware(userHandler.GetUserByUsername))
+		userRoutes.GET("/username/:username", userHandler.GetUserByUsername)
 		userRoutes.GET("profile/pic", userHandler.GetProfilePictures)
 		userRoutes.PATCH("/fullname", authMiddleware(userHandler.UpdateFullname))
 		userRoutes.PATCH("/password", authMiddleware(userHandler.UpdatePassword))
