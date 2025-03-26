@@ -22,6 +22,9 @@ func (s *Storage) CreatePost(ctx context.Context, post *models.Post, deleteAfter
 	post.ID = primitive.NewObjectID()
 	post.CreatedAt = time.Now()
 	post.DeleteAt = post.CreatedAt.Add(time.Duration(deleteAfter) * time.Hour)
+	if post.Pictures == nil {
+		post.Pictures = []string{}
+	}
 	_, err := s.db.InsertOne(ctx, post)
 	return post.ID, err
 }
@@ -127,7 +130,6 @@ func (s *Storage) GetAllPosts(ctx context.Context, page, pageSize int64) ([]mode
 				post.OwnerProfilePic = owner.ProfilePics[0].Url
 			}
 		}
-
 		posts = append(posts, post)
 	}
 
