@@ -25,6 +25,9 @@ func (s *Storage) CreatePost(ctx context.Context, post *models.Post, deleteAfter
 	if post.Pictures == nil {
 		post.Pictures = []string{}
 	}
+	if post.Tags == nil {
+		post.Tags = []string{}
+	}
 	_, err := s.db.InsertOne(ctx, post)
 	return post.ID, err
 }
