@@ -290,8 +290,13 @@ func (h *ChatHandler) UpdateMessage(c *gin.Context) {
 		return
 	}
 
-	// ChatStorage publishes the update event to Redis, notifying WebSocket clients
-	c.JSON(http.StatusOK, gin.H{"data": "message updated successfully"})
+	chatChannel := fmt.Sprintf("chat:%s:%s", min(userID.Hex(), message.RecipientID.Hex()), max(userID.Hex(), message.RecipientID.Hex()))
+	pubsub := h.redis.Subscribe(c, chatChannel)
+	defer pubsub.Close()
+
+	if err := h.redis.Publish(c, chatChannel, fmt.Sprintf("%s is updated", messageID.Hex())).Err(); err != nil {
+		h.logger.Println(err.Error())
+	}
 }
 
 func (h *ChatHandler) DeleteMessage(c *gin.Context) {
@@ -333,6 +338,11 @@ func (h *ChatHandler) DeleteMessage(c *gin.Context) {
 		return
 	}
 
-	// ChatStorage publishes the delete event to Redis, notifying WebSocket clients
-	c.JSON(http.StatusOK, gin.H{"data": "message deleted successfully"})
+	chatChannel := fmt.Sprintf("chat:%s:%s", min(userID.Hex(), message.RecipientID.Hex()), max(userID.Hex(), message.RecipientID.Hex()))
+	pubsub := h.redis.Subscribe(c, chatChannel)
+	defer pubsub.Close()
+
+	if err := h.redis.Publish(c, chatChannel, fmt.Sprintf("%s is deleted", messageID.Hex())).Err(); err != nil {
+		h.logger.Println(err.Error())
+	}
 }
