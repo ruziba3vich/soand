@@ -289,7 +289,7 @@ func (h *ChatHandler) UpdateMessage(c *gin.Context) {
 	}
 
 	// ChatStorage publishes the update event to Redis, notifying WebSocket clients
-	c.JSON(http.StatusOK, gin.H{"message": "message updated successfully"})
+	c.JSON(http.StatusOK, gin.H{"data": "message updated successfully"})
 }
 
 func (h *ChatHandler) DeleteMessage(c *gin.Context) {
@@ -332,5 +332,5 @@ func (h *ChatHandler) DeleteMessage(c *gin.Context) {
 	}
 
 	// ChatStorage publishes the delete event to Redis, notifying WebSocket clients
-	c.JSON(http.StatusOK, gin.H{"message": "message deleted successfully"})
+	c.JSON(http.StatusOK, gin.H{"data": "message deleted successfully"})
 }

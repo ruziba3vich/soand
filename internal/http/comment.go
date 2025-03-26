@@ -234,7 +234,7 @@ func (h *CommentHandler) GetCommentsByPostID(c *gin.Context) {
 		return
 	}
 
-	c.JSON(http.StatusOK, comments)
+	c.JSON(http.StatusOK, gin.H{"data": comments})
 }
 
 // UpdateComment updates the text of a comment
@@ -308,7 +308,7 @@ func (h *CommentHandler) UpdateComment(c *gin.Context) {
 		h.logger.Println("Published comment update for comment", commentID.Hex(), "to post", postIdStr)
 	}
 
-	c.JSON(http.StatusOK, gin.H{"message": "comment updated successfully"})
+	c.JSON(http.StatusOK, gin.H{"data": "comment updated successfully"})
 }
 
 // DeleteComment removes a comment
@@ -378,7 +378,7 @@ func (h *CommentHandler) DeleteComment(c *gin.Context) {
 		h.logger.Println("Published comment deletion for comment", commentID.Hex(), "to post", postID)
 	}
 
-	c.JSON(http.StatusOK, gin.H{"message": "comment deleted successfully"})
+	c.JSON(http.StatusOK, gin.H{"data": "comment deleted successfully"})
 }
 
 // extFromMime maps MIME types to file extensions
