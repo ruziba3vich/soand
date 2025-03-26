@@ -121,7 +121,7 @@ func Run(ctx context.Context, logger *log.Logger) error {
 	// direct messages
 
 	chat_collection, err := storage.ConnectMongoDB(ctx, cfg, "chat_collection")
-	chat_storage := storage.NewChatStorage(chat_collection, redisClient)
+	chat_storage := storage.NewChatStorage(chat_collection)
 	chat_service := service.NewChatService(chat_storage, logger)
 	registerar.RegisterChatHandler(
 		router,

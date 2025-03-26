@@ -232,10 +232,12 @@ func (h *ChatHandler) GetMessages(c *gin.Context) {
 
 	// Return the messages as JSON
 	c.JSON(http.StatusOK, gin.H{
-		"messages":  messages,
-		"page":      page,
-		"page_size": pageSize,
-		"total":     len(messages),
+		"data": map[string]any{
+			"messages":  messages,
+			"page":      page,
+			"page_size": pageSize,
+			"total":     len(messages),
+		},
 	})
 }
 

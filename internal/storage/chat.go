@@ -2,10 +2,8 @@ package storage
 
 import (
 	"context"
-	"encoding/json"
 	"fmt"
 
-	"github.com/redis/go-redis/v9"
 	"github.com/ruziba3vich/soand/internal/models"
 	"go.mongodb.org/mongo-driver/bson"
 	"go.mongodb.org/mongo-driver/bson/primitive"
@@ -14,14 +12,12 @@ import (
 )
 
 type ChatStorage struct {
-	db    *mongo.Collection
-	redis *redis.Client
+	db *mongo.Collection
 }
 
-func NewChatStorage(db *mongo.Collection, redis *redis.Client) *ChatStorage {
+func NewChatStorage(db *mongo.Collection) *ChatStorage {
 	return &ChatStorage{
-		db:    db,
-		redis: redis,
+		db: db,
 	}
 }
 
@@ -29,17 +25,6 @@ func (s *ChatStorage) CreateMessage(ctx context.Context, message *models.Message
 	_, err := s.db.InsertOne(ctx, message)
 	if err != nil {
 		return fmt.Errorf("failed to save message to MongoDB: %v", err)
-	}
-
-	chatChannel := fmt.Sprintf("chat:%s:%s", min(message.SenderID.Hex(), message.RecipientID.Hex()), max(message.SenderID.Hex(), message.RecipientID.Hex()))
-
-	messageJSON, err := json.Marshal(message)
-	if err != nil {
-		return fmt.Errorf("failed to marshal message: %v", err)
-	}
-	err = s.redis.Publish(ctx, chatChannel, string(messageJSON)).Err()
-	if err != nil {
-		return fmt.Errorf("failed to publish message to Redis: %v", err)
 	}
 
 	return nil
@@ -92,22 +77,6 @@ func (s *ChatStorage) UpdateMessageText(ctx context.Context, messageID primitive
 		return fmt.Errorf("failed to update message in MongoDB: %v", err)
 	}
 
-	updateEvent := map[string]string{
-		"action":     "update",
-		"message_id": messageID.Hex(),
-		"content":    newText,
-	}
-	eventJSON, err := json.Marshal(updateEvent)
-	if err != nil {
-		return fmt.Errorf("failed to marshal update event: %v", err)
-	}
-
-	chatChannel := fmt.Sprintf("chat:%s:%s", min(message.SenderID.Hex(), message.RecipientID.Hex()), max(message.SenderID.Hex(), message.RecipientID.Hex()))
-	err = s.redis.Publish(ctx, chatChannel, string(eventJSON)).Err()
-	if err != nil {
-		return fmt.Errorf("failed to publish update event to Redis: %v", err)
-	}
-
 	return nil
 }
 
@@ -122,21 +91,6 @@ func (s *ChatStorage) DeleteMessage(ctx context.Context, messageID primitive.Obj
 	_, err = s.db.DeleteOne(ctx, filter)
 	if err != nil {
 		return fmt.Errorf("failed to delete message from MongoDB: %v", err)
-	}
-
-	deleteEvent := map[string]string{
-		"action":     "delete",
-		"message_id": messageID.Hex(),
-	}
-	eventJSON, err := json.Marshal(deleteEvent)
-	if err != nil {
-		return fmt.Errorf("failed to marshal delete event: %v", err)
-	}
-
-	chatChannel := fmt.Sprintf("chat:%s:%s", min(message.SenderID.Hex(), message.RecipientID.Hex()), max(message.SenderID.Hex(), message.RecipientID.Hex()))
-	err = s.redis.Publish(ctx, chatChannel, string(eventJSON)).Err()
-	if err != nil {
-		return fmt.Errorf("failed to publish delete event to Redis: %v", err)
 	}
 
 	return nil
