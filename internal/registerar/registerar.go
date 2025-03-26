@@ -64,16 +64,17 @@ func RegisterCommentRoutes(
 	logger *log.Logger,
 	redis *redis.Client,
 	authMiddleware func(gin.HandlerFunc) gin.HandlerFunc,
-	wsMiddleware func(gin.HandlerFunc) gin.HandlerFunc) {
+	wsMiddleware func(gin.HandlerFunc) gin.HandlerFunc,
+	commentMiddleware func(gin.HandlerFunc) gin.HandlerFunc) {
 
 	commentHandler := handler.NewCommentHandler(commentService, file_service, logger, redis)
 
 	commentRoutes := r.Group("/comments")
 	{
-		commentRoutes.GET("/ws", wsMiddleware(commentHandler.HandleWebSocket))             // WebSocket endpoint
-		commentRoutes.GET("/:post_id", commentHandler.GetCommentsByPostID)                 // Fetch comments with pagination
-		commentRoutes.PATCH("/:comment_id", authMiddleware(commentHandler.UpdateComment))  // Update comment text
-		commentRoutes.DELETE("/:comment_id", authMiddleware(commentHandler.DeleteComment)) // Delete comment
+		commentRoutes.GET("/ws", wsMiddleware(commentHandler.HandleWebSocket))                // WebSocket endpoint
+		commentRoutes.GET("/:post_id", commentMiddleware(commentHandler.GetCommentsByPostID)) // Fetch comments with pagination
+		commentRoutes.PATCH("/:comment_id", authMiddleware(commentHandler.UpdateComment))     // Update comment text
+		commentRoutes.DELETE("/:comment_id", authMiddleware(commentHandler.DeleteComment))    // Delete comment
 	}
 }
 

@@ -113,6 +113,7 @@ func Run(ctx context.Context, logger *log.Logger) error {
 		redisClient,
 		authMiddleware.AuthMiddleware(),
 		authMiddleware.WebSocketAuthMiddleware(),
+		authMiddleware.CommentsMiddleware(),
 	)
 
 	registerar.RegisterBackgroundHandler(router, background_service, logger)
