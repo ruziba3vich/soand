@@ -187,8 +187,15 @@ func (h *CommentHandler) HandleWebSocket(c *gin.Context) {
 			continue
 		}
 
+		response := map[string]any{
+			"data": map[string]any{
+				"comment": current.Comment,
+				"user_id": userID,
+			},
+		}
+
 		// Publish to Redis
-		commentJSON, err := json.Marshal(current.Comment)
+		commentJSON, err := json.Marshal(response)
 		if err != nil {
 			h.logger.Println("Error marshaling comment:", err)
 			conn.WriteMessage(websocket.TextMessage, []byte(`{"error": "internal server error"}`))
