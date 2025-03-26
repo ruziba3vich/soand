@@ -839,3 +839,14 @@ Key: 'PostRequest.DeleteAfter' Error:Field validation for 'DeleteAfter' failed o
 [MusicLib] 2025/03/24 03:04:29 comment.go:238: New comment published to post 67e0846c1d6594c373c1bcce ID: 67e0856d1d6594c373c1bcda
 [MusicLib] 2025/03/24 03:12:30 main.go:42: Received signal: interrupt, shutting down...
 [MusicLib] 2025/03/24 03:12:30 main.go:49: Shutdown complete
+[MusicLib] 2025/03/26 11:14:01 main.go:36: Application failed: listen tcp :7777: bind: address already in use
+[MusicLib] 2025/03/26 11:14:48 user.go:134: Validating JWT token...
+[MusicLib] 2025/03/26 11:14:48 user.go:142: JWT token validated successfully, user ID: 67e3690208445a854aa1ba17
+[MusicLib] 2025/03/26 11:14:48 comment.go:97: +#+#++#+#+#+#++#+#+#+#+#+#+#+#++# 67e3690208445a854aa1ba17 +#+#+#+#++#+#+#+#++#+#+#+#+#+#+#
+[MusicLib] 2025/03/26 11:14:48 comment.go:99: New WebSocket client connected for post: 67e36b4708445a854aa1ba1a
+[MusicLib] 2025/03/26 11:15:11 user.go:134: Validating JWT token...
+[MusicLib] 2025/03/26 11:15:11 user.go:142: JWT token validated successfully, user ID: 67ddecce6fc7a6f55d5908ec
+[MusicLib] 2025/03/26 11:15:11 comment.go:97: +#+#++#+#+#+#++#+#+#+#+#+#+#+#++# 67ddecce6fc7a6f55d5908ec +#+#+#+#++#+#+#+#++#+#+#+#+#+#+#
+[MusicLib] 2025/03/26 11:15:11 comment.go:99: New WebSocket client connected for post: 67e36b4708445a854aa1ba1a
+[MusicLib] 2025/03/26 11:16:24 main.go:42: Received signal: interrupt, shutting down...
+[MusicLib] 2025/03/26 11:16:24 main.go:49: Shutdown complete

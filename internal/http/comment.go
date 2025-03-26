@@ -64,9 +64,14 @@ func NewCommentHandler(
 }
 
 // PendingComment tracks a comment being built across multiple messages
-type pendingComment struct {
-	Comment models.Comment
-}
+type (
+	CommentResponse struct {
+		Data map[string]any `json:"data"`
+	}
+	pendingComment struct {
+		Comment models.Comment
+	}
+)
 
 // HandleWebSocket handles WebSocket connections for real-time comments
 func (h *CommentHandler) HandleWebSocket(c *gin.Context) {
@@ -117,7 +122,23 @@ func (h *CommentHandler) HandleWebSocket(c *gin.Context) {
 					time.Sleep(5 * time.Second) // Retry after delay
 					continue
 				}
-				if err := conn.WriteMessage(websocket.TextMessage, []byte(msg.Payload)); err != nil {
+				var comment models.Comment
+				if err := json.Unmarshal([]byte(msg.Payload), &comment); err != nil {
+					h.logger.Println("error converting comment: ", msg.Payload)
+					return
+				}
+				response := CommentResponse{
+					Data: map[string]any{
+						"comment": comment,
+						"user_id": userID,
+					},
+				}
+				jsonBytes, err := json.Marshal(response)
+				if err != nil {
+					h.logger.Println("error marshaling response: ", response)
+					return
+				}
+				if err := conn.WriteMessage(websocket.TextMessage, jsonBytes); err != nil {
 					h.logger.Println("Error sending message to WebSocket client:", err)
 					cancel() // Cancel context to stop subscription
 					return
@@ -187,15 +208,8 @@ func (h *CommentHandler) HandleWebSocket(c *gin.Context) {
 			continue
 		}
 
-		response := map[string]any{
-			"data": map[string]any{
-				"comment": current.Comment,
-				"user_id": userID,
-			},
-		}
-
 		// Publish to Redis
-		commentJSON, err := json.Marshal(response)
+		commentJSON, err := json.Marshal(current.Comment)
 		if err != nil {
 			h.logger.Println("Error marshaling comment:", err)
 			conn.WriteMessage(websocket.TextMessage, []byte(`{"error": "internal server error"}`))
