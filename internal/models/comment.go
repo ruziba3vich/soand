@@ -16,5 +16,6 @@ type Comment struct {
 	ReplyTo         primitive.ObjectID `json:"reply_to,omitempty" bson:"reply_to"`
 	OwnerFullname   string             `bson:"owner_full_name" json:"owner_full_name"`
 	OwnerProfilePic string             `bson:"owner_profile_pic" json:"owner_profile_pic"`
+	Post            string             `bson:"title" json:"title"`
 	CreatedAt       time.Time          `json:"created_at" bson:"created_at"`
 }
