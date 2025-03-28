@@ -127,13 +127,10 @@ func (s *PostService) UpdatePost(ctx context.Context, id primitive.ObjectID, upd
 	return nil
 }
 
-func (s *ChatService) GetMessageByID(ctx context.Context, messageID primitive.ObjectID) (*models.Message, error) {
-	s.logger.Printf("Fetching message %s", messageID.Hex())
-	message, err := s.storage.GetMessageByID(ctx, messageID)
+func (s *PostService) SearchPostsByTitle(ctx context.Context, query string, page, pageSize int64) ([]models.Post, error) {
+	posts, err := s.storage.SearchPostsByTitle(ctx, query, page, pageSize)
 	if err != nil {
-		s.logger.Printf("Failed to fetch message %s: %v", messageID.Hex(), err)
-		return nil, err
+		s.logger.Println(err.Error())
 	}
-	s.logger.Printf("Message %s fetched successfully", messageID.Hex())
-	return message, nil
+	return posts, nil
 }

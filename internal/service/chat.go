@@ -68,3 +68,14 @@ func (s *ChatService) DeleteMessage(ctx context.Context, messageID primitive.Obj
 	s.logger.Printf("Message %s deleted successfully", messageID.Hex())
 	return nil
 }
+
+func (s *ChatService) GetMessageByID(ctx context.Context, messageID primitive.ObjectID) (*models.Message, error) {
+	s.logger.Printf("Fetching message %s", messageID.Hex())
+	message, err := s.storage.GetMessageByID(ctx, messageID)
+	if err != nil {
+		s.logger.Printf("Failed to fetch message %s: %v", messageID.Hex(), err)
+		return nil, err
+	}
+	s.logger.Printf("Message %s fetched successfully", messageID.Hex())
+	return message, nil
+}

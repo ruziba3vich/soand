@@ -16,4 +16,5 @@ type IPostService interface {
 	GetAllPosts(ctx context.Context, page int64, pageSize int64) ([]models.Post, error)
 	GetPost(ctx context.Context, id primitive.ObjectID) (*models.Post, error)
 	UpdatePost(ctx context.Context, id primitive.ObjectID, updaterID primitive.ObjectID, update bson.M) error
+	SearchPostsByTitle(ctx context.Context, query string, page, pageSize int64) ([]models.Post, error)
 }
