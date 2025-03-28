@@ -3,6 +3,7 @@ package storage
 import (
 	"context"
 	"errors"
+	"fmt"
 	"time"
 
 	"github.com/ruziba3vich/soand/internal/models"
@@ -145,4 +146,54 @@ func (s *Storage) GetAllPosts(ctx context.Context, page, pageSize int64) ([]mode
 	}
 
 	return []models.Post{}, nil
+}
+
+func (s *Storage) SearchPostsByTitle(ctx context.Context, query string, page, pageSize int64) ([]models.Post, error) {
+	if query == "" {
+		return nil, fmt.Errorf("search query cannot be empty")
+	}
+
+	if page < 1 {
+		page = 1
+	}
+	if pageSize < 1 {
+		pageSize = 10
+	}
+
+	skip := (page - 1) * pageSize
+
+	// Use $text to perform a full-text search on the title field
+	filter := bson.M{
+		"$text": bson.M{
+			"$search":        query,
+			"$caseSensitive": false, // Case-insensitive search
+		},
+	}
+
+	// Project the relevance score and the post fields
+	projection := bson.M{
+		"score": bson.M{"$meta": "textScore"},
+		// Include other fields as needed
+	}
+
+	// Find options: sort by relevance score, paginate
+	findOptions := options.Find().
+		SetProjection(projection).
+		SetSort(bson.M{"score": bson.M{"$meta": "textScore"}}). // Sort by relevance
+		SetSkip(skip).
+		SetLimit(pageSize)
+
+	// Execute the search
+	cursor, err := s.db.Find(ctx, filter, findOptions)
+	if err != nil {
+		return nil, fmt.Errorf("failed to search posts: %v", err)
+	}
+	defer cursor.Close(ctx)
+
+	var posts []models.Post
+	if err := cursor.All(ctx, &posts); err != nil {
+		return nil, fmt.Errorf("failed to decode search results: %v", err)
+	}
+
+	return posts, nil
 }

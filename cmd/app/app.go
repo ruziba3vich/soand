@@ -148,3 +148,14 @@ func createBucket(client *minio.Client, bucket string) error {
 	}
 	return nil
 }
+
+/*
+/ Create a text index on the title field
+	indexModel := mongo.IndexModel{
+		Keys: bson.M{"title": "text"},
+	}
+	_, err := collection.Indexes().CreateOne(context.Background(), indexModel)
+	if err != nil {
+		logger.Fatalf("Failed to create text index on posts.title: %v", err)
+	}
+*/
