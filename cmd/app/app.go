@@ -16,6 +16,8 @@ import (
 	"github.com/ruziba3vich/soand/internal/service"
 	"github.com/ruziba3vich/soand/internal/storage"
 	"github.com/ruziba3vich/soand/pkg/config"
+	"go.mongodb.org/mongo-driver/bson"
+	"go.mongodb.org/mongo-driver/mongo"
 )
 
 func Run(ctx context.Context, logger *log.Logger) error {
@@ -77,6 +79,15 @@ func Run(ctx context.Context, logger *log.Logger) error {
 
 	posts_collection, err := storage.ConnectMongoDB(ctx, cfg, "posts_collection")
 	if err != nil {
+		return err
+	}
+
+	indexModel := mongo.IndexModel{
+		Keys: bson.M{"title": "text"},
+	}
+	_, err = posts_collection.Indexes().CreateOne(context.Background(), indexModel)
+	if err != nil {
+		logger.Fatalf("Failed to create text index on posts.title: %v", err)
 		return err
 	}
 
@@ -148,14 +159,3 @@ func createBucket(client *minio.Client, bucket string) error {
 	}
 	return nil
 }
-
-/*
-/ Create a text index on the title field
-	indexModel := mongo.IndexModel{
-		Keys: bson.M{"title": "text"},
-	}
-	_, err := collection.Indexes().CreateOne(context.Background(), indexModel)
-	if err != nil {
-		logger.Fatalf("Failed to create text index on posts.title: %v", err)
-	}
-*/
