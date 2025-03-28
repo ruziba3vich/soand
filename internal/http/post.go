@@ -213,6 +213,38 @@ func (h *PostHandler) DeletePost(c *gin.Context) {
 	c.JSON(http.StatusOK, gin.H{"data": "Post deleted successfully"})
 }
 
+func (h *PostHandler) SearchPostsByTitle(c *gin.Context) {
+	var reuest struct {
+		Query string `json:"query"`
+	}
+	if err := c.BindJSON(&reuest); err != nil {
+		h.logger.Println(err.Error())
+		c.JSON(http.StatusBadRequest, gin.H{"error": "bad request: " + err.Error()})
+		return
+	}
+	pageStr := c.Query("page")
+	limitStr := c.Query("limit")
+	page, err := strconv.Atoi(pageStr)
+	if err != nil {
+		h.logger.Println(err.Error())
+		c.JSON(http.StatusBadRequest, gin.H{"error": "bad request: " + err.Error()})
+		return
+	}
+	limit, err := strconv.Atoi(limitStr)
+	if err != nil {
+		h.logger.Println(err.Error())
+		c.JSON(http.StatusBadRequest, gin.H{"error": "bad request: " + err.Error()})
+		return
+	}
+
+	posts, err := h.service.SearchPostsByTitle(c.Request.Context(), reuest.Query, int64(page), int64(limit))
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+		return
+	}
+	c.JSON(http.StatusOK, gin.H{"data": posts})
+}
+
 // Helper function to convert string to int64
 func stringToInt64(s string) int64 {
 	val, err := strconv.ParseInt(s, 10, 64)
