@@ -10,6 +10,7 @@ type PostRequest struct {
 	Description string   `json:"description" binding:"required"`
 	CreatorId   string   `json:"creator_id"`
 	DeleteAfter int      `json:"delete_after" binding:"required"`
+	Title       string   `json:"title"`
 	Tags        []string `json:"tags"`
 }
 
@@ -20,6 +21,7 @@ func (p *PostRequest) ToPost() *models.Post {
 		Description: p.Description,
 		CreatorId:   creatorId,
 		Tags:        p.Tags,
+		Title:       p.Title,
 	}
 }
 
