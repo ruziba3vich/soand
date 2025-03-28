@@ -50,6 +50,7 @@ func RegisterPostRoutes(
 	posts := r.Group("/posts")
 	{
 		posts.POST("", authMiddleware(h.CreatePost))
+		posts.POST("search/title", h.SearchPostsByTitle)
 		posts.GET("", h.GetPost)                           // Get post by query param "id"
 		posts.GET("/all", h.GetAllPosts)                   // Get all posts with pagination
 		posts.PUT("/:id", authMiddleware(h.UpdatePost))    // Update post by ID
