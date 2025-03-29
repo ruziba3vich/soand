@@ -223,8 +223,8 @@ func (h *PostHandler) SearchPostsByTitle(c *gin.Context) {
 		c.JSON(http.StatusBadRequest, gin.H{"error": "bad request: " + err.Error()})
 		return
 	}
-	pageStr := c.Query("page")
-	limitStr := c.Query("limit")
+	pageStr := c.DefaultQuery("page", "1")
+	limitStr := c.DefaultQuery("limit", "10")
 	page, err := strconv.Atoi(pageStr)
 	if err != nil {
 		h.logger.Println(err.Error())
