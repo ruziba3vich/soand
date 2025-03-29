@@ -57,6 +57,7 @@ func (h *PostHandler) CreatePost(c *gin.Context) {
 		Description: c.PostForm("description"),
 		DeleteAfter: stringToInt(c.PostForm("delete_after")),
 		Tags:        c.PostFormArray("tags"),
+		Title:       c.PostForm("title"),
 	}
 
 	tagsStr := c.PostForm("tags_json")
