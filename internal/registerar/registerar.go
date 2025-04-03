@@ -55,6 +55,7 @@ func RegisterPostRoutes(
 		posts.GET("/all", h.GetAllPosts)                   // Get all posts with pagination
 		posts.PUT("/:id", authMiddleware(h.UpdatePost))    // Update post by ID
 		posts.DELETE("/:id", authMiddleware(h.DeletePost)) // Delete post by ID
+		posts.POST("/like", authMiddleware(h.LikePostHandler))
 	}
 }
 
