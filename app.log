@@ -850,3 +850,45 @@ Key: 'PostRequest.DeleteAfter' Error:Field validation for 'DeleteAfter' failed o
 [MusicLib] 2025/03/26 11:15:11 comment.go:99: New WebSocket client connected for post: 67e36b4708445a854aa1ba1a
 [MusicLib] 2025/03/26 11:16:24 main.go:42: Received signal: interrupt, shutting down...
 [MusicLib] 2025/03/26 11:16:24 main.go:49: Shutdown complete
+[MusicLib] 2025/04/03 07:14:48 service.go:86: map[count:0 page:1 pageSize:10]
+[MusicLib] 2025/04/03 07:15:22 user.go:46: User logged in successfully, ID: prodonik
+[MusicLib] 2025/04/03 07:16:35 middleware.go:53: Missing authorization token
+[MusicLib] 2025/04/03 07:17:03 user.go:46: User logged in successfully, ID: prodonik
+[MusicLib] 2025/04/03 07:17:25 user.go:134: Validating JWT token...
+[MusicLib] 2025/04/03 07:17:25 user.go:142: JWT token validated successfully, user ID: 67df47aa949e4eef5025414e
+[MusicLib] 2025/04/03 07:17:25 service.go:40: map[content:Hello, this is a description id:67edefb59146ef32331babb1]
+[MusicLib] 2025/04/03 07:17:57 service.go:86: map[count:1 page:1 pageSize:10]
+[MusicLib] 2025/04/03 07:18:53 user.go:134: Validating JWT token...
+[MusicLib] 2025/04/03 07:18:53 user.go:142: JWT token validated successfully, user ID: 67df47aa949e4eef5025414e
+[MusicLib] 2025/04/03 07:19:06 service.go:86: map[count:1 page:1 pageSize:10]
+[MusicLib] 2025/04/03 07:20:18 user.go:134: Validating JWT token...
+[MusicLib] 2025/04/03 07:20:18 user.go:142: JWT token validated successfully, user ID: 67df47aa949e4eef5025414e
+[MusicLib] 2025/04/03 07:20:21 service.go:86: map[count:1 page:1 pageSize:10]
+[MusicLib] 2025/04/03 07:21:53 main.go:42: Received signal: interrupt, shutting down...
+[MusicLib] 2025/04/03 07:21:53 main.go:49: Shutdown complete
+[MusicLib] 2025/04/03 07:22:04 user.go:134: Validating JWT token...
+[MusicLib] 2025/04/03 07:22:04 user.go:142: JWT token validated successfully, user ID: 67df47aa949e4eef5025414e
+[MusicLib] 2025/04/03 07:22:07 service.go:86: map[count:1 page:1 pageSize:10]
+[MusicLib] 2025/04/03 07:22:11 user.go:134: Validating JWT token...
+[MusicLib] 2025/04/03 07:22:11 user.go:142: JWT token validated successfully, user ID: 67df47aa949e4eef5025414e
+[MusicLib] 2025/04/03 07:22:14 service.go:86: map[count:1 page:1 pageSize:10]
+[MusicLib] 2025/04/03 07:23:43 main.go:42: Received signal: interrupt, shutting down...
+[MusicLib] 2025/04/03 07:23:43 main.go:49: Shutdown complete
+[MusicLib] 2025/04/03 07:24:06 user.go:134: Validating JWT token...
+[MusicLib] 2025/04/03 07:24:06 user.go:142: JWT token validated successfully, user ID: 67df47aa949e4eef5025414e
+[MusicLib] 2025/04/03 07:24:06 service.go:140: you have already liked this post !
+[MusicLib] 2025/04/03 07:24:08 service.go:86: map[count:1 page:1 pageSize:10]
+[MusicLib] 2025/04/03 07:24:18 user.go:134: Validating JWT token...
+[MusicLib] 2025/04/03 07:24:18 user.go:142: JWT token validated successfully, user ID: 67df47aa949e4eef5025414e
+[MusicLib] 2025/04/03 07:24:18 service.go:140: you have already liked this post !
+[MusicLib] 2025/04/03 07:24:21 service.go:86: map[count:1 page:1 pageSize:10]
+[MusicLib] 2025/04/03 07:24:21 service.go:86: map[count:1 page:1 pageSize:10]
+[MusicLib] 2025/04/03 07:24:31 user.go:134: Validating JWT token...
+[MusicLib] 2025/04/03 07:24:31 user.go:142: JWT token validated successfully, user ID: 67df47aa949e4eef5025414e
+[MusicLib] 2025/04/03 07:24:34 service.go:86: map[count:1 page:1 pageSize:10]
+[MusicLib] 2025/04/03 07:24:40 user.go:134: Validating JWT token...
+[MusicLib] 2025/04/03 07:24:40 user.go:142: JWT token validated successfully, user ID: 67df47aa949e4eef5025414e
+[MusicLib] 2025/04/03 07:24:49 service.go:86: map[count:1 page:1 pageSize:10]
+[MusicLib] 2025/04/03 07:25:00 user.go:134: Validating JWT token...
+[MusicLib] 2025/04/03 07:25:00 user.go:142: JWT token validated successfully, user ID: 67df47aa949e4eef5025414e
+[MusicLib] 2025/04/03 07:25:03 service.go:86: map[count:1 page:1 pageSize:10]

@@ -2,7 +2,7 @@ package storage
 
 import (
 	"context"
-	"time"
+	"fmt"
 
 	"go.mongodb.org/mongo-driver/bson"
 	"go.mongodb.org/mongo-driver/bson/primitive"
@@ -25,8 +25,7 @@ func (s *LikesStorage) LikePost(ctx context.Context, userID, postID primitive.Ob
 	filter := bson.M{"user_id": userID, "post_id": postID}
 	existing := s.db.FindOne(ctx, filter)
 	if existing.Err() == nil {
-		// User has already liked the post
-		return nil
+		return fmt.Errorf("you have already liked this post !")
 	} else if existing.Err() != mongo.ErrNoDocuments {
 		// Some other error occurred
 		return existing.Err()
@@ -34,9 +33,8 @@ func (s *LikesStorage) LikePost(ctx context.Context, userID, postID primitive.Ob
 
 	// Insert the like
 	like := bson.M{
-		"user_id":    userID,
-		"post_id":    postID,
-		"created_at": time.Now(),
+		"user_id": userID,
+		"post_id": postID,
 	}
 	_, err := s.db.InsertOne(ctx, like)
 	return err
