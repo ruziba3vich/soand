@@ -17,4 +17,5 @@ type IPostService interface {
 	GetPost(ctx context.Context, id primitive.ObjectID) (*models.Post, error)
 	UpdatePost(ctx context.Context, id primitive.ObjectID, updaterID primitive.ObjectID, update bson.M) error
 	SearchPostsByTitle(ctx context.Context, query string, page, pageSize int64) ([]models.Post, error)
+	LikeOrDislikePost(ctx context.Context, userId primitive.ObjectID, postId primitive.ObjectID, count int) error
 }

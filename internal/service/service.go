@@ -134,3 +134,10 @@ func (s *PostService) SearchPostsByTitle(ctx context.Context, query string, page
 	}
 	return posts, nil
 }
+
+func (s *PostService) LikeOrDislikePost(ctx context.Context, userId primitive.ObjectID, postId primitive.ObjectID, count int) error {
+	if err := s.storage.LikeOrDislikePost(ctx, userId, postId, count); err != nil {
+		s.logger.Println(err.Error())
+	}
+	return nil
+}
