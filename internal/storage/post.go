@@ -209,8 +209,15 @@ func (s *Storage) SearchPostsByTitle(ctx context.Context, query string, page, pa
 }
 
 func (s *Storage) LikeOrDislikePost(ctx context.Context, userId primitive.ObjectID, postId primitive.ObjectID, count int) error {
-	if err := s.likes_storage.LikePost(ctx, userId, postId); err != nil {
-		return err
+
+	if count == 1 {
+		if err := s.likes_storage.LikePost(ctx, userId, postId); err != nil {
+			return err
+		}
+	} else {
+		if err := s.likes_storage.DislikePost(ctx, userId, postId); err != nil {
+			return err
+		}
 	}
 
 	filter := bson.M{"_id": postId}
