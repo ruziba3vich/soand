@@ -246,6 +246,44 @@ func (h *PostHandler) SearchPostsByTitle(c *gin.Context) {
 	c.JSON(http.StatusOK, gin.H{"data": posts})
 }
 
+func (h *PostHandler) LikePostHandler(c *gin.Context) {
+	userId, err := getUserIdFromRequest(c)
+	if err != nil {
+		c.JSON(http.StatusUnauthorized, gin.H{"error": "Unauthorized"})
+		return
+	}
+	postIdStr := c.Query("post_id")
+	if len(postIdStr) == 0 {
+		c.JSON(http.StatusBadRequest, gin.H{"error": "no post id provided"})
+	}
+
+	postId, err := primitive.ObjectIDFromHex(postIdStr)
+	if err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"error": "invalid post id provided: " + err.Error()})
+		return
+	}
+	var req struct {
+		Like bool `json:"like"`
+	}
+	if err := c.BindJSON(&req); err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"error": "invalid request"})
+		return
+	}
+	var count int
+	if req.Like {
+		count = 1
+	} else {
+		count = -1
+	}
+
+	err = h.service.LikeOrDislikePost(c.Request.Context(), userId, postId, count)
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+		return
+	}
+	c.JSON(http.StatusOK, gin.H{"data": "post is liked"})
+}
+
 // Helper function to convert string to int64
 func stringToInt64(s string) int64 {
 	val, err := strconv.ParseInt(s, 10, 64)
