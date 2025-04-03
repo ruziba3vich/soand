@@ -65,8 +65,3 @@ func (s *Storage) EnsureTTLIndex(ctx context.Context) error {
 
 	return nil
 }
-
-// NewStorage initializes storage with a MongoDB collection
-func NewStorage(collection *mongo.Collection, users_storage *UserStorage) *Storage {
-	return &Storage{db: collection, users_storage: users_storage}
-}

@@ -16,6 +16,16 @@ import (
 type Storage struct {
 	db            *mongo.Collection
 	users_storage *UserStorage
+	likes_storage *LikesStorage
+}
+
+// NewStorage initializes storage with a MongoDB collection
+func NewStorage(collection *mongo.Collection, users_storage *UserStorage, likes_storage *LikesStorage) *Storage {
+	return &Storage{
+		db:            collection,
+		users_storage: users_storage,
+		likes_storage: likes_storage,
+	}
 }
 
 // CreatePost inserts a new post into the database
@@ -196,4 +206,16 @@ func (s *Storage) SearchPostsByTitle(ctx context.Context, query string, page, pa
 	}
 
 	return posts, nil
+}
+
+func (s *Storage) LikeOrDislikePost(ctx context.Context, userId primitive.ObjectID, postId primitive.ObjectID, count int) error {
+	if err := s.likes_storage.LikePost(ctx, userId, postId); err != nil {
+		return err
+	}
+
+	filter := bson.M{"_id": postId}
+	update := bson.M{"$inc": bson.M{"likes": count}}
+
+	_, err := s.db.UpdateOne(ctx, filter, update)
+	return err
 }

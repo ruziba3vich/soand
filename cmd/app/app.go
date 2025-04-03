@@ -18,6 +18,7 @@ import (
 	"github.com/ruziba3vich/soand/pkg/config"
 	"go.mongodb.org/mongo-driver/bson"
 	"go.mongodb.org/mongo-driver/mongo"
+	"go.mongodb.org/mongo-driver/mongo/options"
 )
 
 func Run(ctx context.Context, logger *log.Logger) error {
@@ -75,6 +76,22 @@ func Run(ctx context.Context, logger *log.Logger) error {
 
 	registerar.RegisterUserRoutes(router, user_service, file_store_service, logger, authMiddleware.AuthMiddleware())
 
+	// likes
+	likes_collection, err := storage.ConnectMongoDB(ctx, cfg, "likes_collection")
+	if err != nil {
+		return err
+	}
+	likes_index := mongo.IndexModel{
+		Keys:    bson.D{{Key: "user_id", Value: 1}, {Key: "post_id", Value: 1}},
+		Options: options.Index().SetUnique(true), // Prevent duplicate likes
+	}
+	_, err = likes_collection.Indexes().CreateOne(ctx, likes_index)
+	if err != nil {
+		return err
+	}
+
+	likes_storage := storage.NewLikesStorage(likes_collection)
+
 	// posts
 
 	posts_collection, err := storage.ConnectMongoDB(ctx, cfg, "posts_collection")
@@ -91,7 +108,7 @@ func Run(ctx context.Context, logger *log.Logger) error {
 		return err
 	}
 
-	posts_storage := storage.NewStorage(posts_collection, user_storage)
+	posts_storage := storage.NewStorage(posts_collection, user_storage, likes_storage)
 	posts_service := service.NewPostService(posts_storage, logger)
 
 	registerar.RegisterPostRoutes(

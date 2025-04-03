@@ -13,6 +13,12 @@ type LikesStorage struct {
 	db *mongo.Collection
 }
 
+func NewLikesStorage(db *mongo.Collection) *LikesStorage {
+	return &LikesStorage{
+		db: db,
+	}
+}
+
 // LikePost adds a like for a post if the user hasn't liked it already.
 func (s *LikesStorage) LikePost(ctx context.Context, userID, postID primitive.ObjectID) error {
 	// Check if the like already exists
