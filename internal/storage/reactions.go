@@ -50,7 +50,7 @@ func (r *ReactionsStorage) AddReaction(ctx context.Context, postID, userID primi
 
 // RemoveReaction removes a user's reaction from a post
 // Returns 1 if deleted, 0 if it didn't exist
-func (r *ReactionsStorage) RemoveReaction(ctx context.Context, postID, userID string) (bool, error) {
+func (r *ReactionsStorage) RemoveReaction(ctx context.Context, postID, userID primitive.ObjectID) (bool, error) {
 	filter := bson.M{"post_id": postID, "user_id": userID}
 
 	res, err := r.db.DeleteOne(ctx, filter)

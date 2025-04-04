@@ -14,9 +14,10 @@ import (
 )
 
 type Storage struct {
-	db            *mongo.Collection
-	users_storage *UserStorage
-	likes_storage *LikesStorage
+	db                *mongo.Collection
+	users_storage     *UserStorage
+	likes_storage     *LikesStorage
+	reactions_storage *ReactionsStorage
 }
 
 // NewStorage initializes storage with a MongoDB collection
@@ -38,6 +39,9 @@ func (s *Storage) CreatePost(ctx context.Context, post *models.Post, deleteAfter
 	}
 	if post.Tags == nil {
 		post.Tags = []string{}
+	}
+	if post.Reactions == nil {
+		post.Reactions = make(map[string]int)
 	}
 	_, err := s.db.InsertOne(ctx, post)
 	return post.ID, err
@@ -224,5 +228,47 @@ func (s *Storage) LikeOrDislikePost(ctx context.Context, userId primitive.Object
 	update := bson.M{"$inc": bson.M{"likes": count}}
 
 	_, err := s.db.UpdateOne(ctx, filter, update)
+	return err
+}
+
+func (s *Storage) ReactToPost(ctx context.Context, postId primitive.ObjectID, userId primitive.ObjectID, reaction string, add bool) error {
+	var updated bool
+	var err error
+	var val int
+
+	filter := bson.M{"_id": postId}
+
+	if add {
+		updated, err = s.reactions_storage.AddReaction(ctx, postId, userId)
+		if err != nil {
+			return err
+		}
+		if updated {
+			val = 1
+		} else {
+			return nil
+		}
+	} else {
+		updated, err = s.reactions_storage.RemoveReaction(ctx, postId, userId)
+		if err != nil {
+			return err
+		}
+		if updated {
+			val = -1
+		} else {
+			return nil
+		}
+	}
+
+	if val == 0 {
+		// No changes, skip updating Mongo
+		return nil
+	}
+
+	update := bson.M{
+		"$inc": bson.M{"reactions." + reaction: val},
+	}
+
+	_, err = s.db.UpdateOne(ctx, filter, update)
 	return err
 }
