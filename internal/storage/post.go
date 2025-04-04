@@ -21,11 +21,16 @@ type Storage struct {
 }
 
 // NewStorage initializes storage with a MongoDB collection
-func NewStorage(collection *mongo.Collection, users_storage *UserStorage, likes_storage *LikesStorage) *Storage {
+func NewStorage(
+	collection *mongo.Collection,
+	users_storage *UserStorage,
+	likes_storage *LikesStorage,
+	reactions_storage *ReactionsStorage) *Storage {
 	return &Storage{
-		db:            collection,
-		users_storage: users_storage,
-		likes_storage: likes_storage,
+		db:                collection,
+		users_storage:     users_storage,
+		likes_storage:     likes_storage,
+		reactions_storage: reactions_storage,
 	}
 }
 
