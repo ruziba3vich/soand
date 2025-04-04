@@ -18,4 +18,5 @@ type Post struct {
 	OwnerProfilePic string             `bson:"owner_profile_pic" json:"owner_profile_pic"`
 	Title           string             `bson:"title" json:"title"`
 	Likes           int                `bson:"likes" json:"likes"`
+	Reactions       map[string]int     `bson:"reactions" json:"reactions"`
 }
