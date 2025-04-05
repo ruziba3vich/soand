@@ -266,14 +266,35 @@ func (s *Storage) ReactToPost(ctx context.Context, postId primitive.ObjectID, us
 	}
 
 	if val == 0 {
-		// No changes, skip updating Mongo
 		return nil
 	}
 
+	// Update the reaction count
 	update := bson.M{
 		"$inc": bson.M{"reactions." + reaction: val},
 	}
-
 	_, err = s.db.UpdateOne(ctx, filter, update)
-	return err
+	if err != nil {
+		return err
+	}
+
+	// Check if the reaction count is now 0 — if so, remove it
+	var post struct {
+		Reactions map[string]int `bson:"reactions"`
+	}
+	err = s.db.FindOne(ctx, filter).Decode(&post)
+	if err != nil {
+		return err
+	}
+
+	if count, ok := post.Reactions[reaction]; ok && count < 1 {
+		_, err = s.db.UpdateOne(ctx, filter, bson.M{
+			"$unset": bson.M{"reactions." + reaction: ""},
+		})
+		if err != nil {
+			return err
+		}
+	}
+
+	return nil
 }
