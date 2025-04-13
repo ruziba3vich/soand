@@ -13,7 +13,7 @@ services:
       - MONGO_URI=mongodb://mongo_user:Dost0n1k@mongo:27017/soand?authSource=admin
       - REDIS_HOST=redis
       - REDIS_PORT=6379
-      - MINIO_ENDPOINT=45.126.127.48:9000
+      - MINIO_ENDPOINT=54.209.252.230:7777:9000
       - MINIO_ACCESS_KEY=admin
       - MINIO_SECRET_KEY=secretpass
       - MINIO_BUCKET=soandfiles
@@ -53,7 +53,7 @@ services:
     image: redis:7
     container_name: redis
     restart: always
-    command: redis-server --requirepass ""
+    command: redis-server
     volumes:
       - redis_data:/data
     ports:
