@@ -5,13 +5,13 @@ services:
     depends_on:
       mongo:
         condition: service_healthy
-      dragonfly:
+      redis:
         condition: service_healthy
       minio:
         condition: service_healthy
     environment:
       - MONGO_URI=mongodb://mongo_user:Dost0n1k@mongo:27017/soand?authSource=admin
-      - REDIS_HOST=dragonfly
+      - REDIS_HOST=redis
       - REDIS_PORT=6379
       - MINIO_ENDPOINT=45.126.127.48:9000
       - MINIO_ACCESS_KEY=admin
@@ -49,13 +49,13 @@ services:
     networks:
       - my_network
 
-  dragonfly:
-    image: docker.dragonflydb.io/dragonflydb/dragonfly:latest
-    container_name: dragonfly
+  redis:
+    image: redis:7
+    container_name: redis
     restart: always
-    command: "--requirepass ''"
+    command: redis-server --requirepass ""
     volumes:
-      - dragonfly_data:/data
+      - redis_data:/data
     ports:
       - "6379:6379"
     healthcheck:
@@ -89,7 +89,7 @@ services:
 
 volumes:
   mongo_data:
-  dragonfly_data:
+  redis_data:
   minio_data:
 
 networks:
