@@ -47,7 +47,7 @@ func (s *BackgroundService) DeleteBackground(id string) error {
 }
 
 func (s *BackgroundService) GetAllBackgrounds(page int64, pageSize int64) ([]models.Background, error) {
-	s.logger.Println("Fetching backgrounds - Page: %d, PageSize: %d\n", page, pageSize)
+	s.logger.Println("Fetching backgrounds - Page:", page, "PageSize:", pageSize)
 
 	backgrounds, err := s.storage.GetAllBackgrounds(page, pageSize)
 	if err != nil {
@@ -59,7 +59,7 @@ func (s *BackgroundService) GetAllBackgrounds(page int64, pageSize int64) ([]mod
 }
 
 func (s *BackgroundService) GetBackgroundByID(id string) (string, error) {
-	s.logger.Println("Fetching background with ID: %s\n", id)
+	s.logger.Printf("Fetching background with ID: %s\n", id)
 
 	background, err := s.storage.GetBackgroundByID(id)
 	if err != nil {
