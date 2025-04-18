@@ -17,4 +17,5 @@ type Comment struct {
 	OwnerFullname   string             `bson:"owner_full_name" json:"owner_full_name"`
 	OwnerProfilePic string             `bson:"owner_profile_pic" json:"owner_profile_pic"`
 	CreatedAt       time.Time          `json:"created_at" bson:"created_at"`
+	Reactions       map[string]int     `json:"reactions" bson:"reactions"`
 }
