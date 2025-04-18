@@ -44,6 +44,11 @@ func (s *CommentStorage) DeleteComment(ctx context.Context, commentID primitive.
 	return nil
 }
 
+func (s *CommentStorage) GetParentComment(ctx context.Context, comment *models.Comment) error {
+	var parentComment models.Comment
+	return s.db.FindOne(ctx, bson.M{"_id": comment.ReplyTo, "post_id": comment.PostID}).Decode(&parentComment)
+}
+
 // GetCommentsByPostID retrieves paginated comments for a specific post
 func (s *CommentStorage) GetCommentsByPostID(ctx context.Context, postID primitive.ObjectID, page, pageSize int64) ([]models.Comment, error) {
 	// Ensure page and pageSize have valid values
