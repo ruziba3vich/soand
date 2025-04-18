@@ -18,5 +18,5 @@ type IPostService interface {
 	UpdatePost(ctx context.Context, id primitive.ObjectID, updaterID primitive.ObjectID, update bson.M) error
 	SearchPostsByTitle(ctx context.Context, query string, page, pageSize int64) ([]models.Post, error)
 	LikeOrDislikePost(ctx context.Context, userId primitive.ObjectID, postId primitive.ObjectID, count int) error
-	ReactToPost(ctx context.Context, postId primitive.ObjectID, userId primitive.ObjectID, reaction string, add bool) error
+	// ReactToPost(ctx context.Context, postId primitive.ObjectID, userId primitive.ObjectID, reaction string, add bool) error
 }
