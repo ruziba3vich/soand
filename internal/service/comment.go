@@ -68,6 +68,21 @@ func (s *CommentService) CreateComment(ctx context.Context, comment *models.Comm
 }
 
 func (s *CommentService) ReactToComment(ctx context.Context, reaction *models.Reaction) error {
+	if !reaction.Incr {
+		reacted, err := s.storage.HasUserReactedWith(ctx, reaction.CommentId, reaction.UserID, reaction.Reaction)
+		if err != nil {
+			s.logger.Println("failed to check if user reacted: ", reaction.CommentId, reaction.UserID, reaction.Reaction)
+		}
+		if reacted {
+			if err := s.storage.RemoveReactionFromComment(ctx, reaction); err != nil {
+				s.logger.Println("failed to remove reaction: ", reaction.CommentId, reaction.UserID, reaction.Reaction)
+				return err
+			}
+		} else {
+			s.logger.Println("user has not reacted ", reaction.CommentId, reaction.UserID, reaction.Reaction)
+			return fmt.Errorf("user has not reacted")
+		}
+	}
 	return nil
 }
 
