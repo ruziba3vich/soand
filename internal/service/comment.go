@@ -9,7 +9,6 @@ import (
 	"time"
 
 	"github.com/redis/go-redis/v9"
-	"go.mongodb.org/mongo-driver/bson"
 	"go.mongodb.org/mongo-driver/bson/primitive"
 	"go.mongodb.org/mongo-driver/mongo"
 
@@ -38,8 +37,7 @@ func (s *CommentService) CreateComment(ctx context.Context, comment *models.Comm
 
 	// If it's a reply, ensure the parent comment exists within the same post
 	if !comment.ReplyTo.IsZero() {
-		var parentComment models.Comment
-		err := s.db.FindOne(ctx, bson.M{"_id": comment.ReplyTo, "post_id": comment.PostID}).Decode(&parentComment)
+		err := s.storage.GetParentComment(ctx, comment)
 		if err != nil {
 			return fmt.Errorf("parent comment not found within the same post")
 		}
