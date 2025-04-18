@@ -27,22 +27,6 @@ var upgrader = websocket.Upgrader{
 }
 */
 
-var supportedImageExtensions = map[string]bool{
-	".jpg":  true,
-	".jpeg": true,
-	".png":  true,
-	".gif":  true,
-	".webp": true,
-}
-
-// Supported MIME types
-var supportedMimeTypes = map[string]bool{
-	"image/jpeg": true,
-	"image/png":  true,
-	"image/gif":  true,
-	"image/webp": true,
-}
-
 type CommentHandler struct {
 	service      repos.ICommentService
 	file_service repos.IFIleStoreService
