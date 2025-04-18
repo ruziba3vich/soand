@@ -32,7 +32,7 @@ func Run(ctx context.Context, logger *log.Logger) error {
 		Secure: false,
 	})
 	if err != nil {
-		return fmt.Errorf("Failed to connect to MinIO: " + err.Error())
+		return fmt.Errorf("failed to connect to MinIO: %s", err.Error())
 	}
 
 	if err := createBucket(minio_client, cfg.MinIO.Bucket); err != nil {
@@ -48,6 +48,9 @@ func Run(ctx context.Context, logger *log.Logger) error {
 
 	// Background
 	background_collection, err := storage.ConnectMongoDB(ctx, cfg, "background_collection")
+	if err != nil {
+		return err
+	}
 	background_storage := storage.NewBackgroundStorage(file_storage, background_collection)
 
 	background_service := service.NewBackgroundService(logger, background_storage)
@@ -158,6 +161,9 @@ func Run(ctx context.Context, logger *log.Logger) error {
 	// direct messages
 
 	chat_collection, err := storage.ConnectMongoDB(ctx, cfg, "chat_collection")
+	if err != nil {
+		return err
+	}
 	chat_storage := storage.NewChatStorage(chat_collection)
 	chat_service := service.NewChatService(chat_storage, logger)
 	registerar.RegisterChatHandler(
