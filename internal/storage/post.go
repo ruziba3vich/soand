@@ -14,23 +14,21 @@ import (
 )
 
 type Storage struct {
-	db                *mongo.Collection
-	users_storage     *UserStorage
-	likes_storage     *LikesStorage
-	reactions_storage *ReactionsStorage
+	db            *mongo.Collection
+	users_storage *UserStorage
+	likes_storage *LikesStorage
+	// reactions_storage *ReactionsStorage
 }
 
 // NewStorage initializes storage with a MongoDB collection
 func NewStorage(
 	collection *mongo.Collection,
 	users_storage *UserStorage,
-	likes_storage *LikesStorage,
-	reactions_storage *ReactionsStorage) *Storage {
+	likes_storage *LikesStorage) *Storage {
 	return &Storage{
-		db:                collection,
-		users_storage:     users_storage,
-		likes_storage:     likes_storage,
-		reactions_storage: reactions_storage,
+		db:            collection,
+		users_storage: users_storage,
+		likes_storage: likes_storage,
 	}
 }
 
@@ -236,65 +234,65 @@ func (s *Storage) LikeOrDislikePost(ctx context.Context, userId primitive.Object
 	return err
 }
 
-func (s *Storage) ReactToPost(ctx context.Context, postId primitive.ObjectID, userId primitive.ObjectID, reaction string, add bool) error {
-	var updated bool
-	var err error
-	var val int
+// func (s *Storage) ReactToPost(ctx context.Context, postId primitive.ObjectID, userId primitive.ObjectID, reaction string, add bool) error {
+// 	var updated bool
+// 	var err error
+// 	var val int
 
-	filter := bson.M{"_id": postId}
+// 	filter := bson.M{"_id": postId}
 
-	if add {
-		updated, err = s.reactions_storage.AddReaction(ctx, postId, userId)
-		if err != nil {
-			return err
-		}
-		if updated {
-			val = 1
-		} else {
-			return nil
-		}
-	} else {
-		updated, err = s.reactions_storage.RemoveReaction(ctx, postId, userId)
-		if err != nil {
-			return err
-		}
-		if updated {
-			val = -1
-		} else {
-			return nil
-		}
-	}
+// 	if add {
+// 		updated, err = s.reactions_storage.AddReaction(ctx, postId, userId)
+// 		if err != nil {
+// 			return err
+// 		}
+// 		if updated {
+// 			val = 1
+// 		} else {
+// 			return nil
+// 		}
+// 	} else {
+// 		updated, err = s.reactions_storage.RemoveReaction(ctx, postId, userId)
+// 		if err != nil {
+// 			return err
+// 		}
+// 		if updated {
+// 			val = -1
+// 		} else {
+// 			return nil
+// 		}
+// 	}
 
-	if val == 0 {
-		return nil
-	}
+// 	if val == 0 {
+// 		return nil
+// 	}
 
-	// Update the reaction count
-	update := bson.M{
-		"$inc": bson.M{"reactions." + reaction: val},
-	}
-	_, err = s.db.UpdateOne(ctx, filter, update)
-	if err != nil {
-		return err
-	}
+// 	// Update the reaction count
+// 	update := bson.M{
+// 		"$inc": bson.M{"reactions." + reaction: val},
+// 	}
+// 	_, err = s.db.UpdateOne(ctx, filter, update)
+// 	if err != nil {
+// 		return err
+// 	}
 
-	// Check if the reaction count is now 0 — if so, remove it
-	var post struct {
-		Reactions map[string]int `bson:"reactions"`
-	}
-	err = s.db.FindOne(ctx, filter).Decode(&post)
-	if err != nil {
-		return err
-	}
+// 	// Check if the reaction count is now 0 — if so, remove it
+// 	var post struct {
+// 		Reactions map[string]int `bson:"reactions"`
+// 	}
+// 	err = s.db.FindOne(ctx, filter).Decode(&post)
+// 	if err != nil {
+// 		return err
+// 	}
 
-	if count, ok := post.Reactions[reaction]; ok && count < 1 {
-		_, err = s.db.UpdateOne(ctx, filter, bson.M{
-			"$unset": bson.M{"reactions." + reaction: ""},
-		})
-		if err != nil {
-			return err
-		}
-	}
+// 	if count, ok := post.Reactions[reaction]; ok && count < 1 {
+// 		_, err = s.db.UpdateOne(ctx, filter, bson.M{
+// 			"$unset": bson.M{"reactions." + reaction: ""},
+// 		})
+// 		if err != nil {
+// 			return err
+// 		}
+// 	}
 
-	return nil
-}
+// 	return nil
+// }
