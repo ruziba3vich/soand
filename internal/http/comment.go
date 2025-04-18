@@ -286,19 +286,12 @@ func (h *CommentHandler) UpdateComment(c *gin.Context) {
 	}
 	postIdStr := c.Param("post_id")
 	// Extract user ID from context (Assuming AuthMiddleware sets user_id)
-	userID, exists := c.Get("user_id")
-	if !exists {
+	userID, err := getUserIdFromRequest(c)
+	if err != nil {
 		h.logger.Println("User ID not found in context")
 		c.JSON(http.StatusUnauthorized, gin.H{"error": "unauthorized"})
 		return
 	}
-	userObjectID, ok := userID.(primitive.ObjectID)
-	if !ok {
-		h.logger.Println("Invalid user ID format")
-		c.JSON(http.StatusUnauthorized, gin.H{"error": "unauthorized"})
-		return
-	}
-
 	var req struct {
 		NewText string `json:"new_text" binding:"required"`
 	}
@@ -310,7 +303,7 @@ func (h *CommentHandler) UpdateComment(c *gin.Context) {
 	}
 
 	// Update the comment and retrieve the associated post_id
-	err = h.service.UpdateCommentText(c.Request.Context(), commentID, userObjectID, req.NewText)
+	err = h.service.UpdateCommentText(c.Request.Context(), commentID, userID, req.NewText)
 	if err != nil {
 		h.logger.Println("Failed to update comment:", err)
 		c.JSON(http.StatusInternalServerError, gin.H{"error": "could not update comment"})
@@ -358,15 +351,8 @@ func (h *CommentHandler) DeleteComment(c *gin.Context) {
 	}
 
 	// Extract user ID from context
-	userID, exists := c.Get("user_id")
-	if !exists {
-		h.logger.Println("User ID not found in context")
-		c.JSON(http.StatusUnauthorized, gin.H{"error": "unauthorized"})
-		return
-	}
-	userObjectID, ok := userID.(primitive.ObjectID)
-	if !ok {
-		h.logger.Println("Invalid user ID format")
+	userID, err := getUserIdFromRequest(c)
+	if err != nil {
 		c.JSON(http.StatusUnauthorized, gin.H{"error": "unauthorized"})
 		return
 	}
@@ -380,7 +366,7 @@ func (h *CommentHandler) DeleteComment(c *gin.Context) {
 	}
 
 	// Delete the comment
-	err = h.service.DeleteComment(c.Request.Context(), commentID, userObjectID)
+	err = h.service.DeleteComment(c.Request.Context(), commentID, userID)
 	if err != nil {
 		h.logger.Println("Failed to delete comment:", err)
 		c.JSON(http.StatusInternalServerError, gin.H{"error": "could not delete comment"})
