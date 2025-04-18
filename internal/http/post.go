@@ -15,7 +15,6 @@ import (
 // PostHandler struct that handles HTTP requests
 type PostHandler struct {
 	service      repos.IPostService
-	user_service repos.UserRepo
 	logger       *log.Logger
 	file_service repos.IFIleStoreService
 }
