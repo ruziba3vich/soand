@@ -918,3 +918,8 @@ Key: 'PostRequest.DeleteAfter' Error:Field validation for 'DeleteAfter' failed o
 [MusicLib] 2025/04/05 06:16:06 service.go:86: map[count:1 page:1 pageSize:10]
 [MusicLib] 2025/04/05 06:16:18 main.go:42: Received signal: interrupt, shutting down...
 [MusicLib] 2025/04/05 06:16:18 main.go:49: Shutdown complete
+[MusicLib] 2025/04/19 01:58:00 main.go:36: Application failed: The Access Key Id you provided does not exist in our records.
+[MusicLib] 2025/04/19 02:00:10 app.go:66: Failed to ping MongoDB: server selection error: context deadline exceeded, current topology: { Type: Unknown, Servers: [{ Addr: mongo:27017, Type: Unknown }, ] }
+[MusicLib] 2025/04/19 02:00:10 main.go:36: Application failed: Failed to ping MongoDB: server selection error: context deadline exceeded, current topology: { Type: Unknown, Servers: [{ Addr: mongo:27017, Type: Unknown }, ] }
+[MusicLib] 2025/04/19 02:02:54 app.go:66: Failed to ping MongoDB: connection() error occurred during connection handshake: auth error: unable to authenticate using mechanism "SCRAM-SHA-256": (AuthenticationFailed) Authentication failed.
+[MusicLib] 2025/04/19 02:02:54 main.go:36: Application failed: Failed to ping MongoDB: connection() error occurred during connection handshake: auth error: unable to authenticate using mechanism "SCRAM-SHA-256": (AuthenticationFailed) Authentication failed.

@@ -57,9 +57,9 @@ func LoadConfig() *Config {
 		},
 		MinIO: MinIOConfig{
 			Endpoint:  getEnv("MINIO_ENDPOINT", "localhost:9000"),
-			AccessKey: getEnv("MINIO_ACCESS_KEY", "my-access-key"),
-			SecretKey: getEnv("MINIO_SECRET_KEY", "my-secret-key"),
-			Bucket:    getEnv("MINIO_BUCKET", "my-bucket"),
+			AccessKey: getEnv("MINIO_ACCESS_KEY", "admin"),
+			SecretKey: getEnv("MINIO_SECRET_KEY", "secretpass"),
+			Bucket:    getEnv("MINIO_BUCKET", "soandfiles"),
 		},
 		Redis: RedisConfig{
 			Host:     getEnv("REDIS_HOST", "localhost"),
