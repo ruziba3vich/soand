@@ -9,6 +9,7 @@ import (
 	"github.com/gin-gonic/gin"
 	limiter "github.com/ruziba3vich/soand/internal/rate_limiter"
 	"github.com/ruziba3vich/soand/internal/repos"
+	"go.mongodb.org/mongo-driver/bson/primitive"
 )
 
 // AuthHandler holds dependencies for authentication
@@ -153,51 +154,7 @@ func (a *AuthHandler) CommentsMiddleware() func(gin.HandlerFunc) gin.HandlerFunc
 
 			tokenString := c.GetHeader("Authorization")
 			if tokenString == "" {
-				return
-			}
-
-			parts := strings.Split(tokenString, " ")
-
-			userID, err := a.userRepo.ValidateJWT(parts[1])
-			if err != nil {
-				a.logger.Println("Invalid token:", err)
-				c.JSON(http.StatusUnauthorized, gin.H{"error": "Invalid token"})
-				c.Abort()
-				return
-			}
-
-			// Set user ID in context
-			c.Set("userID", userID)
-
-			// Call the actual handler
-			handler(c)
-		}
-	}
-}
-
-// GetCOmmentsMiddleware validates JWT and sets user ID before executing the given handlers
-func (a *AuthHandler) GetCOmmentsMiddleware() func(gin.HandlerFunc) gin.HandlerFunc {
-	return func(handler gin.HandlerFunc) gin.HandlerFunc {
-		return func(c *gin.Context) {
-			ip := c.ClientIP() // Get user IP for rate limiting
-
-			allowed, err := a.limiter.AllowRequest(c, ip)
-			if err != nil {
-				a.logger.Println("Rate limiter error:", err)
-				c.JSON(http.StatusInternalServerError, gin.H{"error": "Internal server error"})
-				c.Abort()
-				return
-			}
-
-			if !allowed {
-				a.logger.Println("Rate limit exceeded for IP:", ip)
-				c.JSON(http.StatusTooManyRequests, gin.H{"error": "Too many requests"})
-				c.Abort()
-				return
-			}
-
-			tokenString := c.GetHeader("Authorization")
-			if tokenString == "" {
+				c.Set("userID", primitive.NilObjectID.Hex())
 				return
 			}
 
