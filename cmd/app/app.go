@@ -97,12 +97,12 @@ func Run(ctx context.Context, logger *log.Logger) error {
 
 	// reactions
 
-	reactions_collection, err := storage.ConnectMongoDB(ctx, cfg, "reactions_collection")
-	if err != nil {
-		return err
-	}
+	// reactions_collection, err := storage.ConnectMongoDB(ctx, cfg, "reactions_collection")
+	// if err != nil {
+	// 	return err
+	// }
 
-	reactions_storage := storage.NewReactionsStorage(reactions_collection)
+	// reactions_storage := storage.NewReactionsStorage(reactions_collection)
 
 	// posts
 
@@ -120,7 +120,7 @@ func Run(ctx context.Context, logger *log.Logger) error {
 		return err
 	}
 
-	posts_storage := storage.NewStorage(posts_collection, user_storage, likes_storage, reactions_storage)
+	posts_storage := storage.NewStorage(posts_collection, user_storage, likes_storage)
 	posts_service := service.NewPostService(posts_storage, logger)
 
 	registerar.RegisterPostRoutes(
