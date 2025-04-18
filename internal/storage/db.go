@@ -35,13 +35,13 @@ func ConnectMongoDB(ctx context.Context, cfg *config.Config, collectionName stri
 
 	client, err := mongo.Connect(ctx, clientOptions)
 	if err != nil {
-		return nil, fmt.Errorf("Failed to connect to MongoDB: %v", err)
+		return nil, fmt.Errorf("failed to connect to MongoDB: %s", err.Error())
 	}
 
 	// Ping the database to ensure the connection is established
 	err = client.Ping(ctx, nil)
 	if err != nil {
-		return nil, fmt.Errorf("Failed to ping MongoDB: %v", err)
+		return nil, fmt.Errorf("failed to ping MongoDB: %s", err.Error())
 	}
 
 	fmt.Println("✅ Connected to MongoDB!")

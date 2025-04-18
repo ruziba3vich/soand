@@ -25,7 +25,7 @@ func (s *LikesStorage) LikePost(ctx context.Context, userID, postID primitive.Ob
 	filter := bson.M{"user_id": userID, "post_id": postID}
 	existing := s.db.FindOne(ctx, filter)
 	if existing.Err() == nil {
-		return fmt.Errorf("you have already liked this post !")
+		return fmt.Errorf("you have already liked this post")
 	} else if existing.Err() != mongo.ErrNoDocuments {
 		// Some other error occurred
 		return existing.Err()
