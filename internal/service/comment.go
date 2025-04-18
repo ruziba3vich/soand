@@ -17,16 +17,18 @@ import (
 )
 
 type CommentService struct {
-	storage *storage.CommentStorage
-	redis   *redis.Client
-	logger  *log.Logger
+	storage      *storage.CommentStorage
+	redis        *redis.Client
+	logger       *log.Logger
+	user_storage *storage.UserStorage
 }
 
-func NewCommentService(storage *storage.CommentStorage, redis *redis.Client, logger *log.Logger) *CommentService {
+func NewCommentService(storage *storage.CommentStorage, user_storage *storage.UserStorage, redis *redis.Client, logger *log.Logger) *CommentService {
 	return &CommentService{
-		storage: storage,
-		redis:   redis,
-		logger:  logger,
+		storage:      storage,
+		redis:        redis,
+		logger:       logger,
+		user_storage: user_storage,
 	}
 }
 
@@ -115,7 +117,7 @@ func (s *CommentService) SubscribeToComments(ctx context.Context, postID primiti
 }
 
 func (s *CommentService) GetCommentByID(ctx context.Context, commentID primitive.ObjectID) (*models.Comment, error) {
-	comment, err := s.GetCommentByID(ctx, commentID)
+	comment, err := s.storage.GetCommentByID(ctx, commentID)
 	if err != nil {
 		s.logger.Println("Error getting comment by id:", err)
 		return nil, err
