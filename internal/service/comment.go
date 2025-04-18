@@ -3,10 +3,15 @@ package service
 import (
 	"context"
 	"encoding/json"
+	"errors"
+	"fmt"
 	"log"
+	"time"
 
 	"github.com/redis/go-redis/v9"
+	"go.mongodb.org/mongo-driver/bson"
 	"go.mongodb.org/mongo-driver/bson/primitive"
+	"go.mongodb.org/mongo-driver/mongo"
 
 	"github.com/ruziba3vich/soand/internal/models"
 	"github.com/ruziba3vich/soand/internal/storage"
@@ -27,13 +32,39 @@ func NewCommentService(storage *storage.CommentStorage, redis *redis.Client, log
 }
 
 func (s *CommentService) CreateComment(ctx context.Context, comment *models.Comment) error {
+	comment.ID = primitive.NewObjectID()
+	comment.CreatedAt = time.Now()
+	comment.Reactions = make(map[string]int)
+
+	// If it's a reply, ensure the parent comment exists within the same post
+	if !comment.ReplyTo.IsZero() {
+		var parentComment models.Comment
+		err := s.db.FindOne(ctx, bson.M{"_id": comment.ReplyTo, "post_id": comment.PostID}).Decode(&parentComment)
+		if err != nil {
+			return fmt.Errorf("parent comment not found within the same post")
+		}
+	}
+
 	// Store the comment in MongoDB
 	if err := s.storage.CreateComment(ctx, comment); err != nil {
 		s.logger.Println("Error storing comment:", err)
 		return err
 	}
 
-	return nil
+	user, err := s.user_storage.GetUserByID(ctx, comment.UserID)
+	if err != nil {
+		if errors.Is(err, mongo.ErrNoDocuments) {
+			comment.OwnerFullname = "Deleted Account"
+			return nil
+		}
+		return err
+	}
+	comment.OwnerFullname = user.Fullname
+	if len(user.ProfilePics) > 0 {
+		comment.OwnerProfilePic = user.ProfilePics[0].Url
+	}
+	return err
+
 }
 
 func (s *CommentService) DeleteComment(ctx context.Context, commentID primitive.ObjectID, userID primitive.ObjectID) error {
