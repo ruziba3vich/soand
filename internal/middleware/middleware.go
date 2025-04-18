@@ -154,12 +154,13 @@ func (a *AuthHandler) CommentsMiddleware() func(gin.HandlerFunc) gin.HandlerFunc
 
 			tokenString := c.GetHeader("Authorization")
 			if tokenString == "" {
-				c.Set("userID", primitive.NilObjectID.Hex())
+				c.Set("userID", primitive.NilObjectID.Hex()) // no token, assign NilObjectID
+				handler(c)
 				return
 			}
 
+			// If token exists, validate it (optional for setting user ID)
 			parts := strings.Split(tokenString, " ")
-
 			userID, err := a.userRepo.ValidateJWT(parts[1])
 			if err != nil {
 				a.logger.Println("Invalid token:", err)
@@ -168,10 +169,7 @@ func (a *AuthHandler) CommentsMiddleware() func(gin.HandlerFunc) gin.HandlerFunc
 				return
 			}
 
-			// Set user ID in context
 			c.Set("userID", userID)
-
-			// Call the actual handler
 			handler(c)
 		}
 	}
