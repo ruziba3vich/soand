@@ -28,34 +28,7 @@ func NewCommentStorage(db *mongo.Collection, user_storage *UserStorage) *Comment
 
 // CreateComment inserts a new comment into the database
 func (s *CommentStorage) CreateComment(ctx context.Context, comment *models.Comment) error {
-	comment.ID = primitive.NewObjectID()
-	comment.CreatedAt = time.Now()
-
-	// If it's a reply, ensure the parent comment exists within the same post
-	if !comment.ReplyTo.IsZero() {
-		var parentComment models.Comment
-		err := s.db.FindOne(ctx, bson.M{"_id": comment.ReplyTo, "post_id": comment.PostID}).Decode(&parentComment)
-		if err != nil {
-			return fmt.Errorf("parent comment not found within the same post")
-		}
-	}
-
 	_, err := s.db.InsertOne(ctx, comment)
-	if err != nil {
-		return err
-	}
-	user, err := s.user_storage.GetUserByID(ctx, comment.UserID)
-	if err != nil {
-		if errors.Is(err, mongo.ErrNoDocuments) {
-			comment.OwnerFullname = "Deleted Account"
-			return nil
-		}
-		return err
-	}
-	comment.OwnerFullname = user.Fullname
-	if len(user.ProfilePics) > 0 {
-		comment.OwnerProfilePic = user.ProfilePics[0].Url
-	}
 	return err
 }
 
