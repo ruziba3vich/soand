@@ -142,11 +142,11 @@ func (s *PostService) LikeOrDislikePost(ctx context.Context, userId primitive.Ob
 	return nil
 }
 
-func (s *PostService) ReactToPost(ctx context.Context, postId primitive.ObjectID, userId primitive.ObjectID, reaction string, add bool) error {
-	if err := s.storage.ReactToPost(ctx, postId, userId, reaction, add); err != nil {
-		s.logger.Println(err.Error())
-		return err
-	}
+// func (s *PostService) ReactToPost(ctx context.Context, postId primitive.ObjectID, userId primitive.ObjectID, reaction string, add bool) error {
+// 	if err := s.storage.ReactToPost(ctx, postId, userId, reaction, add); err != nil {
+// 		s.logger.Println(err.Error())
+// 		return err
+// 	}
 
-	return nil
-}
+// 	return nil
+// }
