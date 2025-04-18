@@ -67,6 +67,8 @@ func (s *CommentService) CreateComment(ctx context.Context, comment *models.Comm
 
 }
 
+func (s *CommentService) ReactToComment(ctx context.Context, reaction *models.Reaction) {}
+
 func (s *CommentService) DeleteComment(ctx context.Context, commentID primitive.ObjectID, userID primitive.ObjectID) error {
 	err := s.storage.DeleteComment(ctx, commentID, userID)
 	if err != nil {
