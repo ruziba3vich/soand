@@ -35,7 +35,7 @@ func NewCommentService(storage *storage.CommentStorage, user_storage *storage.Us
 func (s *CommentService) CreateComment(ctx context.Context, comment *models.Comment) error {
 	comment.ID = primitive.NewObjectID()
 	comment.CreatedAt = time.Now()
-	comment.Reactions = make(map[string]int)
+	comment.Reactions = make(map[string][]primitive.ObjectID)
 
 	// If it's a reply, ensure the parent comment exists within the same post
 	if !comment.ReplyTo.IsZero() {
@@ -67,7 +67,9 @@ func (s *CommentService) CreateComment(ctx context.Context, comment *models.Comm
 
 }
 
-func (s *CommentService) ReactToComment(ctx context.Context, reaction *models.Reaction) {}
+func (s *CommentService) ReactToComment(ctx context.Context, reaction *models.Reaction) error {
+	return nil
+}
 
 func (s *CommentService) DeleteComment(ctx context.Context, commentID primitive.ObjectID, userID primitive.ObjectID) error {
 	err := s.storage.DeleteComment(ctx, commentID, userID)

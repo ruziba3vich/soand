@@ -44,6 +44,74 @@ func (s *CommentStorage) DeleteComment(ctx context.Context, commentID primitive.
 	return nil
 }
 
+// AddReactionToComment adds a user's reaction to a comment
+func (s *CommentStorage) AddReactionToComment(ctx context.Context, reaction *models.Reaction) error {
+	update := bson.M{
+		"$addToSet": bson.M{
+			"reactions." + reaction.Reaction: reaction.UserID,
+		},
+	}
+
+	_, err := s.db.UpdateOne(
+		ctx,
+		bson.M{"_id": reaction.CommentId},
+		update,
+	)
+	return err
+}
+
+// RemoveReactionFromComment removes a user's reaction from a comment
+func (s *CommentStorage) RemoveReactionFromComment(ctx context.Context, reaction *models.Reaction) error {
+	update := bson.M{
+		"$pull": bson.M{
+			"reactions." + reaction.Reaction: reaction.UserID,
+		},
+	}
+
+	_, err := s.db.UpdateOne(
+		ctx,
+		bson.M{"_id": reaction.CommentId},
+		update,
+	)
+	return err
+}
+
+// HasUserReacted checks if a user has already reacted to a comment with any reaction
+func (s *CommentStorage) HasUserReacted(ctx context.Context, commentID, userID primitive.ObjectID) (bool, error) {
+	var comment models.Comment
+	err := s.db.FindOne(ctx, bson.M{"_id": commentID}).Decode(&comment)
+	if err != nil {
+		return false, err
+	}
+
+	for _, userIDs := range comment.Reactions {
+		for _, id := range userIDs {
+			if id == userID {
+				return true, nil
+			}
+		}
+	}
+	return false, nil
+}
+
+// HasUserReactedWith checks if a user has reacted to a comment with a specific reaction
+func (s *CommentStorage) HasUserReactedWith(ctx context.Context, commentID, userID primitive.ObjectID, reaction string) (bool, error) {
+	var comment models.Comment
+	err := s.db.FindOne(ctx, bson.M{"_id": commentID}).Decode(&comment)
+	if err != nil {
+		return false, err
+	}
+
+	if userIDs, exists := comment.Reactions[reaction]; exists {
+		for _, id := range userIDs {
+			if id == userID {
+				return true, nil
+			}
+		}
+	}
+	return false, nil
+}
+
 func (s *CommentStorage) GetParentComment(ctx context.Context, comment *models.Comment) error {
 	var parentComment models.Comment
 	return s.db.FindOne(ctx, bson.M{"_id": comment.ReplyTo, "post_id": comment.PostID}).Decode(&parentComment)
