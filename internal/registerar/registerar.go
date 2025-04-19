@@ -73,6 +73,7 @@ func RegisterCommentRoutes(
 
 	commentRoutes := r.Group("/comments")
 	{
+		commentRoutes.POST("react", wsMiddleware(commentHandler.ReactToComment))
 		commentRoutes.GET("/ws", wsMiddleware(commentHandler.HandleWebSocket))                // WebSocket endpoint
 		commentRoutes.GET("/:post_id", commentMiddleware(commentHandler.GetCommentsByPostID)) // Fetch comments with pagination
 		commentRoutes.PATCH("/:comment_id", authMiddleware(commentHandler.UpdateComment))     // Update comment text
