@@ -82,6 +82,11 @@ func (s *CommentService) ReactToComment(ctx context.Context, reaction *models.Re
 			s.logger.Println("user has not reacted ", reaction.CommentId, reaction.UserID, reaction.Reaction)
 			return fmt.Errorf("user has not reacted")
 		}
+	} else {
+		if err := s.storage.AddReactionToComment(ctx, reaction); err != nil {
+			s.logger.Println("failed to react to post", err.Error())
+			return err
+		}
 	}
 	return nil
 }
