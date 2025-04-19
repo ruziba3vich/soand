@@ -14,5 +14,6 @@ type (
 		GetCommentsByPostID(context.Context, primitive.ObjectID, int64, int64) ([]models.Comment, error)
 		UpdateCommentText(context.Context, primitive.ObjectID, primitive.ObjectID, string) error
 		GetCommentByID(context.Context, primitive.ObjectID) (*models.Comment, error)
+		ReactToComment(context.Context, *models.Reaction) error
 	}
 )
