@@ -13,6 +13,7 @@ import (
 	"go.mongodb.org/mongo-driver/mongo"
 
 	"github.com/ruziba3vich/soand/internal/models"
+	"github.com/ruziba3vich/soand/internal/repos"
 	"github.com/ruziba3vich/soand/internal/storage"
 )
 
@@ -23,7 +24,7 @@ type CommentService struct {
 	user_storage *storage.UserStorage
 }
 
-func NewCommentService(storage *storage.CommentStorage, user_storage *storage.UserStorage, redis *redis.Client, logger *log.Logger) *CommentService {
+func NewCommentService(storage *storage.CommentStorage, user_storage *storage.UserStorage, redis *redis.Client, logger *log.Logger) repos.ICommentService {
 	return &CommentService{
 		storage:      storage,
 		redis:        redis,
