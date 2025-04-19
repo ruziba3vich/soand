@@ -246,6 +246,28 @@ func (h *CommentHandler) GetCommentsByPostID(c *gin.Context) {
 	}})
 }
 
+func (h *CommentHandler) ReactToComment(c *gin.Context) {
+	userId, err := getUserIdFromRequest(c)
+	if err != nil {
+		c.JSON(http.StatusUnauthorized, gin.H{"error": "Unauthorized"})
+		return
+	}
+	var req models.Reaction
+	if err := c.BindJSON(&req); err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"error": "bad request: " + err.Error()})
+		return
+	}
+
+	req.UserID = userId
+
+	if err := h.service.ReactToComment(c.Request.Context(), &req); err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+		return
+	}
+
+	c.JSON(http.StatusOK, gin.H{"data": "reacted successfully"})
+}
+
 // UpdateComment updates the text of a comment
 // @Summary Update a comment
 // @Description Updates the text of a specific comment for the authenticated user
