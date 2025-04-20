@@ -58,18 +58,41 @@ func (s *CommentStorage) AddReactionToComment(ctx context.Context, reaction *mod
 
 // RemoveReactionFromComment removes a user's reaction from a comment
 func (s *CommentStorage) RemoveReactionFromComment(ctx context.Context, reaction *models.Reaction) error {
-	update := bson.M{
-		"$pull": bson.M{
-			"reactions." + reaction.Reaction: reaction.UserID,
-		},
+	comment, err := s.GetCommentByID(ctx, reaction.CommentId)
+	if err != nil {
+		return err
 	}
 
-	_, err := s.db.UpdateOne(
+	users, ok := comment.Reactions[reaction.Reaction]
+	if !ok {
+		return fmt.Errorf("reaction type %s not found", reaction.Reaction)
+	}
+
+	ind := slices.Index(users, reaction.UserID)
+	if ind == -1 {
+		return fmt.Errorf("reaction with this user id not found")
+	}
+
+	// Remove the user ID from the slice
+	users = slices.Delete(users, ind, ind+1)
+
+	// If no users left for this reaction type, remove the reaction key entirely
+	if len(users) == 0 {
+		delete(comment.Reactions, reaction.Reaction)
+	} else {
+		comment.Reactions[reaction.Reaction] = users
+	}
+
+	_, err = s.db.ReplaceOne(
 		ctx,
-		bson.M{"_id": reaction.CommentId},
-		update,
+		bson.M{"_id": comment.ID},
+		comment,
 	)
-	return err
+	if err != nil {
+		return fmt.Errorf("failed to update comment: %w", err)
+	}
+
+	return nil
 }
 
 // HasUserReacted checks if a user has already reacted to a comment with any reaction
