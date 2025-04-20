@@ -141,11 +141,11 @@ func (s *PostService) SearchPostsByTitle(ctx context.Context, query string, page
 
 func (s *PostService) LikeOrDislikePost(ctx context.Context, userId primitive.ObjectID, postId primitive.ObjectID, count int) error {
 	liked, err := s.likes_storage.HasUserLiked(ctx, userId, postId)
+	if err != nil {
+		s.logger.Printf("failed to check if user liked %s\n", err.Error())
+		return err
+	}
 	if count == 1 {
-		if err != nil {
-			s.logger.Printf("failed to check if user liked %s\n", err.Error())
-			return err
-		}
 		if liked {
 			return errors.New("user already liked this post")
 		}
