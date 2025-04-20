@@ -16,19 +16,16 @@ import (
 type Storage struct {
 	db            *mongo.Collection
 	users_storage *UserStorage
-	likes_storage *LikesStorage
 	// reactions_storage *ReactionsStorage
 }
 
 // NewStorage initializes storage with a MongoDB collection
 func NewStorage(
 	collection *mongo.Collection,
-	users_storage *UserStorage,
-	likes_storage *LikesStorage) *Storage {
+	users_storage *UserStorage) *Storage {
 	return &Storage{
 		db:            collection,
 		users_storage: users_storage,
-		likes_storage: likes_storage,
 	}
 }
 
