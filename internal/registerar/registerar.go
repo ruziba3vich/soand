@@ -51,7 +51,7 @@ func RegisterPostRoutes(
 	{
 		posts.POST("", authMiddleware(h.CreatePost))
 		posts.POST("search/title", h.SearchPostsByTitle)
-		// posts.POST("/react", authMiddleware(h.ReactToPostHandler))
+		posts.POST("/like", authMiddleware(h.LikePostHandler))
 		posts.GET("", h.GetPost)                           // Get post by query param "id"
 		posts.GET("/all", h.GetAllPosts)                   // Get all posts with pagination
 		posts.PUT("/:id", authMiddleware(h.UpdatePost))    // Update post by ID
