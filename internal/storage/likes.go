@@ -2,7 +2,6 @@ package storage
 
 import (
 	"context"
-	"fmt"
 
 	"go.mongodb.org/mongo-driver/bson"
 	"go.mongodb.org/mongo-driver/bson/primitive"
@@ -21,16 +20,6 @@ func NewLikesStorage(db *mongo.Collection) *LikesStorage {
 
 // LikePost adds a like for a post if the user hasn't liked it already.
 func (s *LikesStorage) LikePost(ctx context.Context, userID, postID primitive.ObjectID) error {
-	// Check if the like already exists
-	filter := bson.M{"user_id": userID, "post_id": postID}
-	existing := s.db.FindOne(ctx, filter)
-	if existing.Err() == nil {
-		return fmt.Errorf("you have already liked this post")
-	} else if existing.Err() != mongo.ErrNoDocuments {
-		// Some other error occurred
-		return existing.Err()
-	}
-
 	// Insert the like
 	like := bson.M{
 		"user_id": userID,
@@ -45,4 +34,18 @@ func (s *LikesStorage) DislikePost(ctx context.Context, userID, postID primitive
 	filter := bson.M{"user_id": userID, "post_id": postID}
 	_, err := s.db.DeleteOne(ctx, filter)
 	return err
+}
+
+// HasUserLiked checks if a user has already liked a given post.
+func (s *LikesStorage) HasUserLiked(ctx context.Context, userID, postID primitive.ObjectID) (bool, error) {
+	filter := bson.M{"user_id": userID, "post_id": postID}
+	result := s.db.FindOne(ctx, filter)
+
+	if result.Err() == mongo.ErrNoDocuments {
+		return false, nil // user has not liked the post
+	}
+	if result.Err() != nil {
+		return false, result.Err() // some unexpected error
+	}
+	return true, nil // user has liked the post
 }
