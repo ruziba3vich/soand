@@ -7,6 +7,7 @@ import (
 	"slices"
 	"time"
 
+	dto "github.com/ruziba3vich/soand/internal/dtos"
 	"github.com/ruziba3vich/soand/internal/models"
 	"go.mongodb.org/mongo-driver/bson"
 	"go.mongodb.org/mongo-driver/bson/primitive"
@@ -80,7 +81,7 @@ func (s *CommentStorage) RemoveReactionFromComment(ctx context.Context, reaction
 
 	ind := slices.Index(users, reaction.UserID)
 	if ind == -1 {
-		return fmt.Errorf("reaction with this user id not found")
+		return dto.ErrNotReacted
 	}
 
 	// Remove the user ID from the slice
@@ -99,7 +100,7 @@ func (s *CommentStorage) RemoveReactionFromComment(ctx context.Context, reaction
 		comment,
 	)
 	if err != nil {
-		return fmt.Errorf("failed to update comment: %w", err)
+		return fmt.Errorf("failed to update comment: %s", err.Error())
 	}
 
 	return nil
