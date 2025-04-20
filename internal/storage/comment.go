@@ -74,21 +74,20 @@ func (s *CommentStorage) RemoveReactionFromComment(ctx context.Context, reaction
 		return err
 	}
 
-	users := comment.Reactions[reaction.Reaction]
+	var found bool
 
-	ind := slices.Index(users, reaction.UserID)
-	if ind == -1 {
-		return dto.ErrNotReacted
+	for r, users := range comment.Reactions {
+		ind := slices.Index(users, reaction.UserID)
+		if ind != -1 {
+			newUsers := slices.Delete(users, ind, ind+1)
+			comment.Reactions[r] = newUsers
+			found = true
+			break
+		}
 	}
 
-	// Remove the user ID from the slice
-	users = slices.Delete(users, ind, ind+1)
-
-	// If no users left for this reaction type, remove the reaction key entirely
-	if len(users) == 0 {
-		delete(comment.Reactions, reaction.Reaction)
-	} else {
-		comment.Reactions[reaction.Reaction] = users
+	if !found {
+		return dto.ErrNotReacted
 	}
 
 	_, err = s.db.ReplaceOne(
@@ -101,39 +100,6 @@ func (s *CommentStorage) RemoveReactionFromComment(ctx context.Context, reaction
 	}
 
 	return nil
-}
-
-// HasUserReacted checks if a user has already reacted to a comment with any reaction
-func (s *CommentStorage) HasUserReacted(ctx context.Context, commentID, userID primitive.ObjectID) (bool, error) {
-	var comment models.Comment
-	err := s.db.FindOne(ctx, bson.M{"_id": commentID}).Decode(&comment)
-	if err != nil {
-		return false, err
-	}
-
-	for _, userIDs := range comment.Reactions {
-		for _, id := range userIDs {
-			if id == userID {
-				return true, nil
-			}
-		}
-	}
-	return false, nil
-}
-
-// HasUserReactedWith checks if a user has reacted to a comment with a specific reaction
-func (s *CommentStorage) HasUserReactedWith(ctx context.Context, commentID, userID primitive.ObjectID, reaction string) (bool, error) {
-	comment, err := s.GetCommentByID(ctx, commentID)
-	if err != nil {
-		return false, err
-	}
-
-	if userIDs, exists := comment.Reactions[reaction]; exists {
-		if slices.Contains(userIDs, userID) {
-			return true, nil
-		}
-	}
-	return false, nil
 }
 
 func (s *CommentStorage) GetParentComment(ctx context.Context, comment *models.Comment) error {
