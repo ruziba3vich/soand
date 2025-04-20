@@ -249,7 +249,7 @@ func (h *CommentHandler) GetCommentsByPostID(c *gin.Context) {
 func (h *CommentHandler) ReactToComment(c *gin.Context) {
 	userId, err := getUserIdFromRequest(c)
 	if err != nil {
-		c.JSON(http.StatusUnauthorized, gin.H{"error": "Unauthorized"})
+		c.JSON(http.StatusUnauthorized, gin.H{"error": "Unauthorized: " + err.Error()})
 		return
 	}
 	var req models.Reaction
