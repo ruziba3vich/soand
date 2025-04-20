@@ -74,10 +74,7 @@ func (s *CommentStorage) RemoveReactionFromComment(ctx context.Context, reaction
 		return err
 	}
 
-	users, ok := comment.Reactions[reaction.Reaction]
-	if !ok {
-		return fmt.Errorf("reaction type %s not found", reaction.Reaction)
-	}
+	users := comment.Reactions[reaction.Reaction]
 
 	ind := slices.Index(users, reaction.UserID)
 	if ind == -1 {
