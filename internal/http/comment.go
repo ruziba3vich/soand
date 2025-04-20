@@ -252,12 +252,19 @@ func (h *CommentHandler) ReactToComment(c *gin.Context) {
 		c.JSON(http.StatusUnauthorized, gin.H{"error": "Unauthorized: " + err.Error()})
 		return
 	}
+	commentIdStr := c.Query("comment_id")
+	commentId, err := primitive.ObjectIDFromHex(commentIdStr)
+	if err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"error": "invalid comment id"})
+		return
+	}
 	var req models.Reaction
 	if err := c.BindJSON(&req); err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{"error": "bad request: " + err.Error()})
 		return
 	}
 
+	req.CommentId = commentId
 	req.UserID = userId
 
 	if err := h.service.ReactToComment(c.Request.Context(), &req); err != nil {
