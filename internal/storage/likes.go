@@ -2,6 +2,7 @@ package storage
 
 import (
 	"context"
+	"errors"
 
 	"go.mongodb.org/mongo-driver/bson"
 	"go.mongodb.org/mongo-driver/bson/primitive"
@@ -41,7 +42,7 @@ func (s *LikesStorage) HasUserLiked(ctx context.Context, userID, postID primitiv
 	filter := bson.M{"user_id": userID, "post_id": postID}
 	result := s.db.FindOne(ctx, filter)
 
-	if result.Err() == mongo.ErrNoDocuments {
+	if errors.Is(result.Err(), mongo.ErrNoDocuments) {
 		return false, nil // user has not liked the post
 	}
 	if result.Err() != nil {
