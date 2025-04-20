@@ -5,6 +5,7 @@ import (
 	"log"
 
 	"github.com/ruziba3vich/soand/internal/models"
+	"github.com/ruziba3vich/soand/internal/repos"
 	"github.com/ruziba3vich/soand/internal/storage"
 	"go.mongodb.org/mongo-driver/bson/primitive"
 )
@@ -14,7 +15,7 @@ type ChatService struct {
 	logger  *log.Logger
 }
 
-func NewChatService(storage *storage.ChatStorage, logger *log.Logger) *ChatService {
+func NewChatService(storage *storage.ChatStorage, logger *log.Logger) repos.IChatService {
 	return &ChatService{
 		storage: storage,
 		logger:  logger,

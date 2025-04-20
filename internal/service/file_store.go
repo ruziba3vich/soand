@@ -4,6 +4,7 @@ import (
 	"log"
 	"mime/multipart"
 
+	"github.com/ruziba3vich/soand/internal/repos"
 	"github.com/ruziba3vich/soand/internal/storage"
 )
 
@@ -14,7 +15,7 @@ type (
 	}
 )
 
-func NewFileStoreService(storage *storage.FileStorage, logger *log.Logger) *FileStoreService {
+func NewFileStoreService(storage *storage.FileStorage, logger *log.Logger) repos.IFIleStoreService {
 	return &FileStoreService{
 		storage: storage,
 		logger:  logger,

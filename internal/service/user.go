@@ -5,6 +5,7 @@ import (
 	"log"
 
 	"github.com/ruziba3vich/soand/internal/models"
+	"github.com/ruziba3vich/soand/internal/repos"
 	"github.com/ruziba3vich/soand/internal/storage"
 	"go.mongodb.org/mongo-driver/bson/primitive"
 )
@@ -16,7 +17,7 @@ type UserService struct {
 }
 
 // NewUserService initializes UserService
-func NewUserService(storage *storage.UserStorage, logger *log.Logger) *UserService {
+func NewUserService(storage *storage.UserStorage, logger *log.Logger) repos.UserRepo {
 	return &UserService{storage: storage, logger: logger}
 }
 

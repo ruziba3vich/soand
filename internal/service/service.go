@@ -6,6 +6,7 @@ import (
 	"log"
 
 	"github.com/ruziba3vich/soand/internal/models"
+	"github.com/ruziba3vich/soand/internal/repos"
 	"github.com/ruziba3vich/soand/internal/storage"
 	"github.com/sirupsen/logrus"
 	"go.mongodb.org/mongo-driver/bson"
@@ -20,7 +21,7 @@ type PostService struct {
 }
 
 // NewPostService initializes a new PostService with storage and logger
-func NewPostService(storage *storage.Storage, likes_storage *storage.LikesStorage, logger *log.Logger) *PostService {
+func NewPostService(storage *storage.Storage, likes_storage *storage.LikesStorage, logger *log.Logger) repos.IPostService {
 	// Create a logger
 	return &PostService{
 		storage:       storage,

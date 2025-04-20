@@ -5,6 +5,7 @@ import (
 	"mime/multipart"
 
 	"github.com/ruziba3vich/soand/internal/models"
+	"github.com/ruziba3vich/soand/internal/repos"
 	"github.com/ruziba3vich/soand/internal/storage"
 )
 
@@ -13,7 +14,7 @@ type BackgroundService struct {
 	storage *storage.BackgroundStorage
 }
 
-func NewBackgroundService(logger *log.Logger, storage *storage.BackgroundStorage) *BackgroundService {
+func NewBackgroundService(logger *log.Logger, storage *storage.BackgroundStorage) repos.IBackgroundService {
 	return &BackgroundService{
 		logger:  logger,
 		storage: storage,
