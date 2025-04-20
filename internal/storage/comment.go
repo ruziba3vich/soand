@@ -53,6 +53,16 @@ func (s *CommentStorage) AddReactionToComment(ctx context.Context, reaction *mod
 		return err
 	}
 	comment.Reactions[reaction.Reaction] = append(comment.Reactions[reaction.Reaction], reaction.UserID)
+
+	_, err = s.db.ReplaceOne(
+		ctx,
+		bson.M{"_id": comment.ID},
+		comment,
+	)
+	if err != nil {
+		return fmt.Errorf("failed to update comment: %w", err)
+	}
+
 	return nil
 }
 
