@@ -149,9 +149,17 @@ func (s *PostService) LikeOrDislikePost(ctx context.Context, userId primitive.Ob
 		if liked {
 			return errors.New("user already liked this post")
 		}
+		if err := s.likes_storage.LikePost(ctx, userId, postId); err != nil {
+			s.logger.Printf("failed to like the post [%s] by user [%s]\n", postId.Hex(), userId.Hex())
+			return err
+		}
 	} else {
 		if !liked {
 			return errors.New("user has not liked this post")
+		}
+		if err := s.likes_storage.DislikePost(ctx, userId, postId); err != nil {
+			s.logger.Printf("failed to dislike the post [%s] by user [%s]\n", postId.Hex(), userId.Hex())
+			return err
 		}
 	}
 
