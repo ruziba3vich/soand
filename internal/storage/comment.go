@@ -46,18 +46,13 @@ func (s *CommentStorage) DeleteComment(ctx context.Context, commentID primitive.
 
 // AddReactionToComment adds a user's reaction to a comment
 func (s *CommentStorage) AddReactionToComment(ctx context.Context, reaction *models.Reaction) error {
-	update := bson.M{
-		"$addToSet": bson.M{
-			"reactions." + reaction.Reaction: reaction.UserID,
-		},
-	}
 
-	_, err := s.db.UpdateOne(
-		ctx,
-		bson.M{"_id": reaction.CommentId},
-		update,
-	)
-	return err
+	comment, err := s.GetCommentByID(ctx, reaction.CommentId)
+	if err != nil {
+		return err
+	}
+	comment.Reactions[reaction.Reaction] = append(comment.Reactions[reaction.Reaction], reaction.UserID)
+	return nil
 }
 
 // RemoveReactionFromComment removes a user's reaction from a comment
