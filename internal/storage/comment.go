@@ -4,6 +4,7 @@ import (
 	"context"
 	"errors"
 	"fmt"
+	"slices"
 	"time"
 
 	"github.com/ruziba3vich/soand/internal/models"
@@ -91,17 +92,14 @@ func (s *CommentStorage) HasUserReacted(ctx context.Context, commentID, userID p
 
 // HasUserReactedWith checks if a user has reacted to a comment with a specific reaction
 func (s *CommentStorage) HasUserReactedWith(ctx context.Context, commentID, userID primitive.ObjectID, reaction string) (bool, error) {
-	var comment models.Comment
-	err := s.db.FindOne(ctx, bson.M{"_id": commentID}).Decode(&comment)
+	comment, err := s.GetCommentByID(ctx, commentID)
 	if err != nil {
 		return false, err
 	}
 
 	if userIDs, exists := comment.Reactions[reaction]; exists {
-		for _, id := range userIDs {
-			if id == userID {
-				return true, nil
-			}
+		if slices.Contains(userIDs, userID) {
+			return true, nil
 		}
 	}
 	return false, nil
