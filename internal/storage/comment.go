@@ -80,7 +80,11 @@ func (s *CommentStorage) RemoveReactionFromComment(ctx context.Context, reaction
 		ind := slices.Index(users, reaction.UserID)
 		if ind != -1 {
 			newUsers := slices.Delete(users, ind, ind+1)
-			comment.Reactions[r] = newUsers
+			if len(newUsers) == 0 {
+				delete(comment.Reactions, r)
+			} else {
+				comment.Reactions[r] = newUsers
+			}
 			found = true
 			break
 		}
