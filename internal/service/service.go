@@ -2,6 +2,7 @@ package service
 
 import (
 	"context"
+	"errors"
 	"log"
 
 	"github.com/ruziba3vich/soand/internal/models"
@@ -13,16 +14,18 @@ import (
 
 // PostService struct to handle post-related operations
 type PostService struct {
-	storage *storage.Storage
-	logger  *log.Logger
+	storage       *storage.Storage
+	likes_storage *storage.LikesStorage
+	logger        *log.Logger
 }
 
 // NewPostService initializes a new PostService with storage and logger
-func NewPostService(storage *storage.Storage, logger *log.Logger) *PostService {
+func NewPostService(storage *storage.Storage, likes_storage *storage.LikesStorage, logger *log.Logger) *PostService {
 	// Create a logger
 	return &PostService{
-		storage: storage,
-		logger:  logger,
+		storage:       storage,
+		likes_storage: likes_storage,
+		logger:        logger,
 	}
 }
 
@@ -136,6 +139,21 @@ func (s *PostService) SearchPostsByTitle(ctx context.Context, query string, page
 }
 
 func (s *PostService) LikeOrDislikePost(ctx context.Context, userId primitive.ObjectID, postId primitive.ObjectID, count int) error {
+	liked, err := s.likes_storage.HasUserLiked(ctx, userId, postId)
+	if count == 1 {
+		if err != nil {
+			s.logger.Printf("failed to check if user liked %s\n", err.Error())
+			return err
+		}
+		if liked {
+			return errors.New("user already liked this post")
+		}
+	} else {
+		if !liked {
+			return errors.New("user has not liked this post")
+		}
+	}
+
 	if err := s.storage.LikeOrDislikePost(ctx, userId, postId, count); err != nil {
 		s.logger.Println(err.Error())
 	}
