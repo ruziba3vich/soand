@@ -73,6 +73,7 @@ func (s *CommentService) ReactToComment(ctx context.Context, reaction *models.Re
 		reacted, err := s.storage.HasUserReactedWith(ctx, reaction.CommentId, reaction.UserID, reaction.Reaction)
 		if err != nil {
 			s.logger.Println("failed to check if user reacted: ", reaction.CommentId, reaction.UserID, reaction.Reaction)
+			return fmt.Errorf("failed to check if user reacted: %s", err.Error())
 		}
 		if reacted {
 			if err := s.storage.RemoveReactionFromComment(ctx, reaction); err != nil {
