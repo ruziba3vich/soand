@@ -12,6 +12,7 @@ import (
 	"go.mongodb.org/mongo-driver/bson/primitive"
 	"go.mongodb.org/mongo-driver/mongo"
 
+	dto "github.com/ruziba3vich/soand/internal/dtos"
 	"github.com/ruziba3vich/soand/internal/models"
 	"github.com/ruziba3vich/soand/internal/repos"
 	"github.com/ruziba3vich/soand/internal/storage"
@@ -69,7 +70,12 @@ func (s *CommentService) CreateComment(ctx context.Context, comment *models.Comm
 }
 
 func (s *CommentService) ReactToComment(ctx context.Context, reaction *models.Reaction) error {
-	s.storage.RemoveReactionFromComment(ctx, reaction)
+	if err := s.storage.RemoveReactionFromComment(ctx, reaction); err != nil {
+		if !errors.Is(err, dto.ErrNotReacted) {
+			s.logger.Println(err.Error())
+			return err
+		}
+	}
 	if reaction.Incr {
 		if err := s.storage.AddReactionToComment(ctx, reaction); err != nil {
 			s.logger.Printf("could not react to comment %s by user %s : %s", reaction.CommentId.Hex(), reaction.UserID.Hex(), err.Error())
