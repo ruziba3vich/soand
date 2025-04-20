@@ -1,6 +1,8 @@
 package dto
 
 import (
+	"errors"
+
 	"github.com/ruziba3vich/soand/internal/models"
 	"go.mongodb.org/mongo-driver/bson/primitive"
 )
@@ -24,6 +26,8 @@ func (p *PostRequest) ToPost() *models.Post {
 		Title:       p.Title,
 	}
 }
+
+var ErrNotReacted = errors.New("user has not reacted")
 
 /*
 	ID          primitive.ObjectID `bson:"_id,omitempty" json:"id"`                // MongoDB ObjectID
