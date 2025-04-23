@@ -10,7 +10,7 @@ import (
 
 // PostServiceInterface defines all methods for the PostService
 type IPostService interface {
-	CreatePost(ctx context.Context, post *models.Post, deleteAfter int) (primitive.ObjectID, error)
+	CreatePost(ctx context.Context, post *models.Post, deleteAfter int) error
 	DeletePost(ctx context.Context, id primitive.ObjectID) error
 	EnsureTTLIndex(ctx context.Context) error
 	GetAllPosts(ctx context.Context, page int64, pageSize int64) ([]models.Post, error)
