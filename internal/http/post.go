@@ -83,13 +83,13 @@ func (h *PostHandler) CreatePost(c *gin.Context) {
 		}
 	}
 
-	id, err := h.service.CreatePost(c.Request.Context(), post, req.DeleteAfter)
+	err = h.service.CreatePost(c.Request.Context(), post, req.DeleteAfter)
 	if err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to create post"})
 		return
 	}
 
-	c.JSON(http.StatusCreated, gin.H{"message": "Post created successfully", "id": id.Hex()})
+	c.JSON(http.StatusCreated, gin.H{"data": post})
 }
 
 // GetPost retrieves a post by its ID
