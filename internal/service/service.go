@@ -31,21 +31,21 @@ func NewPostService(storage *storage.Storage, likes_storage *storage.LikesStorag
 }
 
 // CreatePost inserts a new post into the database
-func (s *PostService) CreatePost(ctx context.Context, post *models.Post, deleteAfter int) (primitive.ObjectID, error) {
-	id, err := s.storage.CreatePost(ctx, post, deleteAfter)
+func (s *PostService) CreatePost(ctx context.Context, post *models.Post, deleteAfter int) error {
+	err := s.storage.CreatePost(ctx, post, deleteAfter)
 	if err != nil {
 		s.logger.Println(logrus.Fields{
 			"content": post.Description,
 			"error":   err.Error(),
 		})
-		return primitive.NilObjectID, err
+		return err
 	}
 
 	s.logger.Println(logrus.Fields{
-		"id":      id.Hex(),
+		"id":      post.ID.Hex(),
 		"content": post.Description,
 	})
-	return id, nil
+	return nil
 }
 
 // DeletePost removes a post by ID
