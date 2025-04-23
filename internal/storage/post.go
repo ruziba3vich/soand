@@ -30,7 +30,7 @@ func NewStorage(
 }
 
 // CreatePost inserts a new post into the database
-func (s *Storage) CreatePost(ctx context.Context, post *models.Post, deleteAfter int) (*models.Post, error) {
+func (s *Storage) CreatePost(ctx context.Context, post *models.Post, deleteAfter int) error {
 	post.ID = primitive.NewObjectID()
 	post.CreatedAt = time.Now()
 	post.DeleteAt = post.CreatedAt.Add(time.Duration(deleteAfter) * time.Hour)
@@ -44,7 +44,7 @@ func (s *Storage) CreatePost(ctx context.Context, post *models.Post, deleteAfter
 		post.Reactions = make(map[string]int)
 	}
 	_, err := s.db.InsertOne(ctx, post)
-	return post, err
+	return err
 }
 
 // GetPost retrieves a post by ID
