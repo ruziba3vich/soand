@@ -23,3 +23,17 @@ type ProfilePic struct {
 	Url      string    `bson:"url" json:"url"`
 	PostedAt time.Time `bson:"posted_at" json:"posted_at"`
 }
+
+type UserUpdate struct {
+	UserId        primitive.ObjectID
+	Fullname      *string `json:"full_name"`
+	Bio           *string `json:"bio"`
+	ProfileHidden *bool   `json:"profile_hidden"`
+}
+
+/*
+	"user_id":    userID.Hex(),
+    "full_name":  updates.Fullname,
+    "bio":        updates.Bio,
+    "profile_hidden": updates.HiddenProfile
+*/
