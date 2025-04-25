@@ -190,6 +190,43 @@ func (s *UserStorage) UpdateUsername(ctx context.Context, userID primitive.Objec
 	return nil
 }
 
+// UpdateUser updates Fullname, Bio, and HiddenProfile fields for a user
+func (s *UserStorage) UpdateUser(ctx context.Context, userID primitive.ObjectID, updates *models.UserUpdate) error {
+	ctx, cancel := context.WithTimeout(ctx, 5*time.Second)
+	defer cancel()
+
+	// Build the update document
+	updateFields := bson.M{}
+	if updates.Fullname != nil {
+		updateFields["full_name"] = *updates.Fullname
+	}
+	if updates.Bio != nil {
+		updateFields["bio"] = *updates.Bio
+	}
+	if updates.HiddenProfile != nil {
+		updateFields["profile_hidden"] = *updates.HiddenProfile
+	}
+
+	// If no fields to update, return an error
+	if len(updateFields) == 0 {
+		return fmt.Errorf("no fields provided for update")
+	}
+
+	// Perform the update
+	filter := bson.M{"_id": userID}
+	update := bson.M{"$set": updateFields}
+	result, err := s.db.UpdateOne(ctx, filter, update)
+	if err != nil {
+		return fmt.Errorf("failed to update user: %v", err)
+	}
+
+	if result.MatchedCount == 0 {
+		return fmt.Errorf("user not found")
+	}
+
+	return nil
+}
+
 // UpdatePassword updates a user's password after verifying the old password
 func (s *UserStorage) UpdatePassword(ctx context.Context, userID primitive.ObjectID, oldPassword, newPassword string) error {
 	user, err := s.GetUserByID(ctx, userID)
@@ -214,52 +251,16 @@ func (s *UserStorage) UpdatePassword(ctx context.Context, userID primitive.Objec
 	return err
 }
 
-// UpdateFullname updates a user's full name
-func (s *UserStorage) UpdateFullname(ctx context.Context, userID primitive.ObjectID, newFullname string) error {
-	ctx, cancel := context.WithTimeout(ctx, 5*time.Second)
-	defer cancel()
-
-	_, err := s.db.UpdateOne(ctx, bson.M{"_id": userID}, bson.M{"$set": bson.M{"fullname": newFullname}})
-	return err
-}
-
 // HashPassword hashes a password using bcrypt
 func HashPassword(password string) (string, error) {
 	bytes, err := bcrypt.GenerateFromPassword([]byte(password), bcrypt.DefaultCost)
 	return string(bytes), err
 }
 
-func (s *UserStorage) SetBio(ctx context.Context, userId primitive.ObjectID, bio string) error {
-	ctx, cancel := context.WithTimeout(ctx, 5*time.Second)
-	defer cancel()
-
-	_, err := s.db.UpdateOne(ctx, bson.M{"_id": userId}, bson.M{"$set": bson.M{"bio": bio}})
-	return err
-}
-
 // CheckPassword verifies a hashed password
 func CheckPassword(hashedPassword, plainPassword string) bool {
 	err := bcrypt.CompareHashAndPassword([]byte(hashedPassword), []byte(plainPassword))
 	return err == nil
-}
-
-func (s *UserStorage) ChangeProfileVisibility(ctx context.Context, userID primitive.ObjectID, hidden bool) error {
-	ctx, cancel := context.WithTimeout(ctx, 5*time.Second)
-	defer cancel()
-
-	filter := bson.M{"_id": userID}
-	update := bson.M{"$set": bson.M{"profile_hidden": hidden}}
-
-	result, err := s.db.UpdateOne(ctx, filter, update)
-	if err != nil {
-		return err
-	}
-
-	if result.MatchedCount == 0 {
-		return errors.New("user not found")
-	}
-
-	return nil
 }
 
 func (s *UserStorage) SetBackgroundPic(ctx context.Context, userID primitive.ObjectID, pic_id string) error {
