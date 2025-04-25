@@ -2,11 +2,14 @@ package service
 
 import (
 	"context"
+	"fmt"
 	"log"
+	"time"
 
 	"github.com/ruziba3vich/soand/internal/models"
 	"github.com/ruziba3vich/soand/internal/repos"
 	"github.com/ruziba3vich/soand/internal/storage"
+	"go.mongodb.org/mongo-driver/bson"
 	"go.mongodb.org/mongo-driver/bson/primitive"
 )
 
@@ -88,19 +91,19 @@ func (s *UserService) GetUserByUsername(ctx context.Context, username string) (*
 	return user, nil
 }
 
-// UpdateFullname updates a user's full name
-func (s *UserService) UpdateFullname(ctx context.Context, userID primitive.ObjectID, newFullname string) error {
-	s.logger.Printf("Updating fullname for user ID: %s\n", userID.Hex())
+// // UpdateFullname updates a user's full name
+// func (s *UserService) UpdateFullname(ctx context.Context, userID primitive.ObjectID, newFullname string) error {
+// 	s.logger.Printf("Updating fullname for user ID: %s\n", userID.Hex())
 
-	err := s.storage.UpdateFullname(ctx, userID, newFullname)
-	if err != nil {
-		s.logger.Printf("Error updating fullname: %v\n", err)
-		return err
-	}
+// 	err := s.storage.UpdateFullname(ctx, userID, newFullname)
+// 	if err != nil {
+// 		s.logger.Printf("Error updating fullname: %v\n", err)
+// 		return err
+// 	}
 
-	s.logger.Println("User fullname updated successfully")
-	return nil
-}
+// 	s.logger.Println("User fullname updated successfully")
+// 	return nil
+// }
 
 // UpdatePassword updates a user's password after checking the old one
 func (s *UserService) UpdatePassword(ctx context.Context, userID primitive.ObjectID, oldPassword, newPassword string) error {
@@ -130,6 +133,27 @@ func (s *UserService) UpdateUsername(ctx context.Context, userID primitive.Objec
 	return nil
 }
 
+func (s *UserService) UpdateUser(ctx context.Context, userID primitive.ObjectID, updates *models.UserUpdate) error {
+	ctx, cancel := context.WithTimeout(ctx, 5*time.Second)
+	defer cancel()
+
+	updateFields := bson.M{}
+	if updates.Fullname != nil {
+		updateFields["full_name"] = *updates.Fullname
+	}
+	if updates.Bio != nil {
+		updateFields["bio"] = *updates.Bio
+	}
+	if updates.ProfileHidden != nil {
+		updateFields["profile_hidden"] = *updates.ProfileHidden
+	}
+
+	if len(updateFields) == 0 {
+		return fmt.Errorf("no fields provided for update")
+	}
+	return s.storage.UpdateUser(ctx, userID, updateFields)
+}
+
 // ValidateJWT validates a JWT token and returns the user ID
 func (s *UserService) ValidateJWT(tokenString string) (string, error) {
 	s.logger.Println("Validating JWT token...")
@@ -144,31 +168,31 @@ func (s *UserService) ValidateJWT(tokenString string) (string, error) {
 	return userID, nil
 }
 
-func (s *UserService) ChangeProfileVisibility(ctx context.Context, userID primitive.ObjectID, hidden bool) error {
-	s.logger.Printf("Changing profile visibility for user %s to %v", userID.Hex(), hidden)
+// func (s *UserService) ChangeProfileVisibility(ctx context.Context, userID primitive.ObjectID, hidden bool) error {
+// 	s.logger.Printf("Changing profile visibility for user %s to %v", userID.Hex(), hidden)
 
-	err := s.storage.ChangeProfileVisibility(ctx, userID, hidden)
-	if err != nil {
-		s.logger.Printf("Failed to change profile visibility for user %s: %v", userID.Hex(), err)
-		return err
-	}
+// 	err := s.storage.ChangeProfileVisibility(ctx, userID, hidden)
+// 	if err != nil {
+// 		s.logger.Printf("Failed to change profile visibility for user %s: %v", userID.Hex(), err)
+// 		return err
+// 	}
 
-	s.logger.Printf("Successfully changed profile visibility for user %s", userID.Hex())
-	return nil
-}
+// 	s.logger.Printf("Successfully changed profile visibility for user %s", userID.Hex())
+// 	return nil
+// }
 
-func (s *UserService) SetBio(ctx context.Context, userId primitive.ObjectID, bio string) error {
-	s.logger.Printf("Changing bio for user %s to %s", userId.Hex(), bio[:10])
+// func (s *UserService) SetBio(ctx context.Context, userId primitive.ObjectID, bio string) error {
+// 	s.logger.Printf("Changing bio for user %s to %s", userId.Hex(), bio[:10])
 
-	err := s.storage.SetBio(ctx, userId, bio)
-	if err != nil {
-		s.logger.Printf("Failed to change bio for user %s: %s", userId.Hex(), err.Error())
-		return err
-	}
+// 	err := s.storage.SetBio(ctx, userId, bio)
+// 	if err != nil {
+// 		s.logger.Printf("Failed to change bio for user %s: %s", userId.Hex(), err.Error())
+// 		return err
+// 	}
 
-	s.logger.Printf("Successfully changed bio for user %s", userId.Hex())
-	return nil
-}
+// 	s.logger.Printf("Successfully changed bio for user %s", userId.Hex())
+// 	return nil
+// }
 
 func (s *UserService) SetBackgroundPic(ctx context.Context, userID primitive.ObjectID, pic_id string) error {
 	s.logger.Printf("Changing background_pic for user %s", userID.Hex())
