@@ -58,7 +58,6 @@ type (
 )
 
 // HandleWebSocket handles WebSocket connections for real-time comments
-// HandleWebSocket handles WebSocket connections for real-time comments
 func (h *CommentHandler) HandleWebSocket(c *gin.Context) {
 	// Extract post ID from query parameters
 	postID := c.Query("post_id")
@@ -108,74 +107,28 @@ func (h *CommentHandler) HandleWebSocket(c *gin.Context) {
 					continue
 				}
 
-				// Parse the message to determine its type
+				// Parse the message
 				var messageData map[string]interface{}
 				if err := json.Unmarshal([]byte(msg.Payload), &messageData); err != nil {
-					// If it's not a map, try to parse it as a comment (backwards compatibility)
-					var comment models.Comment
-					if err := json.Unmarshal([]byte(msg.Payload), &comment); err != nil {
-						h.logger.Println("error converting message payload: ", msg.Payload)
-						continue
-					}
-
-					// It's a comment object (create action)
-					response := CommentResponse{
-						Data: map[string]any{
-							"action":  "create",
-							"comment": comment,
-							"user_id": userID,
-						},
-					}
-					jsonBytes, err := json.Marshal(response)
-					if err != nil {
-						h.logger.Println("error marshaling response: ", response)
-						continue
-					}
-					if err := conn.WriteMessage(websocket.TextMessage, jsonBytes); err != nil {
-						h.logger.Println("Error sending message to WebSocket client:", err)
-						cancel() // Cancel context to stop subscription
-						return
-					}
+					h.logger.Println("Error parsing Redis message:", err)
 					continue
 				}
 
-				// Handle different action types
-				action, ok := messageData["action"].(string)
-				if !ok {
-					// No action specified, treat as comment creation (backwards compatibility)
-					action = "create"
-				}
+				// Add the current user's ID to the response for client-side use
+				messageData["current_user_id"] = userID
 
+				// Wrap in expected response format
 				response := CommentResponse{
-					Data: map[string]any{
-						"action":  action,
-						"user_id": userID,
-					},
+					Data: messageData,
 				}
 
-				// Add action-specific data
-				switch action {
-				case "create":
-					// Already handled above
-				case "update":
-					response.Data["comment_id"] = messageData["comment_id"]
-					response.Data["new_text"] = messageData["new_text"]
-					response.Data["updated_at"] = messageData["updated_at"]
-				case "delete":
-					response.Data["comment_id"] = messageData["comment_id"]
-					response.Data["deleted_at"] = messageData["deleted_at"]
-				case "reaction":
-					response.Data["comment_id"] = messageData["comment_id"]
-					response.Data["reaction_user_id"] = messageData["user_id"]
-					response.Data["reaction"] = messageData["reaction"]
-					response.Data["reacted_at"] = messageData["reacted_at"]
-				}
-
+				// Send to WebSocket client
 				jsonBytes, err := json.Marshal(response)
 				if err != nil {
-					h.logger.Println("error marshaling response: ", response)
+					h.logger.Println("Error marshaling response:", err)
 					continue
 				}
+
 				if err := conn.WriteMessage(websocket.TextMessage, jsonBytes); err != nil {
 					h.logger.Println("Error sending message to WebSocket client:", err)
 					cancel() // Cancel context to stop subscription
@@ -185,11 +138,10 @@ func (h *CommentHandler) HandleWebSocket(c *gin.Context) {
 		}
 	}()
 
-	// Store pending comments per connection
+	// Handle creation of new comments via WebSocket
 	pending := make(map[*websocket.Conn]pendingComment)
 	defer delete(pending, conn) // Cleanup on disconnect
 
-	// Listen for messages from WebSocket client
 	for {
 		messageType, msg, err := conn.ReadMessage()
 		if err != nil {
@@ -246,15 +198,15 @@ func (h *CommentHandler) HandleWebSocket(c *gin.Context) {
 			continue
 		}
 
-		// Publish to Redis
-		commentJSON, err := json.Marshal(current.Comment)
-		if err != nil {
-			h.logger.Println("Error marshaling comment:", err)
-			conn.WriteMessage(websocket.TextMessage, []byte(`{"error": "internal server error"}`))
-			continue
-		}
-		h.redis.Publish(ctx, "comments:"+postID, string(commentJSON))
-		h.logger.Println("New comment published to post", postID, "ID:", current.Comment.ID.Hex())
+		// Broadcast the new comment
+		h.BroadcastToPostSubscribers(
+			ctx,
+			current.Comment.PostID,
+			"create",
+			map[string]interface{}{
+				"comment": current.Comment,
+			},
+		)
 
 		// Reset pending comment after saving
 		delete(pending, conn)
@@ -321,9 +273,41 @@ func (h *CommentHandler) ReactToComment(c *gin.Context) {
 	req.CommentId = commentId
 	req.UserID = userId
 
+	comment, err := h.service.GetCommentByID(c.Request.Context(), commentId)
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": "could not find comment: " + err.Error()})
+		return
+	}
 	if err := h.service.ReactToComment(c.Request.Context(), &req); err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
 		return
+	}
+
+	updatedComment, err := h.service.GetCommentByID(c.Request.Context(), commentId)
+	if err != nil {
+		h.logger.Println("Error fetching updated comment after reaction:", err)
+		h.BroadcastToPostSubscribers(
+			c.Request.Context(),
+			comment.PostID,
+			"reaction",
+			map[string]interface{}{
+				"comment_id": commentId.Hex(),
+				"user_id":    userId,
+				"reaction":   req,
+			},
+		)
+	} else {
+		h.BroadcastToPostSubscribers(
+			c.Request.Context(),
+			comment.PostID,
+			"reaction",
+			map[string]interface{}{
+				"comment_id": commentId.Hex(),
+				"user_id":    userId,
+				"reaction":   req,
+				"comment":    updatedComment,
+			},
+		)
 	}
 
 	c.JSON(http.StatusOK, gin.H{"data": "reacted successfully"})
@@ -343,6 +327,7 @@ func (h *CommentHandler) ReactToComment(c *gin.Context) {
 // @Failure 401 {object} map[string]string "Unauthorized"
 // @Failure 500 {object} map[string]string "Could not update comment"
 // @Router /comments/{comment_id} [put]
+// UpdateComment updates the text of a comment
 func (h *CommentHandler) UpdateComment(c *gin.Context) {
 	commentIDStr := c.Param("comment_id")
 	commentID, err := primitive.ObjectIDFromHex(commentIDStr)
@@ -351,14 +336,15 @@ func (h *CommentHandler) UpdateComment(c *gin.Context) {
 		c.JSON(http.StatusBadRequest, gin.H{"error": "invalid comment ID"})
 		return
 	}
-	postIdStr := c.Param("post_id")
-	// Extract user ID from context (Assuming AuthMiddleware sets user_id)
+
+	// Extract user ID from context
 	userID, err := getUserIdFromRequest(c)
 	if err != nil {
 		h.logger.Println("User ID not found in context")
 		c.JSON(http.StatusUnauthorized, gin.H{"error": "unauthorized"})
 		return
 	}
+
 	var req struct {
 		NewText string `json:"new_text" binding:"required"`
 	}
@@ -369,7 +355,15 @@ func (h *CommentHandler) UpdateComment(c *gin.Context) {
 		return
 	}
 
-	// Update the comment and retrieve the associated post_id
+	// Get the comment to find the post ID before updating
+	comment, err := h.service.GetCommentByID(c.Request.Context(), commentID)
+	if err != nil {
+		h.logger.Println("Failed to fetch comment for update:", err)
+		c.JSON(http.StatusInternalServerError, gin.H{"error": "could not find comment"})
+		return
+	}
+
+	// Update the comment
 	err = h.service.UpdateCommentText(c.Request.Context(), commentID, userID, req.NewText)
 	if err != nil {
 		h.logger.Println("Failed to update comment:", err)
@@ -377,20 +371,32 @@ func (h *CommentHandler) UpdateComment(c *gin.Context) {
 		return
 	}
 
-	// Publish the update to Redis
-	updateMessage := map[string]string{
-		"action":     "update",
-		"comment_id": commentID.Hex(),
-		"new_text":   req.NewText,
-		"updated_at": time.Now().String(),
-	}
-	messageJSON, err := json.Marshal(updateMessage)
+	// Fetch the updated comment
+	updatedComment, err := h.service.GetCommentByID(c.Request.Context(), commentID)
 	if err != nil {
-		h.logger.Println("Error marshaling update message:", err)
-		// Don't fail the request, just log the error
+		h.logger.Println("Error fetching updated comment:", err)
+		// Broadcast with partial data if we can't get the complete comment
+		h.BroadcastToPostSubscribers(
+			c.Request.Context(),
+			comment.PostID,
+			"update",
+			map[string]interface{}{
+				"comment_id": commentID.Hex(),
+				"new_text":   req.NewText,
+			},
+		)
 	} else {
-		h.redis.Publish(c.Request.Context(), "comments:"+postIdStr, string(messageJSON))
-		h.logger.Println("Published comment update for comment", commentID.Hex(), "to post", postIdStr)
+		// Broadcast with the complete updated comment
+		h.BroadcastToPostSubscribers(
+			c.Request.Context(),
+			comment.PostID,
+			"update",
+			map[string]interface{}{
+				"comment_id": commentID.Hex(),
+				"new_text":   req.NewText,
+				"comment":    updatedComment,
+			},
+		)
 	}
 
 	c.JSON(http.StatusOK, gin.H{"data": "comment updated successfully"})
@@ -408,6 +414,7 @@ func (h *CommentHandler) UpdateComment(c *gin.Context) {
 // @Failure 401 {object} map[string]string "Unauthorized"
 // @Failure 500 {object} map[string]string "Could not delete comment"
 // @Router /comments/{comment_id} [delete]
+// DeleteComment removes a comment
 func (h *CommentHandler) DeleteComment(c *gin.Context) {
 	commentIDStr := c.Param("comment_id")
 	commentID, err := primitive.ObjectIDFromHex(commentIDStr)
@@ -424,13 +431,16 @@ func (h *CommentHandler) DeleteComment(c *gin.Context) {
 		return
 	}
 
-	// Fetch the comment to get the post_id before deletion (if needed)
-	comment, err := h.service.GetCommentByID(c.Request.Context(), commentID) // New service method
+	// Fetch the comment to get the post_id before deletion
+	comment, err := h.service.GetCommentByID(c.Request.Context(), commentID)
 	if err != nil {
 		h.logger.Println("Failed to fetch comment for deletion:", err)
 		c.JSON(http.StatusInternalServerError, gin.H{"error": "could not delete comment"})
 		return
 	}
+
+	// Store needed info before deletion
+	postID := comment.PostID
 
 	// Delete the comment
 	err = h.service.DeleteComment(c.Request.Context(), commentID, userID)
@@ -440,21 +450,40 @@ func (h *CommentHandler) DeleteComment(c *gin.Context) {
 		return
 	}
 
-	// Publish the deletion to Redis
-	deleteMessage := map[string]interface{}{
-		"action":     "delete",
-		"comment_id": commentID.Hex(),
-		"deleted_at": time.Now(),
-	}
-	messageJSON, err := json.Marshal(deleteMessage)
-	if err != nil {
-		h.logger.Println("Error marshaling delete message:", err)
-		// Don't fail the request, just log the error
-	} else {
-		postID := comment.PostID.Hex() // From fetched comment
-		h.redis.Publish(c.Request.Context(), "comments:"+postID, string(messageJSON))
-		h.logger.Println("Published comment deletion for comment", commentID.Hex(), "to post", postID)
-	}
+	// Broadcast the deletion
+	h.BroadcastToPostSubscribers(
+		c.Request.Context(),
+		postID,
+		"delete",
+		map[string]interface{}{
+			"comment_id": commentID.Hex(),
+		},
+	)
 
 	c.JSON(http.StatusOK, gin.H{"data": "comment deleted successfully"})
+}
+
+// BroadcastToPostSubscribers sends a message to all WebSocket clients subscribed to a post
+func (h *CommentHandler) BroadcastToPostSubscribers(ctx context.Context, postID primitive.ObjectID, action string, payload map[string]interface{}) {
+	postIDStr := postID.Hex()
+
+	payload["action"] = action
+
+	if _, exists := payload["timestamp"]; !exists {
+		payload["timestamp"] = time.Now()
+	}
+
+	messageJSON, err := json.Marshal(payload)
+	if err != nil {
+		h.logger.Println("Error marshaling WebSocket payload:", err)
+		return
+	}
+
+	err = h.redis.Publish(ctx, "comments:"+postIDStr, string(messageJSON)).Err()
+	if err != nil {
+		h.logger.Println("Error publishing to Redis:", err)
+		return
+	}
+
+	h.logger.Printf("Broadcasted %s action for post %s: %s\n", action, postIDStr, string(messageJSON))
 }
