@@ -30,11 +30,12 @@ func RegisterUserRoutes(r *gin.Engine, userRepo repos.UserRepo, file_store repos
 		userRoutes.GET("/:id", userHandler.GetUserByID)
 		userRoutes.GET("/username/:username", userHandler.GetUserByUsername)
 		userRoutes.GET("profile/pic", userHandler.GetProfilePictures)
-		userRoutes.PATCH("/fullname", authMiddleware(userHandler.UpdateFullname))
+		// userRoutes.PATCH("/fullname", authMiddleware(userHandler.UpdateFullname))
+		userRoutes.PUT("/update", authMiddleware(userHandler.UpdateUser))
 		userRoutes.PATCH("/password", authMiddleware(userHandler.UpdatePassword))
 		userRoutes.PATCH("/username", authMiddleware(userHandler.UpdateUsername))
-		userRoutes.PATCH("/visibility", authMiddleware(userHandler.ChangeProfileVisibility))
-		userRoutes.PATCH("/bio", authMiddleware(userHandler.SetBio))
+		// userRoutes.PATCH("/visibility", authMiddleware(userHandler.ChangeProfileVisibility))
+		// userRoutes.PATCH("/bio", authMiddleware(userHandler.SetBio))
 		userRoutes.PATCH("/background", authMiddleware(userHandler.SetBackgroundPic))
 	}
 }
