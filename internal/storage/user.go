@@ -203,8 +203,8 @@ func (s *UserStorage) UpdateUser(ctx context.Context, userID primitive.ObjectID,
 	if updates.Bio != nil {
 		updateFields["bio"] = *updates.Bio
 	}
-	if updates.HiddenProfile != nil {
-		updateFields["profile_hidden"] = *updates.HiddenProfile
+	if updates.ProfileHidden != nil {
+		updateFields["profile_hidden"] = *updates.ProfileHidden
 	}
 
 	// If no fields to update, return an error
