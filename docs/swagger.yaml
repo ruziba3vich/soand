@@ -41,6 +41,17 @@ definitions:
     - full_name
     - password
     type: object
+  github_com_ruziba3vich_soand_internal_models.UserUpdate:
+    properties:
+      bio:
+        type: string
+      full_name:
+        type: string
+      profile_hidden:
+        type: boolean
+      userId:
+        type: string
+    type: object
 info:
   contact:
     email: support@swagger.io
@@ -810,92 +821,6 @@ paths:
       summary: Set user background picture
       tags:
       - users
-  /users/bio:
-    put:
-      consumes:
-      - application/json
-      description: Updates the authenticated user's bio
-      parameters:
-      - description: New bio
-        in: body
-        name: bio
-        required: true
-        schema:
-          properties:
-            bio:
-              type: string
-          type: object
-      produces:
-      - application/json
-      responses:
-        "200":
-          description: Bio updated successfully
-        "400":
-          description: Invalid request body
-          schema:
-            additionalProperties:
-              type: string
-            type: object
-        "401":
-          description: Unauthorized
-          schema:
-            additionalProperties:
-              type: string
-            type: object
-        "500":
-          description: Failed to update bio
-          schema:
-            additionalProperties:
-              type: string
-            type: object
-      security:
-      - BearerAuth: []
-      summary: Set user bio
-      tags:
-      - users
-  /users/fullname:
-    put:
-      consumes:
-      - application/json
-      description: Updates the authenticated user's full name
-      parameters:
-      - description: New full name
-        in: body
-        name: fullname
-        required: true
-        schema:
-          properties:
-            new_fullname:
-              type: string
-          type: object
-      produces:
-      - application/json
-      responses:
-        "200":
-          description: Full name updated successfully
-        "400":
-          description: Invalid request body
-          schema:
-            additionalProperties:
-              type: string
-            type: object
-        "401":
-          description: Unauthorized
-          schema:
-            additionalProperties:
-              type: string
-            type: object
-        "500":
-          description: Failed to update fullname
-          schema:
-            additionalProperties:
-              type: string
-            type: object
-      security:
-      - BearerAuth: []
-      summary: Update user full name
-      tags:
-      - users
   /users/login:
     post:
       consumes:
@@ -1007,6 +932,50 @@ paths:
       summary: Update user password
       tags:
       - users
+  /users/update:
+    put:
+      consumes:
+      - application/json
+      description: Updates user data based on the authenticated user's ID
+      parameters:
+      - description: User update data
+        in: body
+        name: user
+        required: true
+        schema:
+          $ref: '#/definitions/github_com_ruziba3vich_soand_internal_models.UserUpdate'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: user updated successfully
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "400":
+          description: bad request
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "401":
+          description: unauthorized
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "500":
+          description: internal server error
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+      security:
+      - BearerAuth: []
+      summary: Update user
+      tags:
+      - users
   /users/username:
     put:
       consumes:
@@ -1048,54 +1017,6 @@ paths:
       security:
       - BearerAuth: []
       summary: Update user username
-      tags:
-      - users
-  /users/visibility:
-    put:
-      consumes:
-      - application/json
-      description: Updates the authenticated user's profile visibility (hidden or
-        visible)
-      parameters:
-      - description: Profile visibility status
-        in: body
-        name: visibility
-        required: true
-        schema:
-          properties:
-            hidden:
-              type: boolean
-          type: object
-      produces:
-      - application/json
-      responses:
-        "200":
-          description: Profile visibility updated
-          schema:
-            additionalProperties:
-              type: string
-            type: object
-        "400":
-          description: Invalid request payload
-          schema:
-            additionalProperties:
-              type: string
-            type: object
-        "401":
-          description: Unauthorized
-          schema:
-            additionalProperties:
-              type: string
-            type: object
-        "500":
-          description: Failed to update profile visibility
-          schema:
-            additionalProperties:
-              type: string
-            type: object
-      security:
-      - BearerAuth: []
-      summary: Change profile visibility
       tags:
       - users
 securityDefinitions:
