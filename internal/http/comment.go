@@ -58,6 +58,7 @@ type (
 )
 
 // HandleWebSocket handles WebSocket connections for real-time comments
+// HandleWebSocket handles WebSocket connections for real-time comments
 func (h *CommentHandler) HandleWebSocket(c *gin.Context) {
 	// Extract post ID from query parameters
 	postID := c.Query("post_id")
@@ -106,21 +107,74 @@ func (h *CommentHandler) HandleWebSocket(c *gin.Context) {
 					time.Sleep(5 * time.Second) // Retry after delay
 					continue
 				}
-				var comment models.Comment
-				if err := json.Unmarshal([]byte(msg.Payload), &comment); err != nil {
-					h.logger.Println("error converting comment: ", msg.Payload)
-					return
+
+				// Parse the message to determine its type
+				var messageData map[string]interface{}
+				if err := json.Unmarshal([]byte(msg.Payload), &messageData); err != nil {
+					// If it's not a map, try to parse it as a comment (backwards compatibility)
+					var comment models.Comment
+					if err := json.Unmarshal([]byte(msg.Payload), &comment); err != nil {
+						h.logger.Println("error converting message payload: ", msg.Payload)
+						continue
+					}
+
+					// It's a comment object (create action)
+					response := CommentResponse{
+						Data: map[string]any{
+							"action":  "create",
+							"comment": comment,
+							"user_id": userID,
+						},
+					}
+					jsonBytes, err := json.Marshal(response)
+					if err != nil {
+						h.logger.Println("error marshaling response: ", response)
+						continue
+					}
+					if err := conn.WriteMessage(websocket.TextMessage, jsonBytes); err != nil {
+						h.logger.Println("Error sending message to WebSocket client:", err)
+						cancel() // Cancel context to stop subscription
+						return
+					}
+					continue
 				}
+
+				// Handle different action types
+				action, ok := messageData["action"].(string)
+				if !ok {
+					// No action specified, treat as comment creation (backwards compatibility)
+					action = "create"
+				}
+
 				response := CommentResponse{
 					Data: map[string]any{
-						"comment": comment,
+						"action":  action,
 						"user_id": userID,
 					},
 				}
+
+				// Add action-specific data
+				switch action {
+				case "create":
+					// Already handled above
+				case "update":
+					response.Data["comment_id"] = messageData["comment_id"]
+					response.Data["new_text"] = messageData["new_text"]
+					response.Data["updated_at"] = messageData["updated_at"]
+				case "delete":
+					response.Data["comment_id"] = messageData["comment_id"]
+					response.Data["deleted_at"] = messageData["deleted_at"]
+				case "reaction":
+					response.Data["comment_id"] = messageData["comment_id"]
+					response.Data["reaction_user_id"] = messageData["user_id"]
+					response.Data["reaction"] = messageData["reaction"]
+					response.Data["reacted_at"] = messageData["reacted_at"]
+				}
+
 				jsonBytes, err := json.Marshal(response)
 				if err != nil {
 					h.logger.Println("error marshaling response: ", response)
-					return
+					continue
 				}
 				if err := conn.WriteMessage(websocket.TextMessage, jsonBytes); err != nil {
 					h.logger.Println("Error sending message to WebSocket client:", err)
@@ -403,24 +457,4 @@ func (h *CommentHandler) DeleteComment(c *gin.Context) {
 	}
 
 	c.JSON(http.StatusOK, gin.H{"data": "comment deleted successfully"})
-}
-
-// extFromMime maps MIME types to file extensions
-func extFromMime(mime string) string {
-	switch mime {
-	case "image/jpeg":
-		return ".jpg"
-	case "image/png":
-		return ".png"
-	case "image/gif":
-		return ".gif"
-	case "image/webp":
-		return ".webp"
-	case "audio/mpeg":
-		return ".mp3"
-	case "audio/wav":
-		return ".wav"
-	default:
-		return ".bin" // Fallback for unknown types
-	}
 }
