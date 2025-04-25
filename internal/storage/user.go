@@ -191,26 +191,7 @@ func (s *UserStorage) UpdateUsername(ctx context.Context, userID primitive.Objec
 }
 
 // UpdateUser updates Fullname, Bio, and HiddenProfile fields for a user
-func (s *UserStorage) UpdateUser(ctx context.Context, userID primitive.ObjectID, updates *models.UserUpdate) error {
-	ctx, cancel := context.WithTimeout(ctx, 5*time.Second)
-	defer cancel()
-
-	// Build the update document
-	updateFields := bson.M{}
-	if updates.Fullname != nil {
-		updateFields["full_name"] = *updates.Fullname
-	}
-	if updates.Bio != nil {
-		updateFields["bio"] = *updates.Bio
-	}
-	if updates.ProfileHidden != nil {
-		updateFields["profile_hidden"] = *updates.ProfileHidden
-	}
-
-	// If no fields to update, return an error
-	if len(updateFields) == 0 {
-		return fmt.Errorf("no fields provided for update")
-	}
+func (s *UserStorage) UpdateUser(ctx context.Context, userID primitive.ObjectID, updateFields bson.M) error {
 
 	// Perform the update
 	filter := bson.M{"_id": userID}
