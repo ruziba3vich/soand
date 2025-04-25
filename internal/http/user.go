@@ -185,43 +185,43 @@ func (h *UserHandler) GetUserByUsername(c *gin.Context) {
 	c.JSON(http.StatusOK, gin.H{"data": user})
 }
 
-// UpdateFullname handles updating a user's full name
-// @Summary Update user full name
-// @Description Updates the authenticated user's full name
-// @Tags users
-// @Accept json
-// @Produce json
-// @Security BearerAuth
-// @Param fullname body object{new_fullname=string} true "New full name"
-// @Success 200 "Full name updated successfully"
-// @Failure 400 {object} map[string]string "Invalid request body"
-// @Failure 401 {object} map[string]string "Unauthorized"
-// @Failure 500 {object} map[string]string "Failed to update fullname"
-// @Router /users/fullname [put]
-func (h *UserHandler) UpdateFullname(c *gin.Context) {
-	var request struct {
-		NewFullname string `json:"new_fullname"`
-	}
+// // UpdateFullname handles updating a user's full name
+// // @Summary Update user full name
+// // @Description Updates the authenticated user's full name
+// // @Tags users
+// // @Accept json
+// // @Produce json
+// // @Security BearerAuth
+// // @Param fullname body object{new_fullname=string} true "New full name"
+// // @Success 200 "Full name updated successfully"
+// // @Failure 400 {object} map[string]string "Invalid request body"
+// // @Failure 401 {object} map[string]string "Unauthorized"
+// // @Failure 500 {object} map[string]string "Failed to update fullname"
+// // @Router /users/fullname [put]
+// func (h *UserHandler) UpdateFullname(c *gin.Context) {
+// 	var request struct {
+// 		NewFullname string `json:"new_fullname"`
+// 	}
 
-	userId, err := getUserIdFromRequest(c)
-	if err != nil {
-		c.JSON(http.StatusUnauthorized, gin.H{"error": "Unauthorized"})
-		return
-	}
-	if err := c.ShouldBindJSON(&request); err != nil {
-		h.logger.Printf("Error parsing fullname update request: %v", err)
-		c.JSON(http.StatusBadRequest, gin.H{"error": "Invalid request body"})
-		return
-	}
+// 	userId, err := getUserIdFromRequest(c)
+// 	if err != nil {
+// 		c.JSON(http.StatusUnauthorized, gin.H{"error": "Unauthorized"})
+// 		return
+// 	}
+// 	if err := c.ShouldBindJSON(&request); err != nil {
+// 		h.logger.Printf("Error parsing fullname update request: %v", err)
+// 		c.JSON(http.StatusBadRequest, gin.H{"error": "Invalid request body"})
+// 		return
+// 	}
 
-	if err := h.repo.UpdateFullname(c.Request.Context(), userId, request.NewFullname); err != nil {
-		h.logger.Printf("Error updating fullname: %v", err)
-		c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to update fullname"})
-		return
-	}
+// 	if err := h.repo.UpdateFullname(c.Request.Context(), userId, request.NewFullname); err != nil {
+// 		h.logger.Printf("Error updating fullname: %v", err)
+// 		c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to update fullname"})
+// 		return
+// 	}
 
-	c.JSON(http.StatusOK, gin.H{"data": "success"})
-}
+// 	c.JSON(http.StatusOK, gin.H{"data": "success"})
+// }
 
 // UpdatePassword handles updating a user's password
 // @Summary Update user password
@@ -301,84 +301,117 @@ func (h *UserHandler) UpdateUsername(c *gin.Context) {
 	c.JSON(http.StatusOK, gin.H{"data": "username updated successfully"})
 }
 
-// ChangeProfileVisibility handles changing a user's profile visibility
-// @Summary Change profile visibility
-// @Description Updates the authenticated user's profile visibility (hidden or visible)
-// @Tags users
-// @Accept json
-// @Produce json
-// @Security BearerAuth
-// @Param visibility body object{hidden=boolean} true "Profile visibility status"
-// @Success 200 {object} map[string]string "Profile visibility updated"
-// @Failure 400 {object} map[string]string "Invalid request payload"
-// @Failure 401 {object} map[string]string "Unauthorized"
-// @Failure 500 {object} map[string]string "Failed to update profile visibility"
-// @Router /users/visibility [put]
-func (h *UserHandler) ChangeProfileVisibility(c *gin.Context) {
-	userId, err := getUserIdFromRequest(c)
+// UpdateUser godoc
+// @Summary      Update user
+// @Description  Updates user data based on the authenticated user's ID
+// @Tags         users
+// @Accept       json
+// @Produce      json
+// @Security     BearerAuth
+// @Param        user  body      models.UserUpdate  true  "User update data"
+// @Success      200   {object}  map[string]string  "user updated successfully"
+// @Failure      400   {object}  map[string]string  "bad request"
+// @Failure      401   {object}  map[string]string  "unauthorized"
+// @Failure      500   {object}  map[string]string  "internal server error"
+// @Router       /users/update [put]
+func (h *UserHandler) UpdateUser(c *gin.Context) {
+	userID, err := getUserIdFromRequest(c)
 	if err != nil {
 		c.JSON(http.StatusUnauthorized, gin.H{"error": "Unauthorized"})
 		return
 	}
 
-	var req struct {
-		Hidden bool `json:"hidden"`
-	}
-
+	var req models.UserUpdate
 	if err := c.ShouldBindJSON(&req); err != nil {
-		h.logger.Printf("Invalid request payload: %v", err)
-		c.JSON(http.StatusBadRequest, gin.H{"error": "invalid request payload"})
+		c.JSON(http.StatusBadRequest, gin.H{"error": "bad request"})
 		return
 	}
 
-	if err := h.repo.ChangeProfileVisibility(c.Request.Context(), userId, req.Hidden); err != nil {
-		h.logger.Printf("Failed to change profile visibility for user %s: %v", userId.Hex(), err)
-		c.JSON(http.StatusInternalServerError, gin.H{"error": "failed to update profile visibility"})
+	if err := h.repo.UpdateUser(c.Request.Context(), userID, &req); err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": "internal server error: " + err.Error()})
 		return
 	}
-
-	h.logger.Printf("Successfully changed profile visibility for user %s", userId.Hex())
-	c.JSON(http.StatusOK, gin.H{"data": "profile visibility updated"})
+	c.JSON(http.StatusOK, gin.H{"data": "user updated successfully"})
 }
 
-// SetBio handles updating a user's bio
-// @Summary Set user bio
-// @Description Updates the authenticated user's bio
-// @Tags users
-// @Accept json
-// @Security BearerAuth
-// @Produce json
-// @Param bio body object{bio=string} true "New bio"
-// @Success 200 "Bio updated successfully"
-// @Failure 400 {object} map[string]string "Invalid request body"
-// @Failure 401 {object} map[string]string "Unauthorized"
-// @Failure 500 {object} map[string]string "Failed to update bio"
-// @Router /users/bio [put]
-func (h *UserHandler) SetBio(c *gin.Context) {
-	var request struct {
-		Bio string `json:"bio"`
-	}
+// // ChangeProfileVisibility handles changing a user's profile visibility
+// // @Summary Change profile visibility
+// // @Description Updates the authenticated user's profile visibility (hidden or visible)
+// // @Tags users
+// // @Accept json
+// // @Produce json
+// // @Security BearerAuth
+// // @Param visibility body object{hidden=boolean} true "Profile visibility status"
+// // @Success 200 {object} map[string]string "Profile visibility updated"
+// // @Failure 400 {object} map[string]string "Invalid request payload"
+// // @Failure 401 {object} map[string]string "Unauthorized"
+// // @Failure 500 {object} map[string]string "Failed to update profile visibility"
+// // @Router /users/visibility [put]
+// func (h *UserHandler) ChangeProfileVisibility(c *gin.Context) {
+// 	userId, err := getUserIdFromRequest(c)
+// 	if err != nil {
+// 		c.JSON(http.StatusUnauthorized, gin.H{"error": "Unauthorized"})
+// 		return
+// 	}
 
-	userId, err := getUserIdFromRequest(c)
-	if err != nil {
-		c.JSON(http.StatusUnauthorized, gin.H{"error": "Unauthorized"})
-		return
-	}
+// 	var req struct {
+// 		Hidden bool `json:"hidden"`
+// 	}
 
-	if err := c.ShouldBindJSON(&request); err != nil {
-		h.logger.Printf("Error parsing bio request: %v", err)
-		c.JSON(http.StatusBadRequest, gin.H{"error": "Invalid request body"})
-		return
-	}
+// 	if err := c.ShouldBindJSON(&req); err != nil {
+// 		h.logger.Printf("Invalid request payload: %v", err)
+// 		c.JSON(http.StatusBadRequest, gin.H{"error": "invalid request payload"})
+// 		return
+// 	}
 
-	if err := h.repo.SetBio(c.Request.Context(), userId, request.Bio); err != nil {
-		h.logger.Printf("Error updating bio: %v", err)
-		c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to update bio"})
-		return
-	}
+// 	if err := h.repo.ChangeProfileVisibility(c.Request.Context(), userId, req.Hidden); err != nil {
+// 		h.logger.Printf("Failed to change profile visibility for user %s: %v", userId.Hex(), err)
+// 		c.JSON(http.StatusInternalServerError, gin.H{"error": "failed to update profile visibility"})
+// 		return
+// 	}
 
-	c.JSON(http.StatusOK, gin.H{"data": "success"})
-}
+// 	h.logger.Printf("Successfully changed profile visibility for user %s", userId.Hex())
+// 	c.JSON(http.StatusOK, gin.H{"data": "profile visibility updated"})
+// }
+
+// // SetBio handles updating a user's bio
+// // @Summary Set user bio
+// // @Description Updates the authenticated user's bio
+// // @Tags users
+// // @Accept json
+// // @Security BearerAuth
+// // @Produce json
+// // @Param bio body object{bio=string} true "New bio"
+// // @Success 200 "Bio updated successfully"
+// // @Failure 400 {object} map[string]string "Invalid request body"
+// // @Failure 401 {object} map[string]string "Unauthorized"
+// // @Failure 500 {object} map[string]string "Failed to update bio"
+// // @Router /users/bio [put]
+// func (h *UserHandler) SetBio(c *gin.Context) {
+// 	var request struct {
+// 		Bio string `json:"bio"`
+// 	}
+
+// 	userId, err := getUserIdFromRequest(c)
+// 	if err != nil {
+// 		c.JSON(http.StatusUnauthorized, gin.H{"error": "Unauthorized"})
+// 		return
+// 	}
+
+// 	if err := c.ShouldBindJSON(&request); err != nil {
+// 		h.logger.Printf("Error parsing bio request: %v", err)
+// 		c.JSON(http.StatusBadRequest, gin.H{"error": "Invalid request body"})
+// 		return
+// 	}
+
+// 	if err := h.repo.SetBio(c.Request.Context(), userId, request.Bio); err != nil {
+// 		h.logger.Printf("Error updating bio: %v", err)
+// 		c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to update bio"})
+// 		return
+// 	}
+
+// 	c.JSON(http.StatusOK, gin.H{"data": "success"})
+// }
 
 func getUserIdFromRequest(c *gin.Context) (primitive.ObjectID, error) {
 	userID, exists := c.Get("userID")
