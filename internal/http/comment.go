@@ -273,42 +273,22 @@ func (h *CommentHandler) ReactToComment(c *gin.Context) {
 	req.CommentId = commentId
 	req.UserID = userId
 
-	comment, err := h.service.GetCommentByID(c.Request.Context(), commentId)
+	comment, err := h.service.ReactToComment(c.Request.Context(), &req)
 	if err != nil {
-		c.JSON(http.StatusInternalServerError, gin.H{"error": "could not find comment: " + err.Error()})
-		return
-	}
-	if err := h.service.ReactToComment(c.Request.Context(), &req); err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
 		return
 	}
-
-	updatedComment, err := h.service.GetCommentByID(c.Request.Context(), commentId)
-	if err != nil {
-		h.logger.Println("Error fetching updated comment after reaction:", err)
-		h.BroadcastToPostSubscribers(
-			c.Request.Context(),
-			comment.PostID,
-			"reaction",
-			map[string]any{
-				"comment_id": commentId.Hex(),
-				"user_id":    userId,
-				"reaction":   req,
-			},
-		)
-	} else {
-		h.BroadcastToPostSubscribers(
-			c.Request.Context(),
-			comment.PostID,
-			"reaction",
-			map[string]any{
-				"comment_id": commentId.Hex(),
-				"user_id":    userId,
-				"reaction":   req,
-				"comment":    updatedComment,
-			},
-		)
-	}
+	h.BroadcastToPostSubscribers(
+		c.Request.Context(),
+		comment.PostID,
+		"reaction",
+		map[string]any{
+			"comment_id": commentId.Hex(),
+			"user_id":    userId,
+			"reaction":   req,
+			"comment":    comment,
+		},
+	)
 
 	c.JSON(http.StatusOK, gin.H{"data": "reacted successfully"})
 }
@@ -355,49 +335,23 @@ func (h *CommentHandler) UpdateComment(c *gin.Context) {
 		return
 	}
 
-	// Get the comment to find the post ID before updating
-	comment, err := h.service.GetCommentByID(c.Request.Context(), commentID)
+	comment, err := h.service.UpdateCommentText(c.Request.Context(), commentID, userID, req.NewText)
 	if err != nil {
 		h.logger.Println("Failed to fetch comment for update:", err)
 		c.JSON(http.StatusInternalServerError, gin.H{"error": "could not find comment"})
 		return
 	}
 
-	// Update the comment
-	err = h.service.UpdateCommentText(c.Request.Context(), commentID, userID, req.NewText)
-	if err != nil {
-		h.logger.Println("Failed to update comment:", err)
-		c.JSON(http.StatusInternalServerError, gin.H{"error": "could not update comment"})
-		return
-	}
-
-	// Fetch the updated comment
-	updatedComment, err := h.service.GetCommentByID(c.Request.Context(), commentID)
-	if err != nil {
-		h.logger.Println("Error fetching updated comment:", err)
-		// Broadcast with partial data if we can't get the complete comment
-		h.BroadcastToPostSubscribers(
-			c.Request.Context(),
-			comment.PostID,
-			"update",
-			map[string]interface{}{
-				"comment_id": commentID.Hex(),
-				"new_text":   req.NewText,
-			},
-		)
-	} else {
-		// Broadcast with the complete updated comment
-		h.BroadcastToPostSubscribers(
-			c.Request.Context(),
-			comment.PostID,
-			"update",
-			map[string]interface{}{
-				"comment_id": commentID.Hex(),
-				"new_text":   req.NewText,
-				"comment":    updatedComment,
-			},
-		)
-	}
+	h.BroadcastToPostSubscribers(
+		c.Request.Context(),
+		comment.PostID,
+		"update",
+		map[string]interface{}{
+			"comment_id": commentID.Hex(),
+			"new_text":   req.NewText,
+			"comment":    comment,
+		},
+	)
 
 	c.JSON(http.StatusOK, gin.H{"data": "comment updated successfully"})
 }
