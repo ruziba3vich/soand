@@ -290,7 +290,7 @@ func (h *CommentHandler) ReactToComment(c *gin.Context) {
 			c.Request.Context(),
 			comment.PostID,
 			"reaction",
-			map[string]interface{}{
+			map[string]any{
 				"comment_id": commentId.Hex(),
 				"user_id":    userId,
 				"reaction":   req,
@@ -301,7 +301,7 @@ func (h *CommentHandler) ReactToComment(c *gin.Context) {
 			c.Request.Context(),
 			comment.PostID,
 			"reaction",
-			map[string]interface{}{
+			map[string]any{
 				"comment_id": commentId.Hex(),
 				"user_id":    userId,
 				"reaction":   req,
