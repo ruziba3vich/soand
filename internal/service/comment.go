@@ -69,20 +69,22 @@ func (s *CommentService) CreateComment(ctx context.Context, comment *models.Comm
 
 }
 
-func (s *CommentService) ReactToComment(ctx context.Context, reaction *models.Reaction) error {
-	if err := s.storage.RemoveReactionFromComment(ctx, reaction); err != nil {
+func (s *CommentService) ReactToComment(ctx context.Context, reaction *models.Reaction) (*models.Comment, error) {
+	comment, err := s.storage.RemoveReactionFromComment(ctx, reaction)
+	if err != nil {
 		if !errors.Is(err, dto.ErrNotReacted) {
 			s.logger.Println(err.Error())
-			return err
+			return nil, err
 		}
 	}
 	if reaction.Incr {
-		if err := s.storage.AddReactionToComment(ctx, reaction); err != nil {
+		comment, err = s.storage.AddReactionToComment(ctx, reaction)
+		if err != nil {
 			s.logger.Printf("could not react to comment %s by user %s : %s", reaction.CommentId.Hex(), reaction.UserID.Hex(), err.Error())
-			return err
+			return nil, err
 		}
 	}
-	return nil
+	return comment, nil
 }
 
 func (s *CommentService) DeleteComment(ctx context.Context, commentID primitive.ObjectID, userID primitive.ObjectID) error {
@@ -107,15 +109,15 @@ func (s *CommentService) GetCommentsByPostID(ctx context.Context, postID primiti
 	return comments, nil
 }
 
-func (s *CommentService) UpdateCommentText(ctx context.Context, commentID primitive.ObjectID, userID primitive.ObjectID, newText string) error {
-	err := s.storage.UpdateCommentText(ctx, commentID, userID, newText)
+func (s *CommentService) UpdateCommentText(ctx context.Context, commentID primitive.ObjectID, userID primitive.ObjectID, newText string) (*models.Comment, error) {
+	comment, err := s.storage.UpdateCommentText(ctx, commentID, userID, newText)
 	if err != nil {
 		s.logger.Println("Error updating comment text:", err)
-		return err
+		return nil, err
 	}
 
 	s.logger.Println("Comment updated successfully:", commentID.Hex())
-	return nil
+	return comment, nil
 }
 
 func (s *CommentService) SubscribeToComments(ctx context.Context, postID primitive.ObjectID, handleMessage func(comment *models.Comment)) {
