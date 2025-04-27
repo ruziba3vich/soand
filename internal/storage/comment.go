@@ -47,11 +47,11 @@ func (s *CommentStorage) DeleteComment(ctx context.Context, commentID primitive.
 }
 
 // AddReactionToComment adds a user's reaction to a comment
-func (s *CommentStorage) AddReactionToComment(ctx context.Context, reaction *models.Reaction) error {
+func (s *CommentStorage) AddReactionToComment(ctx context.Context, reaction *models.Reaction) (*models.Comment, error) {
 
 	comment, err := s.GetCommentByID(ctx, reaction.CommentId)
 	if err != nil {
-		return err
+		return nil, err
 	}
 	comment.Reactions[reaction.Reaction] = append(comment.Reactions[reaction.Reaction], reaction.UserID)
 
@@ -61,17 +61,17 @@ func (s *CommentStorage) AddReactionToComment(ctx context.Context, reaction *mod
 		comment,
 	)
 	if err != nil {
-		return fmt.Errorf("failed to update comment: %w", err)
+		return nil, fmt.Errorf("failed to update comment: %w", err)
 	}
 
-	return nil
+	return comment, nil
 }
 
 // RemoveReactionFromComment removes a user's reaction from a comment
-func (s *CommentStorage) RemoveReactionFromComment(ctx context.Context, reaction *models.Reaction) error {
+func (s *CommentStorage) RemoveReactionFromComment(ctx context.Context, reaction *models.Reaction) (*models.Comment, error) {
 	comment, err := s.GetCommentByID(ctx, reaction.CommentId)
 	if err != nil {
-		return err
+		return nil, err
 	}
 
 	var found bool
@@ -91,7 +91,7 @@ func (s *CommentStorage) RemoveReactionFromComment(ctx context.Context, reaction
 	}
 
 	if !found {
-		return dto.ErrNotReacted
+		return nil, dto.ErrNotReacted
 	}
 
 	_, err = s.db.ReplaceOne(
@@ -100,10 +100,10 @@ func (s *CommentStorage) RemoveReactionFromComment(ctx context.Context, reaction
 		comment,
 	)
 	if err != nil {
-		return fmt.Errorf("failed to update comment: %s", err.Error())
+		return nil, fmt.Errorf("failed to update comment: %s", err.Error())
 	}
 
-	return nil
+	return comment, nil
 }
 
 func (s *CommentStorage) GetParentComment(ctx context.Context, comment *models.Comment) error {
@@ -173,9 +173,9 @@ func (s *CommentStorage) GetCommentsByPostID(ctx context.Context, postID primiti
 }
 
 // UpdateCommentText updates the text of a comment by its ID
-func (s *CommentStorage) UpdateCommentText(ctx context.Context, commentID primitive.ObjectID, userID primitive.ObjectID, newText string) error {
+func (s *CommentStorage) UpdateCommentText(ctx context.Context, commentID primitive.ObjectID, userID primitive.ObjectID, newText string) (*models.Comment, error) {
 	if newText == "" {
-		return fmt.Errorf("comment text cannot be empty")
+		return nil, fmt.Errorf("comment text cannot be empty")
 	}
 
 	// Define the update filter (only allow the owner of the comment to edit)
@@ -184,15 +184,15 @@ func (s *CommentStorage) UpdateCommentText(ctx context.Context, commentID primit
 
 	result, err := s.db.UpdateOne(ctx, filter, update)
 	if err != nil {
-		return err
+		return nil, err
 	}
 
 	// If no document was modified, return an error (comment not found or not owned by user)
 	if result.ModifiedCount == 0 {
-		return fmt.Errorf("comment not found or user not authorized to edit")
+		return nil, fmt.Errorf("comment not found or user not authorized to edit")
 	}
 
-	return nil
+	return s.GetCommentByID(ctx, commentID)
 }
 
 // GetCommentByID retrieves a comment by its ID, hiding UserID if the user's profile is private
