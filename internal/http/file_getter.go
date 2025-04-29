@@ -68,7 +68,9 @@ func (h *FIleStorageHandler) UploadFile(c *gin.Context) {
 
 	// Return the file URL on success
 	c.JSON(http.StatusOK, gin.H{
-		"message": "file uploaded successfully",
-		"url":     fileURL,
+		"data": map[string]string{
+			"message": "file uploaded successfully",
+			"url":     fileURL,
+		},
 	})
 }
