@@ -58,6 +58,17 @@ type (
 )
 
 // HandleWebSocket handles WebSocket connections for real-time comments
+// @Summary      WebSocket connection for real-time comments
+// @Description  Establishes a WebSocket connection for real-time comment updates on a specific post
+// @Tags         comments
+// @Accept       json
+// @Produce      json
+// @Param        post_id  query  string  true  "Post ID to subscribe to comments for"
+// @Success      101  {string}  string  "Switching Protocols"
+// @Failure      400  {object}  map[string]string  "Missing or invalid post ID"
+// @Failure      401  {object}  map[string]string  "Unauthorized"
+// @Failure      500  {object}  map[string]string  "WebSocket upgrade failed"
+// @Router       /ws/comments [get]
 func (h *CommentHandler) HandleWebSocket(c *gin.Context) {
 	// Extract post ID from query parameters
 	postID := c.Query("post_id")
@@ -252,6 +263,20 @@ func (h *CommentHandler) GetCommentsByPostID(c *gin.Context) {
 	}})
 }
 
+// ReactToComment handles reactions to comments
+// @Summary      React to a comment
+// @Description  Adds or updates a reaction to a specific comment
+// @Tags         comments
+// @Accept       json
+// @Produce      json
+// @Security     BearerAuth
+// @Param        comment_id  query  string  true  "Comment ID to react to"
+// @Param        reaction    body   object{type=string}  true  "Reaction details"
+// @Success      200  {object}  map[string]string  "Reaction successful"
+// @Failure      400  {object}  map[string]string  "Invalid comment ID or request body"
+// @Failure      401  {object}  map[string]string  "Unauthorized"
+// @Failure      500  {object}  map[string]string  "Could not process reaction"
+// @Router       /comments/react [post]
 func (h *CommentHandler) ReactToComment(c *gin.Context) {
 	userId, err := getUserIdFromRequest(c)
 	if err != nil {

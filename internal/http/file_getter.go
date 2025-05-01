@@ -22,6 +22,17 @@ func NewFIleGetterHandler(file_service repos.IFIleStoreService, logger *log.Logg
 	}
 }
 
+// GetFileById retrieves a file by its ID
+// @Summary      Get file by ID
+// @Description  Retrieves file information using the provided file ID
+// @Tags         Files
+// @Accept       json
+// @Produce      json
+// @Param        file_id  query  string  true  "File ID to retrieve"
+// @Success      200  {object}  map[string]interface{}  "Returns the file information"
+// @Failure      400  {object}  map[string]interface{}  "Missing or invalid file ID"
+// @Failure      404  {object}  map[string]interface{}  "File not found"
+// @Router       /files [get]
 func (h *FIleStorageHandler) GetFileById(c *gin.Context) {
 	id := c.Query("file_id")
 	if len(id) == 0 {

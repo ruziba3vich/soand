@@ -31,29 +31,26 @@ const docTemplate = `{
                         "BearerAuth": []
                     }
                 ],
-                "description": "Returns a successful response if the user is authenticated with a valid JWT token",
-                "consumes": [
-                    "application/json"
-                ],
+                "description": "Verifies user authentication via JWT token and returns a success response",
                 "produces": [
                     "application/json"
                 ],
                 "tags": [
                     "users"
                 ],
-                "summary": "Get home endpoint",
+                "summary": "Access home endpoint",
                 "responses": {
                     "200": {
                         "description": "User authenticated successfully",
-                        "headers": {
-                            "Authorization": {
-                                "type": "string",
-                                "description": "Bearer \u003ctoken\u003e\" \"Required JWT token for authentication"
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": {
+                                "type": "string"
                             }
                         }
                     },
                     "401": {
-                        "description": "Unauthorized or invalid token",
+                        "description": "Unauthorized - missing or invalid token",
                         "schema": {
                             "type": "object",
                             "additionalProperties": {
@@ -238,6 +235,87 @@ const docTemplate = `{
                 }
             }
         },
+        "/comments/react": {
+            "post": {
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
+                "description": "Adds or updates a reaction to a specific comment",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "comments"
+                ],
+                "summary": "React to a comment",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "Comment ID to react to",
+                        "name": "comment_id",
+                        "in": "query",
+                        "required": true
+                    },
+                    {
+                        "description": "Reaction details",
+                        "name": "reaction",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "type": "object",
+                            "properties": {
+                                "type": {
+                                    "type": "string"
+                                }
+                            }
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Reaction successful",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": {
+                                "type": "string"
+                            }
+                        }
+                    },
+                    "400": {
+                        "description": "Invalid comment ID or request body",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": {
+                                "type": "string"
+                            }
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthorized",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": {
+                                "type": "string"
+                            }
+                        }
+                    },
+                    "500": {
+                        "description": "Could not process reaction",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": {
+                                "type": "string"
+                            }
+                        }
+                    }
+                }
+            }
+        },
         "/comments/{comment_id}": {
             "put": {
                 "security": [
@@ -382,6 +460,51 @@ const docTemplate = `{
             }
         },
         "/files": {
+            "get": {
+                "description": "Retrieves file information using the provided file ID",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Files"
+                ],
+                "summary": "Get file by ID",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "File ID to retrieve",
+                        "name": "file_id",
+                        "in": "query",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Returns the file information",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": true
+                        }
+                    },
+                    "400": {
+                        "description": "Missing or invalid file ID",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": true
+                        }
+                    },
+                    "404": {
+                        "description": "File not found",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": true
+                        }
+                    }
+                }
+            },
             "post": {
                 "description": "Uploads a single file to the storage service (MinIO). The file is sent as form data and stored, returning the file URL on success.",
                 "consumes": [
@@ -423,6 +546,265 @@ const docTemplate = `{
                         "schema": {
                             "type": "object",
                             "additionalProperties": true
+                        }
+                    }
+                }
+            }
+        },
+        "/messages": {
+            "get": {
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
+                "description": "Retrieves paginated messages between the authenticated user and another user",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "chat"
+                ],
+                "summary": "Get chat messages",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "Recipient's user ID",
+                        "name": "recipient_id",
+                        "in": "query",
+                        "required": true
+                    },
+                    {
+                        "type": "string",
+                        "description": "Page number (default: 1)",
+                        "name": "page",
+                        "in": "query"
+                    },
+                    {
+                        "type": "string",
+                        "description": "Number of messages per page (default: 10)",
+                        "name": "page_size",
+                        "in": "query"
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Returns paginated messages",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": true
+                        }
+                    },
+                    "400": {
+                        "description": "Invalid recipient ID or pagination parameters",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": {
+                                "type": "string"
+                            }
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthorized",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": {
+                                "type": "string"
+                            }
+                        }
+                    },
+                    "500": {
+                        "description": "Could not fetch messages",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": {
+                                "type": "string"
+                            }
+                        }
+                    }
+                }
+            }
+        },
+        "/messages/{message_id}": {
+            "put": {
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
+                "description": "Updates the content of a specific message for the authenticated user",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "chat"
+                ],
+                "summary": "Update a message",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "Message ID to update",
+                        "name": "message_id",
+                        "in": "path",
+                        "required": true
+                    },
+                    {
+                        "description": "New message text",
+                        "name": "message",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "type": "object",
+                            "properties": {
+                                "new_text": {
+                                    "type": "string"
+                                }
+                            }
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Message updated successfully",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": {
+                                "type": "string"
+                            }
+                        }
+                    },
+                    "400": {
+                        "description": "Invalid message ID or request body",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": {
+                                "type": "string"
+                            }
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthorized",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": {
+                                "type": "string"
+                            }
+                        }
+                    },
+                    "403": {
+                        "description": "Not authorized to update this message",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": {
+                                "type": "string"
+                            }
+                        }
+                    },
+                    "404": {
+                        "description": "Message not found",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": {
+                                "type": "string"
+                            }
+                        }
+                    },
+                    "500": {
+                        "description": "Could not update message",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": {
+                                "type": "string"
+                            }
+                        }
+                    }
+                }
+            },
+            "delete": {
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
+                "description": "Deletes a specific message for the authenticated user",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "chat"
+                ],
+                "summary": "Delete a message",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "Message ID to delete",
+                        "name": "message_id",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Message deleted successfully",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": {
+                                "type": "string"
+                            }
+                        }
+                    },
+                    "400": {
+                        "description": "Invalid message ID",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": {
+                                "type": "string"
+                            }
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthorized",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": {
+                                "type": "string"
+                            }
+                        }
+                    },
+                    "403": {
+                        "description": "Not authorized to delete this message",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": {
+                                "type": "string"
+                            }
+                        }
+                    },
+                    "404": {
+                        "description": "Message not found",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": {
+                                "type": "string"
+                            }
+                        }
+                    },
+                    "500": {
+                        "description": "Could not delete message",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": {
+                                "type": "string"
+                            }
                         }
                     }
                 }
@@ -959,7 +1341,7 @@ const docTemplate = `{
         },
         "/users": {
             "post": {
-                "description": "Creates a new user and returns an authentication token",
+                "description": "Creates a new user with the provided data and returns a JWT authentication token",
                 "consumes": [
                     "application/json"
                 ],
@@ -972,7 +1354,7 @@ const docTemplate = `{
                 "summary": "Create a new user",
                 "parameters": [
                     {
-                        "description": "User data",
+                        "description": "User data (e.g., username, password, etc.)",
                         "name": "user",
                         "in": "body",
                         "required": true,
@@ -983,7 +1365,7 @@ const docTemplate = `{
                 ],
                 "responses": {
                     "200": {
-                        "description": "Token for the created user",
+                        "description": "Response containing the JWT token",
                         "schema": {
                             "type": "object",
                             "additionalProperties": {
@@ -1017,7 +1399,7 @@ const docTemplate = `{
                         "BearerAuth": []
                     }
                 ],
-                "description": "Deletes the authenticated user's account",
+                "description": "Deletes the authenticated user's account using their JWT token",
                 "produces": [
                     "application/json"
                 ],
@@ -1026,11 +1408,17 @@ const docTemplate = `{
                 ],
                 "summary": "Delete a user",
                 "responses": {
-                    "204": {
-                        "description": "User deleted successfully"
+                    "200": {
+                        "description": "User deleted successfully",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": {
+                                "type": "string"
+                            }
+                        }
                     },
                     "401": {
-                        "description": "Unauthorized",
+                        "description": "Unauthorized - missing or invalid token",
                         "schema": {
                             "type": "object",
                             "additionalProperties": {
@@ -1057,7 +1445,7 @@ const docTemplate = `{
                         "BearerAuth": []
                     }
                 ],
-                "description": "Sets the authenticated user's background picture",
+                "description": "Updates the authenticated user's chat background picture using a provided picture ID",
                 "consumes": [
                     "application/json"
                 ],
@@ -1070,7 +1458,7 @@ const docTemplate = `{
                 "summary": "Set user background picture",
                 "parameters": [
                     {
-                        "description": "New background picture ID (e.g., UUID or MinIO object key)",
+                        "description": "Picture ID (e.g., UUID or MinIO object key)",
                         "name": "background_pic",
                         "in": "body",
                         "required": true,
@@ -1086,7 +1474,7 @@ const docTemplate = `{
                 ],
                 "responses": {
                     "200": {
-                        "description": "Background picture is set successfully",
+                        "description": "Background picture updated successfully",
                         "schema": {
                             "type": "object",
                             "additionalProperties": {
@@ -1104,7 +1492,7 @@ const docTemplate = `{
                         }
                     },
                     "401": {
-                        "description": "Unauthorized",
+                        "description": "Unauthorized - missing or invalid token",
                         "schema": {
                             "type": "object",
                             "additionalProperties": {
@@ -1126,7 +1514,7 @@ const docTemplate = `{
         },
         "/users/login": {
             "post": {
-                "description": "Authenticates a user and returns an authentication token",
+                "description": "Authenticates a user with username and password, returning a JWT authentication token",
                 "consumes": [
                     "application/json"
                 ],
@@ -1139,7 +1527,7 @@ const docTemplate = `{
                 "summary": "Login a user",
                 "parameters": [
                     {
-                        "description": "Login credentials",
+                        "description": "User login credentials",
                         "name": "credentials",
                         "in": "body",
                         "required": true,
@@ -1158,7 +1546,7 @@ const docTemplate = `{
                 ],
                 "responses": {
                     "200": {
-                        "description": "Authentication token",
+                        "description": "Response containing the JWT token",
                         "schema": {
                             "type": "object",
                             "additionalProperties": {
@@ -1187,44 +1575,6 @@ const docTemplate = `{
                 }
             }
         },
-        "/users/me": {
-            "get": {
-                "description": "Retrieves the authenticated user's details by their ID",
-                "produces": [
-                    "application/json"
-                ],
-                "tags": [
-                    "users"
-                ],
-                "summary": "Get user by ID",
-                "responses": {
-                    "200": {
-                        "description": "User details",
-                        "schema": {
-                            "$ref": "#/definitions/github_com_ruziba3vich_soand_internal_models.User"
-                        }
-                    },
-                    "401": {
-                        "description": "Unauthorized",
-                        "schema": {
-                            "type": "object",
-                            "additionalProperties": {
-                                "type": "string"
-                            }
-                        }
-                    },
-                    "404": {
-                        "description": "User not found",
-                        "schema": {
-                            "type": "object",
-                            "additionalProperties": {
-                                "type": "string"
-                            }
-                        }
-                    }
-                }
-            }
-        },
         "/users/password": {
             "put": {
                 "security": [
@@ -1232,7 +1582,7 @@ const docTemplate = `{
                         "BearerAuth": []
                     }
                 ],
-                "description": "Updates the authenticated user's password",
+                "description": "Updates the authenticated user's password after verifying the old password",
                 "consumes": [
                     "application/json"
                 ],
@@ -1264,7 +1614,13 @@ const docTemplate = `{
                 ],
                 "responses": {
                     "200": {
-                        "description": "Password updated successfully"
+                        "description": "Password updated successfully",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": {
+                                "type": "string"
+                            }
+                        }
                     },
                     "400": {
                         "description": "Invalid request body",
@@ -1276,7 +1632,7 @@ const docTemplate = `{
                         }
                     },
                     "401": {
-                        "description": "Unauthorized",
+                        "description": "Unauthorized - missing or invalid token",
                         "schema": {
                             "type": "object",
                             "additionalProperties": {
@@ -1303,7 +1659,7 @@ const docTemplate = `{
                         "BearerAuth": []
                     }
                 ],
-                "description": "Updates user data based on the authenticated user's ID",
+                "description": "Updates the authenticated user's data based on the provided fields",
                 "consumes": [
                     "application/json"
                 ],
@@ -1313,10 +1669,10 @@ const docTemplate = `{
                 "tags": [
                     "users"
                 ],
-                "summary": "Update user",
+                "summary": "Update user data",
                 "parameters": [
                     {
-                        "description": "User update data",
+                        "description": "User update data (fields to update)",
                         "name": "user",
                         "in": "body",
                         "required": true,
@@ -1327,7 +1683,7 @@ const docTemplate = `{
                 ],
                 "responses": {
                     "200": {
-                        "description": "user updated successfully",
+                        "description": "User updated successfully",
                         "schema": {
                             "type": "object",
                             "additionalProperties": {
@@ -1336,7 +1692,7 @@ const docTemplate = `{
                         }
                     },
                     "400": {
-                        "description": "bad request",
+                        "description": "Invalid request body",
                         "schema": {
                             "type": "object",
                             "additionalProperties": {
@@ -1345,7 +1701,7 @@ const docTemplate = `{
                         }
                     },
                     "401": {
-                        "description": "unauthorized",
+                        "description": "Unauthorized - missing or invalid token",
                         "schema": {
                             "type": "object",
                             "additionalProperties": {
@@ -1354,7 +1710,7 @@ const docTemplate = `{
                         }
                     },
                     "500": {
-                        "description": "internal server error",
+                        "description": "Failed to update user",
                         "schema": {
                             "type": "object",
                             "additionalProperties": {
@@ -1372,7 +1728,7 @@ const docTemplate = `{
                         "BearerAuth": []
                     }
                 ],
-                "description": "Updates the authenticated user's username",
+                "description": "Updates the authenticated user's username to a new value",
                 "consumes": [
                     "application/json"
                 ],
@@ -1401,7 +1757,13 @@ const docTemplate = `{
                 ],
                 "responses": {
                     "200": {
-                        "description": "Username updated successfully"
+                        "description": "Username updated successfully",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": {
+                                "type": "string"
+                            }
+                        }
                     },
                     "400": {
                         "description": "Invalid request body",
@@ -1413,7 +1775,7 @@ const docTemplate = `{
                         }
                     },
                     "401": {
-                        "description": "Unauthorized",
+                        "description": "Unauthorized - missing or invalid token",
                         "schema": {
                             "type": "object",
                             "additionalProperties": {
@@ -1433,9 +1795,70 @@ const docTemplate = `{
                 }
             }
         },
+        "/users/{id}": {
+            "get": {
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
+                "description": "Retrieves user details by their ID, accessible only to the authenticated user",
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "users"
+                ],
+                "summary": "Get user by ID",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "User ID (MongoDB ObjectID)",
+                        "name": "id",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "User details",
+                        "schema": {
+                            "$ref": "#/definitions/github_com_ruziba3vich_soand_internal_models.User"
+                        }
+                    },
+                    "400": {
+                        "description": "Invalid user ID",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": {
+                                "type": "string"
+                            }
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthorized - missing or invalid token",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": {
+                                "type": "string"
+                            }
+                        }
+                    },
+                    "404": {
+                        "description": "User not found",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": {
+                                "type": "string"
+                            }
+                        }
+                    }
+                }
+            }
+        },
         "/users/{username}": {
             "get": {
-                "description": "Retrieves a user's details by their username",
+                "description": "Retrieves user details by their username",
                 "produces": [
                     "application/json"
                 ],
@@ -1461,6 +1884,129 @@ const docTemplate = `{
                     },
                     "404": {
                         "description": "User not found",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": {
+                                "type": "string"
+                            }
+                        }
+                    }
+                }
+            }
+        },
+        "/ws/chat": {
+            "get": {
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
+                "description": "Establishes a WebSocket connection for real-time messaging between two users",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "chat"
+                ],
+                "summary": "WebSocket connection for real-time chat",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "Recipient's user ID",
+                        "name": "recipient_id",
+                        "in": "query",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "101": {
+                        "description": "Switching Protocols",
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
+                    "400": {
+                        "description": "Missing or invalid recipient ID",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": {
+                                "type": "string"
+                            }
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthorized",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": {
+                                "type": "string"
+                            }
+                        }
+                    },
+                    "500": {
+                        "description": "WebSocket upgrade failed",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": {
+                                "type": "string"
+                            }
+                        }
+                    }
+                }
+            }
+        },
+        "/ws/comments": {
+            "get": {
+                "description": "Establishes a WebSocket connection for real-time comment updates on a specific post",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "comments"
+                ],
+                "summary": "WebSocket connection for real-time comments",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "Post ID to subscribe to comments for",
+                        "name": "post_id",
+                        "in": "query",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "101": {
+                        "description": "Switching Protocols",
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
+                    "400": {
+                        "description": "Missing or invalid post ID",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": {
+                                "type": "string"
+                            }
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthorized",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": {
+                                "type": "string"
+                            }
+                        }
+                    },
+                    "500": {
+                        "description": "WebSocket upgrade failed",
                         "schema": {
                             "type": "object",
                             "additionalProperties": {

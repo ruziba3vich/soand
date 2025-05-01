@@ -42,12 +42,12 @@ func NewUserHandler(repo repos.UserRepo, file_store repos.IFIleStoreService, log
 
 // CreateUser handles user creation requests
 // @Summary Create a new user
-// @Description Creates a new user and returns an authentication token
+// @Description Creates a new user with the provided data and returns a JWT authentication token
 // @Tags users
 // @Accept json
 // @Produce json
-// @Param user body models.User true "User data"
-// @Success 200 {object} map[string]string "Token for the created user"
+// @Param user body models.User true "User data (e.g., username, password, etc.)"
+// @Success 200 {object} map[string]string "Response containing the JWT token"
 // @Failure 400 {object} map[string]string "Invalid request body"
 // @Failure 500 {object} map[string]string "Failed to create user"
 // @Router /users [post]
@@ -74,12 +74,12 @@ func (h *UserHandler) CreateUser(c *gin.Context) {
 
 // LoginUser handles user login requests
 // @Summary Login a user
-// @Description Authenticates a user and returns an authentication token
+// @Description Authenticates a user with username and password, returning a JWT authentication token
 // @Tags users
 // @Accept json
 // @Produce json
-// @Param credentials body object{username=string,password=string} true "Login credentials"
-// @Success 200 {object} map[string]string "Authentication token"
+// @Param credentials body object{username=string,password=string} true "User login credentials"
+// @Success 200 {object} map[string]string "Response containing the JWT token"
 // @Failure 400 {object} map[string]string "Invalid request body"
 // @Failure 500 {object} map[string]string "Failed to login user"
 // @Router /users/login [post]
@@ -107,12 +107,12 @@ func (h *UserHandler) LoginUser(c *gin.Context) {
 
 // DeleteUser handles user deletion requests
 // @Summary Delete a user
-// @Description Deletes the authenticated user's account
+// @Description Deletes the authenticated user's account using their JWT token
 // @Tags users
 // @Security BearerAuth
 // @Produce json
-// @Success 204 "User deleted successfully"
-// @Failure 401 {object} map[string]string "Unauthorized"
+// @Success 200 {object} map[string]string "User deleted successfully"
+// @Failure 401 {object} map[string]string "Unauthorized - missing or invalid token"
 // @Failure 500 {object} map[string]string "Failed to delete user"
 // @Router /users [delete]
 func (h *UserHandler) DeleteUser(c *gin.Context) {
@@ -133,13 +133,16 @@ func (h *UserHandler) DeleteUser(c *gin.Context) {
 
 // GetUserByID handles retrieving a user by ID
 // @Summary Get user by ID
-// @Description Retrieves the authenticated user's details by their ID
+// @Description Retrieves user details by their ID, accessible only to the authenticated user
 // @Tags users
+// @Security BearerAuth
 // @Produce json
+// @Param id path string true "User ID (MongoDB ObjectID)"
 // @Success 200 {object} models.User "User details"
-// @Failure 401 {object} map[string]string "Unauthorized"
+// @Failure 400 {object} map[string]string "Invalid user ID"
+// @Failure 401 {object} map[string]string "Unauthorized - missing or invalid token"
 // @Failure 404 {object} map[string]string "User not found"
-// @Router /users/me [get]
+// @Router /users/{id} [get]
 func (h *UserHandler) GetUserByID(c *gin.Context) {
 	userId := c.Param("id")
 	if len(userId) == 0 {
@@ -165,7 +168,7 @@ func (h *UserHandler) GetUserByID(c *gin.Context) {
 
 // GetUserByUsername handles retrieving a user by username
 // @Summary Get user by username
-// @Description Retrieves a user's details by their username
+// @Description Retrieves user details by their username
 // @Tags users
 // @Produce json
 // @Param username path string true "Username of the user"
@@ -225,15 +228,15 @@ func (h *UserHandler) GetUserByUsername(c *gin.Context) {
 
 // UpdatePassword handles updating a user's password
 // @Summary Update user password
-// @Description Updates the authenticated user's password
+// @Description Updates the authenticated user's password after verifying the old password
 // @Tags users
-// @Accept json
 // @Security BearerAuth
+// @Accept json
 // @Produce json
 // @Param passwords body object{old_password=string,new_password=string} true "Old and new passwords"
-// @Success 200 "Password updated successfully"
+// @Success 200 {object} map[string]string "Password updated successfully"
 // @Failure 400 {object} map[string]string "Invalid request body"
-// @Failure 401 {object} map[string]string "Unauthorized"
+// @Failure 401 {object} map[string]string "Unauthorized - missing or invalid token"
 // @Failure 500 {object} map[string]string "Failed to update password"
 // @Router /users/password [put]
 func (h *UserHandler) UpdatePassword(c *gin.Context) {
@@ -264,15 +267,15 @@ func (h *UserHandler) UpdatePassword(c *gin.Context) {
 
 // UpdateUsername handles updating a user's username
 // @Summary Update user username
-// @Description Updates the authenticated user's username
+// @Description Updates the authenticated user's username to a new value
 // @Tags users
-// @Accept json
 // @Security BearerAuth
+// @Accept json
 // @Produce json
 // @Param username body object{new_username=string} true "New username"
-// @Success 200 "Username updated successfully"
+// @Success 200 {object} map[string]string "Username updated successfully"
 // @Failure 400 {object} map[string]string "Invalid request body"
-// @Failure 401 {object} map[string]string "Unauthorized"
+// @Failure 401 {object} map[string]string "Unauthorized - missing or invalid token"
 // @Failure 500 {object} map[string]string "Failed to update username"
 // @Router /users/username [put]
 func (h *UserHandler) UpdateUsername(c *gin.Context) {
@@ -301,19 +304,19 @@ func (h *UserHandler) UpdateUsername(c *gin.Context) {
 	c.JSON(http.StatusOK, gin.H{"data": "username updated successfully"})
 }
 
-// UpdateUser godoc
-// @Summary      Update user
-// @Description  Updates user data based on the authenticated user's ID
-// @Tags         users
-// @Accept       json
-// @Produce      json
-// @Security     BearerAuth
-// @Param        user  body      models.UserUpdate  true  "User update data"
-// @Success      200   {object}  map[string]string  "user updated successfully"
-// @Failure      400   {object}  map[string]string  "bad request"
-// @Failure      401   {object}  map[string]string  "unauthorized"
-// @Failure      500   {object}  map[string]string  "internal server error"
-// @Router       /users/update [put]
+// UpdateUser handles updating user data
+// @Summary Update user data
+// @Description Updates the authenticated user's data based on the provided fields
+// @Tags users
+// @Security BearerAuth
+// @Accept json
+// @Produce json
+// @Param user body models.UserUpdate true "User update data (fields to update)"
+// @Success 200 {object} map[string]string "User updated successfully"
+// @Failure 400 {object} map[string]string "Invalid request body"
+// @Failure 401 {object} map[string]string "Unauthorized - missing or invalid token"
+// @Failure 500 {object} map[string]string "Failed to update user"
+// @Router /users/update [put]
 func (h *UserHandler) UpdateUser(c *gin.Context) {
 	userID, err := getUserIdFromRequest(c)
 	if err != nil {
@@ -425,15 +428,15 @@ func getUserIdFromRequest(c *gin.Context) (primitive.ObjectID, error) {
 
 // SetBackgroundPic handles setting a user's chat background picture
 // @Summary Set user background picture
-// @Description Sets the authenticated user's background picture
+// @Description Updates the authenticated user's chat background picture using a provided picture ID
 // @Tags users
-// @Accept json
 // @Security BearerAuth
+// @Accept json
 // @Produce json
-// @Param background_pic body object{pic_id=string} true "New background picture ID (e.g., UUID or MinIO object key)"
-// @Success 200 {object} map[string]string "Background picture is set successfully"
+// @Param background_pic body object{pic_id=string} true "Picture ID (e.g., UUID or MinIO object key)"
+// @Success 200 {object} map[string]string "Background picture updated successfully"
 // @Failure 400 {object} map[string]string "Invalid request body"
-// @Failure 401 {object} map[string]string "Unauthorized"
+// @Failure 401 {object} map[string]string "Unauthorized - missing or invalid token"
 // @Failure 500 {object} map[string]string "Failed to update background picture"
 // @Router /users/background [put]
 func (h *UserHandler) SetBackgroundPic(c *gin.Context) {
@@ -463,15 +466,13 @@ func (h *UserHandler) SetBackgroundPic(c *gin.Context) {
 }
 
 // Home handles the home endpoint requiring a valid JWT token
-// @Summary Get home endpoint
-// @Description Returns a successful response if the user is authenticated with a valid JWT token
+// @Summary Access home endpoint
+// @Description Verifies user authentication via JWT token and returns a success response
 // @Tags users
-// @Accept json
-// @Produce json
 // @Security BearerAuth
-// @Success 200 "User authenticated successfully"
-// @Failure 401 {object} map[string]string "Unauthorized or invalid token"
-// @Header 200 {string} Authorization "Bearer <token>" "Required JWT token for authentication"
+// @Produce json
+// @Success 200 {object} map[string]string "User authenticated successfully"
+// @Failure 401 {object} map[string]string "Unauthorized - missing or invalid token"
 // @Router / [get]
 func (h *UserHandler) Home(c *gin.Context) {
 	tokenString := c.GetHeader("Authorization")

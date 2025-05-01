@@ -67,28 +67,26 @@ info:
 paths:
   /:
     get:
-      consumes:
-      - application/json
-      description: Returns a successful response if the user is authenticated with
-        a valid JWT token
+      description: Verifies user authentication via JWT token and returns a success
+        response
       produces:
       - application/json
       responses:
         "200":
           description: User authenticated successfully
-          headers:
-            Authorization:
-              description: Bearer <token>" "Required JWT token for authentication
+          schema:
+            additionalProperties:
               type: string
+            type: object
         "401":
-          description: Unauthorized or invalid token
+          description: Unauthorized - missing or invalid token
           schema:
             additionalProperties:
               type: string
             type: object
       security:
       - BearerAuth: []
-      summary: Get home endpoint
+      summary: Access home endpoint
       tags:
       - users
   /backgrounds:
@@ -298,7 +296,90 @@ paths:
       summary: Update a comment
       tags:
       - comments
+  /comments/react:
+    post:
+      consumes:
+      - application/json
+      description: Adds or updates a reaction to a specific comment
+      parameters:
+      - description: Comment ID to react to
+        in: query
+        name: comment_id
+        required: true
+        type: string
+      - description: Reaction details
+        in: body
+        name: reaction
+        required: true
+        schema:
+          properties:
+            type:
+              type: string
+          type: object
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Reaction successful
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "400":
+          description: Invalid comment ID or request body
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "401":
+          description: Unauthorized
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "500":
+          description: Could not process reaction
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+      security:
+      - BearerAuth: []
+      summary: React to a comment
+      tags:
+      - comments
   /files:
+    get:
+      consumes:
+      - application/json
+      description: Retrieves file information using the provided file ID
+      parameters:
+      - description: File ID to retrieve
+        in: query
+        name: file_id
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Returns the file information
+          schema:
+            additionalProperties: true
+            type: object
+        "400":
+          description: Missing or invalid file ID
+          schema:
+            additionalProperties: true
+            type: object
+        "404":
+          description: File not found
+          schema:
+            additionalProperties: true
+            type: object
+      summary: Get file by ID
+      tags:
+      - Files
     post:
       consumes:
       - multipart/form-data
@@ -332,6 +413,176 @@ paths:
       summary: Upload a file
       tags:
       - Files
+  /messages:
+    get:
+      consumes:
+      - application/json
+      description: Retrieves paginated messages between the authenticated user and
+        another user
+      parameters:
+      - description: Recipient's user ID
+        in: query
+        name: recipient_id
+        required: true
+        type: string
+      - description: 'Page number (default: 1)'
+        in: query
+        name: page
+        type: string
+      - description: 'Number of messages per page (default: 10)'
+        in: query
+        name: page_size
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Returns paginated messages
+          schema:
+            additionalProperties: true
+            type: object
+        "400":
+          description: Invalid recipient ID or pagination parameters
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "401":
+          description: Unauthorized
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "500":
+          description: Could not fetch messages
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+      security:
+      - BearerAuth: []
+      summary: Get chat messages
+      tags:
+      - chat
+  /messages/{message_id}:
+    delete:
+      consumes:
+      - application/json
+      description: Deletes a specific message for the authenticated user
+      parameters:
+      - description: Message ID to delete
+        in: path
+        name: message_id
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Message deleted successfully
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "400":
+          description: Invalid message ID
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "401":
+          description: Unauthorized
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "403":
+          description: Not authorized to delete this message
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "404":
+          description: Message not found
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "500":
+          description: Could not delete message
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+      security:
+      - BearerAuth: []
+      summary: Delete a message
+      tags:
+      - chat
+    put:
+      consumes:
+      - application/json
+      description: Updates the content of a specific message for the authenticated
+        user
+      parameters:
+      - description: Message ID to update
+        in: path
+        name: message_id
+        required: true
+        type: string
+      - description: New message text
+        in: body
+        name: message
+        required: true
+        schema:
+          properties:
+            new_text:
+              type: string
+          type: object
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Message updated successfully
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "400":
+          description: Invalid message ID or request body
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "401":
+          description: Unauthorized
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "403":
+          description: Not authorized to update this message
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "404":
+          description: Message not found
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "500":
+          description: Could not update message
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+      security:
+      - BearerAuth: []
+      summary: Update a message
+      tags:
+      - chat
   /posts:
     get:
       consumes:
@@ -691,14 +942,18 @@ paths:
       - Profile
   /users:
     delete:
-      description: Deletes the authenticated user's account
+      description: Deletes the authenticated user's account using their JWT token
       produces:
       - application/json
       responses:
-        "204":
+        "200":
           description: User deleted successfully
+          schema:
+            additionalProperties:
+              type: string
+            type: object
         "401":
-          description: Unauthorized
+          description: Unauthorized - missing or invalid token
           schema:
             additionalProperties:
               type: string
@@ -717,9 +972,10 @@ paths:
     post:
       consumes:
       - application/json
-      description: Creates a new user and returns an authentication token
+      description: Creates a new user with the provided data and returns a JWT authentication
+        token
       parameters:
-      - description: User data
+      - description: User data (e.g., username, password, etc.)
         in: body
         name: user
         required: true
@@ -729,7 +985,7 @@ paths:
       - application/json
       responses:
         "200":
-          description: Token for the created user
+          description: Response containing the JWT token
           schema:
             additionalProperties:
               type: string
@@ -749,9 +1005,49 @@ paths:
       summary: Create a new user
       tags:
       - users
+  /users/{id}:
+    get:
+      description: Retrieves user details by their ID, accessible only to the authenticated
+        user
+      parameters:
+      - description: User ID (MongoDB ObjectID)
+        in: path
+        name: id
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: User details
+          schema:
+            $ref: '#/definitions/github_com_ruziba3vich_soand_internal_models.User'
+        "400":
+          description: Invalid user ID
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "401":
+          description: Unauthorized - missing or invalid token
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "404":
+          description: User not found
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+      security:
+      - BearerAuth: []
+      summary: Get user by ID
+      tags:
+      - users
   /users/{username}:
     get:
-      description: Retrieves a user's details by their username
+      description: Retrieves user details by their username
       parameters:
       - description: Username of the user
         in: path
@@ -778,9 +1074,10 @@ paths:
     put:
       consumes:
       - application/json
-      description: Sets the authenticated user's background picture
+      description: Updates the authenticated user's chat background picture using
+        a provided picture ID
       parameters:
-      - description: New background picture ID (e.g., UUID or MinIO object key)
+      - description: Picture ID (e.g., UUID or MinIO object key)
         in: body
         name: background_pic
         required: true
@@ -793,7 +1090,7 @@ paths:
       - application/json
       responses:
         "200":
-          description: Background picture is set successfully
+          description: Background picture updated successfully
           schema:
             additionalProperties:
               type: string
@@ -805,7 +1102,7 @@ paths:
               type: string
             type: object
         "401":
-          description: Unauthorized
+          description: Unauthorized - missing or invalid token
           schema:
             additionalProperties:
               type: string
@@ -825,9 +1122,10 @@ paths:
     post:
       consumes:
       - application/json
-      description: Authenticates a user and returns an authentication token
+      description: Authenticates a user with username and password, returning a JWT
+        authentication token
       parameters:
-      - description: Login credentials
+      - description: User login credentials
         in: body
         name: credentials
         required: true
@@ -842,7 +1140,7 @@ paths:
       - application/json
       responses:
         "200":
-          description: Authentication token
+          description: Response containing the JWT token
           schema:
             additionalProperties:
               type: string
@@ -862,36 +1160,12 @@ paths:
       summary: Login a user
       tags:
       - users
-  /users/me:
-    get:
-      description: Retrieves the authenticated user's details by their ID
-      produces:
-      - application/json
-      responses:
-        "200":
-          description: User details
-          schema:
-            $ref: '#/definitions/github_com_ruziba3vich_soand_internal_models.User'
-        "401":
-          description: Unauthorized
-          schema:
-            additionalProperties:
-              type: string
-            type: object
-        "404":
-          description: User not found
-          schema:
-            additionalProperties:
-              type: string
-            type: object
-      summary: Get user by ID
-      tags:
-      - users
   /users/password:
     put:
       consumes:
       - application/json
-      description: Updates the authenticated user's password
+      description: Updates the authenticated user's password after verifying the old
+        password
       parameters:
       - description: Old and new passwords
         in: body
@@ -909,6 +1183,10 @@ paths:
       responses:
         "200":
           description: Password updated successfully
+          schema:
+            additionalProperties:
+              type: string
+            type: object
         "400":
           description: Invalid request body
           schema:
@@ -916,7 +1194,7 @@ paths:
               type: string
             type: object
         "401":
-          description: Unauthorized
+          description: Unauthorized - missing or invalid token
           schema:
             additionalProperties:
               type: string
@@ -936,9 +1214,9 @@ paths:
     put:
       consumes:
       - application/json
-      description: Updates user data based on the authenticated user's ID
+      description: Updates the authenticated user's data based on the provided fields
       parameters:
-      - description: User update data
+      - description: User update data (fields to update)
         in: body
         name: user
         required: true
@@ -948,39 +1226,39 @@ paths:
       - application/json
       responses:
         "200":
-          description: user updated successfully
+          description: User updated successfully
           schema:
             additionalProperties:
               type: string
             type: object
         "400":
-          description: bad request
+          description: Invalid request body
           schema:
             additionalProperties:
               type: string
             type: object
         "401":
-          description: unauthorized
+          description: Unauthorized - missing or invalid token
           schema:
             additionalProperties:
               type: string
             type: object
         "500":
-          description: internal server error
+          description: Failed to update user
           schema:
             additionalProperties:
               type: string
             type: object
       security:
       - BearerAuth: []
-      summary: Update user
+      summary: Update user data
       tags:
       - users
   /users/username:
     put:
       consumes:
       - application/json
-      description: Updates the authenticated user's username
+      description: Updates the authenticated user's username to a new value
       parameters:
       - description: New username
         in: body
@@ -996,6 +1274,10 @@ paths:
       responses:
         "200":
           description: Username updated successfully
+          schema:
+            additionalProperties:
+              type: string
+            type: object
         "400":
           description: Invalid request body
           schema:
@@ -1003,7 +1285,7 @@ paths:
               type: string
             type: object
         "401":
-          description: Unauthorized
+          description: Unauthorized - missing or invalid token
           schema:
             additionalProperties:
               type: string
@@ -1019,6 +1301,88 @@ paths:
       summary: Update user username
       tags:
       - users
+  /ws/chat:
+    get:
+      consumes:
+      - application/json
+      description: Establishes a WebSocket connection for real-time messaging between
+        two users
+      parameters:
+      - description: Recipient's user ID
+        in: query
+        name: recipient_id
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "101":
+          description: Switching Protocols
+          schema:
+            type: string
+        "400":
+          description: Missing or invalid recipient ID
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "401":
+          description: Unauthorized
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "500":
+          description: WebSocket upgrade failed
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+      security:
+      - BearerAuth: []
+      summary: WebSocket connection for real-time chat
+      tags:
+      - chat
+  /ws/comments:
+    get:
+      consumes:
+      - application/json
+      description: Establishes a WebSocket connection for real-time comment updates
+        on a specific post
+      parameters:
+      - description: Post ID to subscribe to comments for
+        in: query
+        name: post_id
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "101":
+          description: Switching Protocols
+          schema:
+            type: string
+        "400":
+          description: Missing or invalid post ID
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "401":
+          description: Unauthorized
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "500":
+          description: WebSocket upgrade failed
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+      summary: WebSocket connection for real-time comments
+      tags:
+      - comments
 securityDefinitions:
   BearerAuth:
     description: '"JWT Authorization header using the Bearer scheme. Example: ''Bearer

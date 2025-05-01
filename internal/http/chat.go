@@ -38,6 +38,18 @@ type pendingMessage struct {
 }
 
 // HandleChatWebSocket handles WebSocket connections for real-time chat
+// @Summary      WebSocket connection for real-time chat
+// @Description  Establishes a WebSocket connection for real-time messaging between two users
+// @Tags         chat
+// @Accept       json
+// @Produce      json
+// @Security     BearerAuth
+// @Param        recipient_id  query  string  true  "Recipient's user ID"
+// @Success      101  {string}  string  "Switching Protocols"
+// @Failure      400  {object}  map[string]string  "Missing or invalid recipient ID"
+// @Failure      401  {object}  map[string]string  "Unauthorized"
+// @Failure      500  {object}  map[string]string  "WebSocket upgrade failed"
+// @Router       /ws/chat [get]
 func (h *ChatHandler) HandleChatWebSocket(c *gin.Context) {
 	// Extract recipient ID from query parameters
 	recipientIDStr := c.Query("recipient_id")
@@ -181,6 +193,20 @@ func (h *ChatHandler) HandleChatWebSocket(c *gin.Context) {
 }
 
 // GetMessages retrieves paginated messages between the authenticated user and another user
+// @Summary      Get chat messages
+// @Description  Retrieves paginated messages between the authenticated user and another user
+// @Tags         chat
+// @Accept       json
+// @Produce      json
+// @Security     BearerAuth
+// @Param        recipient_id  query  string  true  "Recipient's user ID"
+// @Param        page         query  string  false  "Page number (default: 1)"
+// @Param        page_size    query  string  false  "Number of messages per page (default: 10)"
+// @Success      200  {object}  map[string]interface{}  "Returns paginated messages"
+// @Failure      400  {object}  map[string]string  "Invalid recipient ID or pagination parameters"
+// @Failure      401  {object}  map[string]string  "Unauthorized"
+// @Failure      500  {object}  map[string]string  "Could not fetch messages"
+// @Router       /messages [get]
 func (h *ChatHandler) GetMessages(c *gin.Context) {
 	// Extract sender ID (authenticated user) from request
 	senderID, err := getUserIdFromRequest(c)
@@ -241,6 +267,22 @@ func (h *ChatHandler) GetMessages(c *gin.Context) {
 	})
 }
 
+// UpdateMessage updates the content of a message
+// @Summary      Update a message
+// @Description  Updates the content of a specific message for the authenticated user
+// @Tags         chat
+// @Accept       json
+// @Produce      json
+// @Security     BearerAuth
+// @Param        message_id  path  string  true  "Message ID to update"
+// @Param        message    body  object{new_text=string}  true  "New message text"
+// @Success      200  {object}  map[string]string  "Message updated successfully"
+// @Failure      400  {object}  map[string]string  "Invalid message ID or request body"
+// @Failure      401  {object}  map[string]string  "Unauthorized"
+// @Failure      403  {object}  map[string]string  "Not authorized to update this message"
+// @Failure      404  {object}  map[string]string  "Message not found"
+// @Failure      500  {object}  map[string]string  "Could not update message"
+// @Router       /messages/{message_id} [put]
 func (h *ChatHandler) UpdateMessage(c *gin.Context) {
 	// Extract authenticated user ID
 	userID, err := getUserIdFromRequest(c)
@@ -299,6 +341,21 @@ func (h *ChatHandler) UpdateMessage(c *gin.Context) {
 	}
 }
 
+// DeleteMessage removes a message
+// @Summary      Delete a message
+// @Description  Deletes a specific message for the authenticated user
+// @Tags         chat
+// @Accept       json
+// @Produce      json
+// @Security     BearerAuth
+// @Param        message_id  path  string  true  "Message ID to delete"
+// @Success      200  {object}  map[string]string  "Message deleted successfully"
+// @Failure      400  {object}  map[string]string  "Invalid message ID"
+// @Failure      401  {object}  map[string]string  "Unauthorized"
+// @Failure      403  {object}  map[string]string  "Not authorized to delete this message"
+// @Failure      404  {object}  map[string]string  "Message not found"
+// @Failure      500  {object}  map[string]string  "Could not delete message"
+// @Router       /messages/{message_id} [delete]
 func (h *ChatHandler) DeleteMessage(c *gin.Context) {
 	// Extract authenticated user ID
 	userID, err := getUserIdFromRequest(c)
