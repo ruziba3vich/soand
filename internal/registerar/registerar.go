@@ -44,9 +44,8 @@ func RegisterPostRoutes(
 	r *gin.Engine,
 	postRepo repos.IPostService,
 	logger *log.Logger,
-	file_service repos.IFIleStoreService,
 	authMiddleware func(gin.HandlerFunc) gin.HandlerFunc) {
-	h := handler.NewPostHandler(postRepo, logger, file_service)
+	h := handler.NewPostHandler(postRepo, logger)
 
 	posts := r.Group("/posts")
 	{
