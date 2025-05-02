@@ -100,6 +100,10 @@ func (s *PostService) GetAllPosts(ctx context.Context, page int64, pageSize int6
 		return nil, err
 	}
 
+	if err := s.changeFilesOfEachPost(posts); err != nil {
+		return nil, err
+	}
+
 	s.logger.Println(logrus.Fields{
 		"page":     page,
 		"pageSize": pageSize,
@@ -118,8 +122,13 @@ func (s *PostService) GetPost(ctx context.Context, id primitive.ObjectID) (*mode
 		})
 		return nil, err
 	}
-
-	s.logger.Println("id", post.ID.Hex())
+	if err := s.changeFiles(post); err != nil {
+		s.logger.Println(logrus.Fields{
+			"post_id": post.ID.Hex(),
+			"error":   err.Error(),
+		})
+		return nil, err
+	}
 	return post, nil
 }
 
@@ -149,6 +158,11 @@ func (s *PostService) SearchPostsByTitle(ctx context.Context, query string, page
 	if err != nil {
 		s.logger.Println(err.Error())
 	}
+
+	if err := s.changeFilesOfEachPost(posts); err != nil {
+		return nil, err
+	}
+
 	return posts, nil
 }
 
@@ -189,6 +203,20 @@ func (s *PostService) changeFiles(post *models.Post) error {
 			return err
 		}
 		post.Pictures[i] = fileUrl
+	}
+
+	return nil
+}
+
+func (s *PostService) changeFilesOfEachPost(posts []models.Post) error {
+	for i := range posts {
+		if err := s.changeFiles(&posts[i]); err != nil {
+			s.logger.Println(logrus.Fields{
+				"post_id": posts[i].ID.Hex(),
+				"error":   err.Error(),
+			})
+			return err
+		}
 	}
 
 	return nil
