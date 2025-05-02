@@ -127,7 +127,6 @@ func Run(ctx context.Context, logger *log.Logger) error {
 		router,
 		posts_service,
 		logger,
-		file_store_service,
 		authMiddleware.AuthMiddleware(),
 	)
 
