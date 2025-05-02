@@ -182,11 +182,14 @@ func (s *PostService) LikeOrDislikePost(ctx context.Context, userId primitive.Ob
 	return nil
 }
 
-// func (s *PostService) ReactToPost(ctx context.Context, postId primitive.ObjectID, userId primitive.ObjectID, reaction string, add bool) error {
-// 	if err := s.storage.ReactToPost(ctx, postId, userId, reaction, add); err != nil {
-// 		s.logger.Println(err.Error())
-// 		return err
-// 	}
+func (s *PostService) changeFiles(post *models.Post) error {
+	for i := range post.Pictures {
+		fileUrl, err := s.file_service.GetFile(post.Pictures[i])
+		if err != nil {
+			return err
+		}
+		post.Pictures[i] = fileUrl
+	}
 
-// 	return nil
-// }
+	return nil
+}
