@@ -54,6 +54,13 @@ func (s *PostService) CreatePost(ctx context.Context, post *models.Post, files [
 		return err
 	}
 
+	if err := s.changeFiles(post); err != nil {
+		s.logger.Println(logrus.Fields{
+			"error": err.Error(),
+		})
+		return err
+	}
+
 	s.logger.Println(logrus.Fields{
 		"id":      post.ID.Hex(),
 		"content": post.Description,
