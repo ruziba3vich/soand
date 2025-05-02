@@ -35,6 +35,16 @@ func NewPostService(storage *storage.Storage, likes_storage *storage.LikesStorag
 
 // CreatePost inserts a new post into the database
 func (s *PostService) CreatePost(ctx context.Context, post *models.Post, files []*multipart.FileHeader, deleteAfter int) error {
+	for _, file := range files {
+		filename, err := s.file_service.UploadFile(file)
+		if err != nil {
+			s.logger.Println(logrus.Fields{
+				"error": err.Error(),
+			})
+			return err
+		}
+		post.Pictures = append(post.Pictures, filename)
+	}
 	err := s.storage.CreatePost(ctx, post, deleteAfter)
 	if err != nil {
 		s.logger.Println(logrus.Fields{
