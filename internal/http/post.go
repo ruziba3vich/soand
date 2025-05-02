@@ -71,19 +71,13 @@ func (h *PostHandler) CreatePost(c *gin.Context) {
 	post.CreatorId = userId
 
 	form, err := c.MultipartForm()
-	if err == nil {
-		uploadedFiles := form.File["files"]
-		for _, file := range uploadedFiles {
-			fileURL, err := h.file_service.UploadFile(file)
-			if err != nil {
-				c.JSON(http.StatusInternalServerError, gin.H{"error": "File upload failed: " + err.Error()})
-				return
-			}
-			post.Pictures = append(post.Pictures, fileURL)
-		}
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+		return
 	}
+	files := form.File["files"]
 
-	err = h.service.CreatePost(c.Request.Context(), post, req.DeleteAfter)
+	err = h.service.CreatePost(c.Request.Context(), post, files, req.DeleteAfter)
 	if err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to create post"})
 		return
