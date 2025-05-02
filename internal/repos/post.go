@@ -2,6 +2,7 @@ package repos
 
 import (
 	"context"
+	"mime/multipart"
 
 	"github.com/ruziba3vich/soand/internal/models"
 	"go.mongodb.org/mongo-driver/bson"
@@ -10,7 +11,7 @@ import (
 
 // PostServiceInterface defines all methods for the PostService
 type IPostService interface {
-	CreatePost(ctx context.Context, post *models.Post, deleteAfter int) error
+	CreatePost(ctx context.Context, post *models.Post, files []*multipart.FileHeader, deleteAfter int) error
 	DeletePost(ctx context.Context, id primitive.ObjectID) error
 	EnsureTTLIndex(ctx context.Context) error
 	GetAllPosts(ctx context.Context, page int64, pageSize int64) ([]models.Post, error)
