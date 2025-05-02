@@ -121,7 +121,7 @@ func Run(ctx context.Context, logger *log.Logger) error {
 	}
 
 	posts_storage := storage.NewStorage(posts_collection, user_storage)
-	posts_service := service.NewPostService(posts_storage, likes_storage, logger)
+	posts_service := service.NewPostService(posts_storage, likes_storage, file_store_service, logger)
 
 	registerar.RegisterPostRoutes(
 		router,
