@@ -14,17 +14,15 @@ import (
 
 // PostHandler struct that handles HTTP requests
 type PostHandler struct {
-	service      repos.IPostService
-	logger       *log.Logger
-	file_service repos.IFIleStoreService
+	service repos.IPostService
+	logger  *log.Logger
 }
 
 // NewPostHandler initializes a new PostHandler with a service and logger
-func NewPostHandler(service repos.IPostService, logger *log.Logger, file_service repos.IFIleStoreService) *PostHandler {
+func NewPostHandler(service repos.IPostService, logger *log.Logger) *PostHandler {
 	return &PostHandler{
-		service:      service,
-		logger:       logger,
-		file_service: file_service,
+		service: service,
+		logger:  logger,
 	}
 }
 
@@ -71,19 +69,13 @@ func (h *PostHandler) CreatePost(c *gin.Context) {
 	post.CreatorId = userId
 
 	form, err := c.MultipartForm()
-	if err == nil {
-		uploadedFiles := form.File["files"]
-		for _, file := range uploadedFiles {
-			fileURL, err := h.file_service.UploadFile(file)
-			if err != nil {
-				c.JSON(http.StatusInternalServerError, gin.H{"error": "File upload failed: " + err.Error()})
-				return
-			}
-			post.Pictures = append(post.Pictures, fileURL)
-		}
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+		return
 	}
+	files := form.File["files"]
 
-	err = h.service.CreatePost(c.Request.Context(), post, req.DeleteAfter)
+	err = h.service.CreatePost(c.Request.Context(), post, files, req.DeleteAfter)
 	if err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to create post"})
 		return

@@ -50,7 +50,7 @@ func (s *FileStorage) UploadFile(file *multipart.FileHeader) (string, error) {
 		return "", fmt.Errorf("failed to upload file: %s", err.Error())
 	}
 
-	return s.GetFile(filename)
+	return filename, nil
 }
 
 func (s *FileStorage) UploadFileFromBytes(data []byte, contentType string) (string, error) {

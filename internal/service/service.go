@@ -4,6 +4,7 @@ import (
 	"context"
 	"errors"
 	"log"
+	"mime/multipart"
 
 	"github.com/ruziba3vich/soand/internal/models"
 	"github.com/ruziba3vich/soand/internal/repos"
@@ -18,20 +19,32 @@ type PostService struct {
 	storage       *storage.Storage
 	likes_storage *storage.LikesStorage
 	logger        *log.Logger
+	file_service  repos.IFIleStoreService
 }
 
 // NewPostService initializes a new PostService with storage and logger
-func NewPostService(storage *storage.Storage, likes_storage *storage.LikesStorage, logger *log.Logger) repos.IPostService {
+func NewPostService(storage *storage.Storage, likes_storage *storage.LikesStorage, file_service repos.IFIleStoreService, logger *log.Logger) repos.IPostService {
 	// Create a logger
 	return &PostService{
 		storage:       storage,
 		likes_storage: likes_storage,
 		logger:        logger,
+		file_service:  file_service,
 	}
 }
 
 // CreatePost inserts a new post into the database
-func (s *PostService) CreatePost(ctx context.Context, post *models.Post, deleteAfter int) error {
+func (s *PostService) CreatePost(ctx context.Context, post *models.Post, files []*multipart.FileHeader, deleteAfter int) error {
+	for _, file := range files {
+		filename, err := s.file_service.UploadFile(file)
+		if err != nil {
+			s.logger.Println(logrus.Fields{
+				"error": err.Error(),
+			})
+			return err
+		}
+		post.Pictures = append(post.Pictures, filename)
+	}
 	err := s.storage.CreatePost(ctx, post, deleteAfter)
 	if err != nil {
 		s.logger.Println(logrus.Fields{
@@ -87,6 +100,10 @@ func (s *PostService) GetAllPosts(ctx context.Context, page int64, pageSize int6
 		return nil, err
 	}
 
+	if err := s.changeFilesOfEachPost(posts); err != nil {
+		return nil, err
+	}
+
 	s.logger.Println(logrus.Fields{
 		"page":     page,
 		"pageSize": pageSize,
@@ -105,8 +122,13 @@ func (s *PostService) GetPost(ctx context.Context, id primitive.ObjectID) (*mode
 		})
 		return nil, err
 	}
-
-	s.logger.Println("id", post.ID.Hex())
+	if err := s.changeFiles(post); err != nil {
+		s.logger.Println(logrus.Fields{
+			"post_id": post.ID.Hex(),
+			"error":   err.Error(),
+		})
+		return nil, err
+	}
 	return post, nil
 }
 
@@ -136,6 +158,11 @@ func (s *PostService) SearchPostsByTitle(ctx context.Context, query string, page
 	if err != nil {
 		s.logger.Println(err.Error())
 	}
+
+	if err := s.changeFilesOfEachPost(posts); err != nil {
+		return nil, err
+	}
+
 	return posts, nil
 }
 
@@ -169,11 +196,28 @@ func (s *PostService) LikeOrDislikePost(ctx context.Context, userId primitive.Ob
 	return nil
 }
 
-// func (s *PostService) ReactToPost(ctx context.Context, postId primitive.ObjectID, userId primitive.ObjectID, reaction string, add bool) error {
-// 	if err := s.storage.ReactToPost(ctx, postId, userId, reaction, add); err != nil {
-// 		s.logger.Println(err.Error())
-// 		return err
-// 	}
+func (s *PostService) changeFiles(post *models.Post) error {
+	for i := range post.Pictures {
+		fileUrl, err := s.file_service.GetFile(post.Pictures[i])
+		if err != nil {
+			return err
+		}
+		post.Pictures[i] = fileUrl
+	}
 
-// 	return nil
-// }
+	return nil
+}
+
+func (s *PostService) changeFilesOfEachPost(posts []models.Post) error {
+	for i := range posts {
+		if err := s.changeFiles(&posts[i]); err != nil {
+			s.logger.Println(logrus.Fields{
+				"post_id": posts[i].ID.Hex(),
+				"error":   err.Error(),
+			})
+			return err
+		}
+	}
+
+	return nil
+}
