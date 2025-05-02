@@ -14,17 +14,15 @@ import (
 
 // PostHandler struct that handles HTTP requests
 type PostHandler struct {
-	service      repos.IPostService
-	logger       *log.Logger
-	file_service repos.IFIleStoreService
+	service repos.IPostService
+	logger  *log.Logger
 }
 
 // NewPostHandler initializes a new PostHandler with a service and logger
-func NewPostHandler(service repos.IPostService, logger *log.Logger, file_service repos.IFIleStoreService) *PostHandler {
+func NewPostHandler(service repos.IPostService, logger *log.Logger) *PostHandler {
 	return &PostHandler{
-		service:      service,
-		logger:       logger,
-		file_service: file_service,
+		service: service,
+		logger:  logger,
 	}
 }
 
