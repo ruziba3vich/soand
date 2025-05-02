@@ -4,6 +4,7 @@ import (
 	"context"
 	"errors"
 	"log"
+	"mime/multipart"
 
 	"github.com/ruziba3vich/soand/internal/models"
 	"github.com/ruziba3vich/soand/internal/repos"
@@ -18,20 +19,22 @@ type PostService struct {
 	storage       *storage.Storage
 	likes_storage *storage.LikesStorage
 	logger        *log.Logger
+	file_service  repos.IFIleStoreService
 }
 
 // NewPostService initializes a new PostService with storage and logger
-func NewPostService(storage *storage.Storage, likes_storage *storage.LikesStorage, logger *log.Logger) repos.IPostService {
+func NewPostService(storage *storage.Storage, likes_storage *storage.LikesStorage, file_service repos.IFIleStoreService, logger *log.Logger) repos.IPostService {
 	// Create a logger
 	return &PostService{
 		storage:       storage,
 		likes_storage: likes_storage,
 		logger:        logger,
+		file_service:  file_service,
 	}
 }
 
 // CreatePost inserts a new post into the database
-func (s *PostService) CreatePost(ctx context.Context, post *models.Post, deleteAfter int) error {
+func (s *PostService) CreatePost(ctx context.Context, post *models.Post, files []*multipart.FileHeader, deleteAfter int) error {
 	err := s.storage.CreatePost(ctx, post, deleteAfter)
 	if err != nil {
 		s.logger.Println(logrus.Fields{
