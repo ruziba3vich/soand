@@ -53,6 +53,10 @@ func (s *CommentService) CreateComment(ctx context.Context, comment *models.Comm
 		}
 	}
 
+	if comment.Pictures == nil {
+		comment.Pictures = make([]string, 0)
+	}
+
 	// Store the comment in MongoDB
 	if err := s.storage.CreateComment(ctx, comment); err != nil {
 		s.logger.Println("Error storing comment:", err)
@@ -109,6 +113,40 @@ func (s *CommentService) GetCommentsByPostID(ctx context.Context, postID primiti
 		return nil, err
 	}
 
+	// Iterate over the cursor and process each comment
+	for _, comment := range comments {
+		owner, err := s.user_storage.GetUserByID(ctx, comment.UserID)
+		if err != nil {
+			if errors.Is(err, mongo.ErrNoDocuments) {
+				comment.UserID = primitive.NilObjectID
+				comment.OwnerFullname = "Deleted Account"
+			} else {
+				return nil, err
+			}
+		}
+		if owner.HiddenProfile {
+			comment.UserID = primitive.NilObjectID
+			comment.OwnerFullname = "Anonim user"
+		} else {
+			comment.OwnerFullname = owner.Fullname
+			if len(owner.ProfilePics) > 0 {
+				comment.OwnerProfilePic = owner.ProfilePics[0].Url
+			}
+		}
+		if len(comment.VoiceMessage) > 0 {
+			if err := s.fetchVoiceMessage(&comment); err != nil {
+				return nil, err
+			}
+		}
+		if len(comment.Pictures) > 0 {
+			if err := s.fetchPictures(&comment); err != nil {
+				return nil, err
+			}
+		}
+
+		comments = append(comments, comment)
+	}
+
 	s.logger.Printf("Fetched %d comments for post %s\n", len(comments), postID.Hex())
 	return comments, nil
 }
@@ -146,7 +184,52 @@ func (s *CommentService) GetCommentByID(ctx context.Context, commentID primitive
 		s.logger.Println("Error getting comment by id:", err)
 		return nil, err
 	}
+	if len(comment.VoiceMessage) > 0 {
+		if err := s.fetchVoiceMessage(comment); err != nil {
+			return nil, err
+		}
+	}
 
+	if len(comment.Pictures) > 0 {
+		if err := s.fetchPictures(comment); err != nil {
+			return nil, err
+		}
+	}
+
+	// Check if the user's profile is hidden
+	user, err := s.user_storage.GetUserByID(ctx, comment.UserID)
+	if err != nil {
+		if errors.Is(err, mongo.ErrNoDocuments) {
+			comment.UserID = primitive.NilObjectID
+			comment.OwnerFullname = "Deleted Account"
+			return comment, nil
+		}
+		return nil, err
+	}
+
+	// If the user's profile is private, clear the UserID
+	if user.HiddenProfile {
+		comment.OwnerFullname = "Anonim user"
+		comment.UserID = primitive.NilObjectID // Set to zero value to hide it
+	}
 	s.logger.Println("Comment updated successfully:", comment.ID.Hex())
 	return comment, nil
+}
+
+func (s *CommentService) fetchVoiceMessage(comment *models.Comment) (err error) {
+	comment.VoiceMessage, err = s.file_storage.GetFile(comment.VoiceMessage)
+	if err != nil {
+		return err
+	}
+	return nil
+}
+
+func (s *CommentService) fetchPictures(comment *models.Comment) (err error) {
+	for i := range comment.Pictures {
+		comment.Pictures[i], err = s.file_storage.GetFile(comment.Pictures[i])
+		if err != nil {
+			return err
+		}
+	}
+	return nil
 }
