@@ -16,15 +16,13 @@ import (
 )
 
 type CommentStorage struct {
-	db           *mongo.Collection
-	user_storage *UserStorage
+	db *mongo.Collection
 }
 
 // NewCommentStorage initializes the comment storage
-func NewCommentStorage(db *mongo.Collection, user_storage *UserStorage) *CommentStorage {
+func NewCommentStorage(db *mongo.Collection) *CommentStorage {
 	return &CommentStorage{
-		db:           db,
-		user_storage: user_storage,
+		db: db,
 	}
 }
 
@@ -111,61 +109,29 @@ func (s *CommentStorage) GetParentComment(ctx context.Context, comment *models.C
 	return s.db.FindOne(ctx, bson.M{"_id": comment.ReplyTo, "post_id": comment.PostID}).Decode(&parentComment)
 }
 
-// GetCommentsByPostID retrieves paginated comments for a specific post
 func (s *CommentStorage) GetCommentsByPostID(ctx context.Context, postID primitive.ObjectID, page, pageSize int64) ([]models.Comment, error) {
-	// Ensure page and pageSize have valid values
 	if page < 1 {
 		page = 1
 	}
 	if pageSize < 1 {
-		pageSize = 10 // Default page size
+		pageSize = 10
 	}
 
 	skip := (page - 1) * pageSize
 
-	// Find comments with pagination and sorting
-	cursor, err := s.db.Find(ctx, bson.M{"post_id": postID}, &options.FindOptions{
-		Limit: &pageSize,
-		Skip:  &skip,
-		Sort:  bson.M{"created_at": -1}, // Sort by newest comments first
-	})
+	opts := options.Find().
+		SetLimit(pageSize).
+		SetSkip(skip).
+		SetSort(bson.M{"created_at": -1})
+
+	cursor, err := s.db.Find(ctx, bson.M{"post_id": postID}, opts)
 	if err != nil {
 		return nil, err
 	}
 	defer cursor.Close(ctx)
 
-	// Initialize an empty slice to store comments
 	var comments []models.Comment
-
-	// Iterate over the cursor and process each comment
-	for cursor.Next(ctx) {
-		var comment models.Comment
-		if err := cursor.Decode(&comment); err != nil {
-			return nil, err
-		}
-		owner, err := s.user_storage.GetUserByID(ctx, comment.UserID)
-		if err != nil {
-			if errors.Is(err, mongo.ErrNoDocuments) {
-				comment.UserID = primitive.NilObjectID
-				comment.OwnerFullname = "Deleted Account"
-			} else {
-				return nil, err
-			}
-		}
-		if owner.HiddenProfile {
-			comment.UserID = primitive.NilObjectID
-			comment.OwnerFullname = "Anonim user"
-		} else {
-			comment.OwnerFullname = owner.Fullname
-			if len(owner.ProfilePics) > 0 {
-				comment.OwnerProfilePic = owner.ProfilePics[0].Url
-			}
-		}
-		comments = append(comments, comment)
-	}
-
-	// Check for any errors that occurred during iteration
-	if err := cursor.Err(); err != nil {
+	if err := cursor.All(ctx, &comments); err != nil {
 		return nil, err
 	}
 
@@ -206,23 +172,6 @@ func (s *CommentStorage) GetCommentByID(ctx context.Context, commentID primitive
 			return nil, errors.New("comment not found")
 		}
 		return nil, err
-	}
-
-	// Check if the user's profile is hidden
-	user, err := s.user_storage.GetUserByID(ctx, comment.UserID)
-	if err != nil {
-		if errors.Is(err, mongo.ErrNoDocuments) {
-			comment.UserID = primitive.NilObjectID
-			comment.OwnerFullname = "Deleted Account"
-			return &comment, bson.ErrDecodeToNil
-		}
-		return nil, err
-	}
-
-	// If the user's profile is private, clear the UserID
-	if user.HiddenProfile {
-		comment.OwnerFullname = "Anonim user"
-		comment.UserID = primitive.NilObjectID // Set to zero value to hide it
 	}
 
 	return &comment, nil
