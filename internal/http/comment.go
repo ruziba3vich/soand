@@ -190,13 +190,6 @@ func (h *CommentHandler) HandleWebSocket(c *gin.Context) {
 			continue
 		}
 
-		// Ensure the comment has at least some content
-		if current.Comment.Text == "" {
-			h.logger.Println("Empty comment received")
-			conn.WriteMessage(websocket.TextMessage, []byte(`{"error": "comment text is required"}`))
-			continue
-		}
-
 		// Set metadata
 		current.Comment.ID = primitive.NewObjectID()
 		current.Comment.UserID = userID
