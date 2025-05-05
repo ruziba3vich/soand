@@ -23,12 +23,18 @@ type CommentService struct {
 	redis        *redis.Client
 	logger       *log.Logger
 	user_storage *storage.UserStorage
+	file_storage repos.IFIleStoreService
 }
 
-func NewCommentService(storage *storage.CommentStorage, user_storage *storage.UserStorage, redis *redis.Client, logger *log.Logger) repos.ICommentService {
+func NewCommentService(
+	storage *storage.CommentStorage,
+	user_storage *storage.UserStorage,
+	file_storage repos.IFIleStoreService,
+	redis *redis.Client, logger *log.Logger) repos.ICommentService {
 	return &CommentService{
 		storage:      storage,
 		redis:        redis,
+		file_storage: file_storage,
 		logger:       logger,
 		user_storage: user_storage,
 	}
