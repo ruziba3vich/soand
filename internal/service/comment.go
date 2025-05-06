@@ -75,6 +75,16 @@ func (s *CommentService) CreateComment(ctx context.Context, comment *models.Comm
 	if len(user.ProfilePics) > 0 {
 		comment.OwnerProfilePic = user.ProfilePics[0].Url
 	}
+	if len(comment.VoiceMessage) > 0 {
+		if err := s.fetchVoiceMessage(comment); err != nil {
+			return err
+		}
+	}
+	if len(comment.Pictures) > 0 {
+		if err := s.fetchPictures(comment); err != nil {
+			return err
+		}
+	}
 	return err
 
 }
