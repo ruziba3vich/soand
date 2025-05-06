@@ -116,7 +116,7 @@ func (s *CommentService) DeleteComment(ctx context.Context, commentID primitive.
 	return nil
 }
 
-func (s *CommentService) GetCommentsByPostID(ctx context.Context, postID primitive.ObjectID, page int64, pageSize int64) ([]models.Comment, error) {
+func (s *CommentService) GetCommentsByPostID(ctx context.Context, postID primitive.ObjectID, page int64, pageSize int64) ([]*models.Comment, error) {
 	comments, err := s.storage.GetCommentsByPostID(ctx, postID, page, pageSize)
 	if err != nil {
 		s.logger.Println("Error fetching comments:", err)
@@ -144,17 +144,15 @@ func (s *CommentService) GetCommentsByPostID(ctx context.Context, postID primiti
 			}
 		}
 		if len(comment.VoiceMessage) > 0 {
-			if err := s.fetchVoiceMessage(&comment); err != nil {
+			if err := s.fetchVoiceMessage(comment); err != nil {
 				return nil, err
 			}
 		}
 		if len(comment.Pictures) > 0 {
-			if err := s.fetchPictures(&comment); err != nil {
+			if err := s.fetchPictures(comment); err != nil {
 				return nil, err
 			}
 		}
-
-		comments = append(comments, comment)
 	}
 
 	s.logger.Printf("Fetched %d comments for post %s\n", len(comments), postID.Hex())

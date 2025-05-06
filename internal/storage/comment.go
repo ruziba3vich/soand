@@ -109,7 +109,7 @@ func (s *CommentStorage) GetParentComment(ctx context.Context, comment *models.C
 	return s.db.FindOne(ctx, bson.M{"_id": comment.ReplyTo, "post_id": comment.PostID}).Decode(&parentComment)
 }
 
-func (s *CommentStorage) GetCommentsByPostID(ctx context.Context, postID primitive.ObjectID, page, pageSize int64) ([]models.Comment, error) {
+func (s *CommentStorage) GetCommentsByPostID(ctx context.Context, postID primitive.ObjectID, page, pageSize int64) ([]*models.Comment, error) {
 	if page < 1 {
 		page = 1
 	}
@@ -130,8 +130,16 @@ func (s *CommentStorage) GetCommentsByPostID(ctx context.Context, postID primiti
 	}
 	defer cursor.Close(ctx)
 
-	var comments []models.Comment
-	if err := cursor.All(ctx, &comments); err != nil {
+	var comments []*models.Comment
+	for cursor.Next(ctx) {
+		var comment models.Comment
+		if err := cursor.Decode(&comment); err != nil {
+			return nil, err
+		}
+		comments = append(comments, &comment)
+	}
+
+	if err := cursor.Err(); err != nil {
 		return nil, err
 	}
 
