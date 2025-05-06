@@ -1,6 +1,7 @@
 package handler
 
 import (
+	"bytes"
 	"context"
 	"encoding/json"
 	"log"
@@ -134,11 +135,14 @@ func (h *CommentHandler) HandleWebSocket(c *gin.Context) {
 				}
 
 				// Send to WebSocket client
-				jsonBytes, err := json.Marshal(response)
-				if err != nil {
-					h.logger.Println("Error marshaling response:", err)
+				var buf bytes.Buffer
+				encoder := json.NewEncoder(&buf)
+				encoder.SetEscapeHTML(false)
+				if err := encoder.Encode(response); err != nil {
+					h.logger.Println("Error encoding JSON response:", err)
 					continue
 				}
+				jsonBytes := buf.Bytes()
 
 				if err := conn.WriteMessage(websocket.TextMessage, jsonBytes); err != nil {
 					h.logger.Println("Error sending message to WebSocket client:", err)
