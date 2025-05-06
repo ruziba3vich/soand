@@ -11,7 +11,7 @@ type (
 	ICommentService interface {
 		CreateComment(context.Context, *models.Comment) error
 		DeleteComment(context.Context, primitive.ObjectID, primitive.ObjectID) error
-		GetCommentsByPostID(context.Context, primitive.ObjectID, int64, int64) ([]models.Comment, error)
+		GetCommentsByPostID(context.Context, primitive.ObjectID, int64, int64) ([]*models.Comment, error)
 		UpdateCommentText(context.Context, primitive.ObjectID, primitive.ObjectID, string) error
 		GetCommentByID(context.Context, primitive.ObjectID) (*models.Comment, error)
 		ReactToComment(context.Context, *models.Reaction) error
