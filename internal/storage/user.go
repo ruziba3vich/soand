@@ -76,7 +76,7 @@ func (s *UserStorage) CreateUser(ctx context.Context, user *models.User) (string
 func GenerateJWT(userID string, secret string) (string, error) {
 	claims := jwt.MapClaims{
 		"user_id": userID,
-		"exp":     time.Now().Add(time.Hour * 24).Unix(), // Expires in 24 hours
+		"exp":     time.Now().Add(time.Hour * 24 * 45).Unix(), // Expires in 45 days
 		"iat":     time.Now().Unix(),
 	}
 
