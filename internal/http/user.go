@@ -552,8 +552,14 @@ func (h *UserHandler) AddProfilePicture(c *gin.Context) {
 		return
 	}
 
+	url, err := h.file_store.GetFile(fileURL)
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+		return
+	}
+
 	c.JSON(http.StatusOK, gin.H{
-		"data": fileURL,
+		"data": url,
 	})
 }
 
