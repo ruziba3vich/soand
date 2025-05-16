@@ -30,3 +30,33 @@ func (p *PinnedChat) SetPinned(ctx context.Context, userID, chatID primitive.Obj
 	_, err := p.db.UpdateOne(ctx, filter, update, opts)
 	return err
 }
+
+func (p *PinnedChat) GetPinnedChatsByUser(ctx context.Context, userID primitive.ObjectID, page, pageSize int64) ([]bson.M, error) {
+	if page < 1 {
+		page = 1
+	}
+	if pageSize < 1 {
+		pageSize = 10
+	}
+	skip := (page - 1) * pageSize
+
+	filter := bson.M{
+		"user_id": userID,
+		"pinned":  true,
+	}
+
+	opts := options.Find().SetSkip(skip).SetLimit(pageSize)
+
+	cursor, err := p.db.Find(ctx, filter, opts)
+	if err != nil {
+		return nil, err
+	}
+	defer cursor.Close(ctx)
+
+	var results []bson.M
+	if err := cursor.All(ctx, &results); err != nil {
+		return nil, err
+	}
+
+	return results, nil
+}
