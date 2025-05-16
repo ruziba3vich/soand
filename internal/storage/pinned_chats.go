@@ -31,15 +31,7 @@ func (p *PinnedChat) SetPinned(ctx context.Context, userID, chatID primitive.Obj
 	return err
 }
 
-func (p *PinnedChat) GetPinnedChatsByUser(ctx context.Context, userID primitive.ObjectID, page, pageSize int64) ([]bson.M, error) {
-	if page < 1 {
-		page = 1
-	}
-	if pageSize < 1 {
-		pageSize = 10
-	}
-	skip := (page - 1) * pageSize
-
+func (p *PinnedChat) GetPinnedChatsByUser(ctx context.Context, userID primitive.ObjectID, page, skip, pageSize int64) ([]bson.M, error) {
 	filter := bson.M{
 		"user_id": userID,
 		"pinned":  true,
