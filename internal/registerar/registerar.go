@@ -9,6 +9,7 @@ import (
 	_ "github.com/ruziba3vich/soand/docs"
 	handler "github.com/ruziba3vich/soand/internal/http"
 	"github.com/ruziba3vich/soand/internal/repos"
+	"github.com/ruziba3vich/soand/internal/service"
 	swaggerFiles "github.com/swaggo/files"
 	ginSwagger "github.com/swaggo/gin-swagger"
 )
@@ -121,6 +122,13 @@ func RegisterFileStorageHandler(r *gin.Engine, file_service repos.IFIleStoreServ
 
 	r.POST("/upload/file/soand/secure", file_getter_handler.UploadFile)
 	r.GET("get/file/by/query", file_getter_handler.GetFileById)
+}
+
+func RegisterPinnedChatsHandler(r *gin.Engine, pinnedChatService *service.PinnedChatsService, authMiddleware func(gin.HandlerFunc) gin.HandlerFunc, logger *log.Logger) {
+	pinnedChatHandler := handler.NewPinnedChatsHandler(pinnedChatService, logger)
+
+	r.POST("/chats/pin", authMiddleware(pinnedChatHandler.SetChatPinned))
+	r.GET("/chats/pinned", authMiddleware(pinnedChatHandler.GetPinnedChats))
 }
 
 func CORSMiddleware() gin.HandlerFunc {
