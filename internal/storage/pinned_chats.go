@@ -19,8 +19,11 @@ func NewPinnedChat(db *mongo.Collection) *PinnedChat {
 	}
 }
 
-func (p *PinnedChat) SetPinned(ctx context.Context, chatID primitive.ObjectID, pinned bool) error {
-	filter := bson.M{"chat_id": chatID}
+func (p *PinnedChat) SetPinned(ctx context.Context, userID, chatID primitive.ObjectID, pinned bool) error {
+	filter := bson.M{
+		"chat_id": chatID,
+		"user_id": userID,
+	}
 	update := bson.M{"$set": bson.M{"pinned": pinned}}
 
 	opts := options.Update().SetUpsert(true)
