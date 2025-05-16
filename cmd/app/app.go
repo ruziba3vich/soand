@@ -134,6 +134,18 @@ func Run(ctx context.Context, logger *log.Logger) error {
 		return err
 	}
 
+	// pinned chats
+
+	pinnedChatsCollection, err := storage.ConnectMongoDB(ctx, cfg, "posts_collection")
+	if err != nil {
+		return err
+	}
+
+	pinnedChatStorage := storage.NewPinnedChat(pinnedChatsCollection)
+	pinnedChatService := service.NewPinnedChatService(pinnedChatStorage, logger)
+
+	registerar.RegisterPinnedChatsHandler(router, pinnedChatService, authMiddleware.AuthMiddleware(), logger)
+
 	// Comments
 	comments_collection, err := storage.ConnectMongoDB(ctx, cfg, "comments_collection")
 	if err != nil {
