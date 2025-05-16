@@ -31,7 +31,7 @@ func (h *PinnedChatsHandler) SetChatPinned(c *gin.Context) {
 	}
 
 	var req models.PinChatRequest
-	if err := c.BindQuery(&req); err != nil {
+	if err := c.BindJSON(&req); err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{"error": "bad request"})
 		return
 	}
@@ -64,6 +64,10 @@ func (h *PinnedChatsHandler) GetPinnedChats(c *gin.Context) {
 	if err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{"error": "internal server error: " + err.Error()})
 		return
+	}
+
+	if response == nil {
+		response = []*models.PinnedChat{}
 	}
 
 	c.JSON(http.StatusOK, gin.H{"data": response})
