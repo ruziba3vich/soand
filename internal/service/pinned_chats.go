@@ -11,8 +11,9 @@ import (
 )
 
 type PinnedChatsService struct {
-	storage repos.IPinnedChatsService
-	logger  *log.Logger
+	storage     repos.IPinnedChatsService
+	logger      *log.Logger
+	postService *PostService
 }
 
 func NewPinnedChatService(storage repos.IPinnedChatsService, logger *log.Logger) *PinnedChatsService {
@@ -34,7 +35,7 @@ func (s *PinnedChatsService) SetPinned(ctx context.Context, userID primitive.Obj
 	return nil
 }
 
-func (s *PinnedChatsService) GetPinnedChatsByUser(ctx context.Context, userID primitive.ObjectID, page int64, pageSize int64) ([]*models.PinnedChat, error) {
+func (s *PinnedChatsService) GetPinnedChatsByUser(ctx context.Context, userID primitive.ObjectID, page int64, pageSize int64) ([]*models.Post, error) {
 	if page < 1 {
 		page = 1
 	}
@@ -54,20 +55,24 @@ func (s *PinnedChatsService) GetPinnedChatsByUser(ctx context.Context, userID pr
 		return nil, err
 	}
 
-	var chats []*models.PinnedChat
+	response := []*models.Post{}
+
 	for _, raw := range rawChats {
 		chat := &models.PinnedChat{}
 
-		if chatID, ok := raw["chat_id"].(primitive.ObjectID); ok {
+		chatID, ok := raw["chat_id"].(primitive.ObjectID)
+		if ok {
 			chat.ChatId = chatID.Hex()
 		}
 		if pinned, ok := raw["pinned"].(bool); ok {
 			if pinned {
-				chat.Pinned = pinned
-				chats = append(chats, chat)
+				chat, err := s.postService.GetPost(ctx, chatID)
+				if err == nil {
+					response = append(response, chat)
+				}
 			}
 		}
 	}
 
-	return chats, nil
+	return response, nil
 }
