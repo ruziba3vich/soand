@@ -16,10 +16,11 @@ type PinnedChatsService struct {
 	postService *PostService
 }
 
-func NewPinnedChatService(storage repos.IPinnedChatsService, logger *log.Logger) *PinnedChatsService {
+func NewPinnedChatService(storage repos.IPinnedChatsService, postService *PostService, logger *log.Logger) *PinnedChatsService {
 	return &PinnedChatsService{
-		storage: storage,
-		logger:  logger,
+		storage:     storage,
+		logger:      logger,
+		postService: postService,
 	}
 }
 
@@ -58,17 +59,15 @@ func (s *PinnedChatsService) GetPinnedChatsByUser(ctx context.Context, userID pr
 	response := []*models.Post{}
 
 	for _, raw := range rawChats {
-		chat := &models.PinnedChat{}
 
 		chatID, ok := raw["chat_id"].(primitive.ObjectID)
 		if ok {
-			chat.ChatId = chatID.Hex()
-		}
-		if pinned, ok := raw["pinned"].(bool); ok {
-			if pinned {
-				chat, err := s.postService.GetPost(ctx, chatID)
-				if err == nil {
-					response = append(response, chat)
+			if pinned, ok := raw["pinned"].(bool); ok {
+				if pinned {
+					chat, err := s.postService.GetPost(ctx, chatID)
+					if err == nil {
+						response = append(response, chat)
+					}
 				}
 			}
 		}
