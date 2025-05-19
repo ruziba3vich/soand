@@ -13,10 +13,10 @@ import (
 type PinnedChatsService struct {
 	storage     repos.IPinnedChatsService
 	logger      *log.Logger
-	postService *PostService
+	postService repos.IPostService
 }
 
-func NewPinnedChatService(storage repos.IPinnedChatsService, postService *PostService, logger *log.Logger) *PinnedChatsService {
+func NewPinnedChatService(storage repos.IPinnedChatsService, postService repos.IPostService, logger *log.Logger) *PinnedChatsService {
 	return &PinnedChatsService{
 		storage:     storage,
 		logger:      logger,
