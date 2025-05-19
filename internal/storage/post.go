@@ -4,6 +4,7 @@ import (
 	"context"
 	"errors"
 	"fmt"
+	"log"
 	"time"
 
 	"github.com/ruziba3vich/soand/internal/models"
@@ -129,10 +130,19 @@ func (s *Storage) GetAllPosts(ctx context.Context, page, pageSize int64) ([]mode
 
 		// Fetch owner details
 		owner, err := s.users_storage.GetUserByID(ctx, post.CreatorId)
+		log.Println("[OWNER] : ", owner)
+		log.Println("[ERROR]", err)
 		if err != nil {
 			if errors.Is(err, mongo.ErrNoDocuments) {
-				post.OwnerFullname = "Deleted Account"
-				post.CreatorId = primitive.NilObjectID
+				username := "deleted"
+				owner = &models.User{
+					Fullname:      "Deleted Account",
+					Username:      &username,
+					ProfilePics:   []models.ProfilePic{},
+					HiddenProfile: false,
+				}
+				post.OwnerFullname = owner.Fullname
+
 			} else {
 				return nil, err
 			}
