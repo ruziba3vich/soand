@@ -67,7 +67,7 @@ func (h *PinnedChatsHandler) GetPinnedChats(c *gin.Context) {
 	}
 
 	if response == nil {
-		response = []*models.PinnedChat{}
+		response = []*models.Post{}
 	}
 
 	c.JSON(http.StatusOK, gin.H{"data": response})

@@ -142,7 +142,7 @@ func Run(ctx context.Context, logger *log.Logger) error {
 	}
 
 	pinnedChatStorage := storage.NewPinnedChat(pinnedChatsCollection)
-	pinnedChatService := service.NewPinnedChatService(pinnedChatStorage, logger)
+	pinnedChatService := service.NewPinnedChatService(pinnedChatStorage, posts_service, logger)
 
 	registerar.RegisterPinnedChatsHandler(router, pinnedChatService, authMiddleware.AuthMiddleware(), logger)
 
