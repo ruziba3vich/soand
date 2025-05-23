@@ -53,16 +53,11 @@ func (s *Storage) GetPost(ctx context.Context, id primitive.ObjectID) (*models.P
 	err := s.db.FindOne(ctx, bson.M{"_id": id}).Decode(&post)
 	if err == mongo.ErrNoDocuments {
 		return nil, errors.New("post not found")
-	}
-	owner, err := s.users_storage.GetUserByID(ctx, post.CreatorId)
-	if err != nil {
+	} else if err != nil {
 		return nil, err
 	}
-	post.OwnerFullname = owner.Fullname
-	if len(owner.ProfilePics) > 0 {
-		post.OwnerProfilePic = owner.ProfilePics[0].Url
-	}
-	return &post, err
+
+	return &post, nil
 }
 
 func (s *Storage) UpdatePost(ctx context.Context, id, updaterID primitive.ObjectID, update bson.M) error {
