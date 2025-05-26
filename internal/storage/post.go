@@ -61,7 +61,6 @@ func (s *Storage) GetPost(ctx context.Context, id primitive.ObjectID) (*models.P
 }
 
 func (s *Storage) UpdatePost(ctx context.Context, id, updaterID primitive.ObjectID, update bson.M) error {
-	// Find the post and check ownership
 	post, err := s.GetPost(ctx, id)
 	if err != nil {
 		return err
