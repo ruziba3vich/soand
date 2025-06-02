@@ -29,7 +29,7 @@ func (s *FileStoreService) UploadFile(file *multipart.FileHeader) (string, error
 		return "", err
 	}
 	s.logger.Println("File uploaded successfully to:", path)
-	return path, nil
+	return s.storage.GetFile(path)
 }
 
 func (s *FileStoreService) UploadFileFromBytes(data []byte, contentType string) (string, error) {
