@@ -28,10 +28,10 @@ func NewBackgroundHandler(service repos.IBackgroundService, logger *log.Logger) 
 // @Accept multipart/form-data
 // @Produce json
 // @Param file formData file true "Background image file"
-// @Success 201 {string} string "File uploaded successfully"
-// @Failure 400 {string} string "Bad request"
-// @Failure 500 {string} string "Internal server error"
-// @Router /backgrounds [post]
+// @Success 201 {object} map[string]interface{} "File uploaded successfully"
+// @Failure 400 {object} map[string]interface{} "Bad request"
+// @Failure 500 {object} map[string]interface{} "Internal server error"
+// @Router /backgrounds/ [post]
 func (h *BackgroundHandler) CreateBackground(c *gin.Context) {
 	file, err := c.FormFile("file")
 	if err != nil {
@@ -54,11 +54,12 @@ func (h *BackgroundHandler) CreateBackground(c *gin.Context) {
 // @Summary Delete a background image
 // @Description Deletes a background image by ID
 // @Tags backgrounds
+// @Produce json
 // @Param id path string true "Background ID"
-// @Success 200 {string} string "Background deleted successfully"
-// @Failure 400 {string} string "Invalid ID"
-// @Failure 404 {string} string "Background not found"
-// @Failure 500 {string} string "Internal server error"
+// @Success 200 {object} map[string]interface{} "Background deleted successfully"
+// @Failure 400 {object} map[string]interface{} "Invalid ID"
+// @Failure 404 {object} map[string]interface{} "Background not found"
+// @Failure 500 {object} map[string]interface{} "Internal server error"
 // @Router /backgrounds/{id} [delete]
 func (h *BackgroundHandler) DeleteBackground(c *gin.Context) {
 	id := c.Param("id")
@@ -82,12 +83,13 @@ func (h *BackgroundHandler) DeleteBackground(c *gin.Context) {
 // @Summary Get all background images
 // @Description Retrieves a list of background images with pagination
 // @Tags backgrounds
+// @Produce json
 // @Param page query int false "Page number"
 // @Param pageSize query int false "Page size"
-// @Success 200 {array} models.Background
-// @Failure 400 {string} string "Invalid query parameters"
-// @Failure 500 {string} string "Internal server error"
-// @Router /backgrounds [get]
+// @Success 200 {object} map[string]interface{} "List of backgrounds"
+// @Failure 400 {object} map[string]interface{} "Invalid query parameters"
+// @Failure 500 {object} map[string]interface{} "Internal server error"
+// @Router /backgrounds/ [get]
 func (h *BackgroundHandler) GetAllBackgrounds(c *gin.Context) {
 	page, _ := strconv.ParseInt(c.DefaultQuery("page", "1"), 10, 64)
 	pageSize, _ := strconv.ParseInt(c.DefaultQuery("pageSize", "10"), 10, 64)
@@ -106,11 +108,12 @@ func (h *BackgroundHandler) GetAllBackgrounds(c *gin.Context) {
 // @Summary Get a background image by ID
 // @Description Retrieves a specific background image by its ID
 // @Tags backgrounds
+// @Produce json
 // @Param id path string true "Background ID"
-// @Success 200 {object} models.Background
-// @Failure 400 {string} string "Invalid ID"
-// @Failure 404 {string} string "Background not found"
-// @Failure 500 {string} string "Internal server error"
+// @Success 200 {object} map[string]interface{} "Background object"
+// @Failure 400 {object} map[string]interface{} "Invalid ID"
+// @Failure 404 {object} map[string]interface{} "Background not found"
+// @Failure 500 {object} map[string]interface{} "Internal server error"
 // @Router /backgrounds/{id} [get]
 func (h *BackgroundHandler) GetBackgroundByID(c *gin.Context) {
 	id := c.Param("id")

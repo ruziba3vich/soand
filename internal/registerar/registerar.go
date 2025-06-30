@@ -133,7 +133,7 @@ func RegisterPinnedChatsHandler(r *gin.Engine, pinnedChatService *service.Pinned
 
 func CORSMiddleware() gin.HandlerFunc {
 	return func(c *gin.Context) {
-		c.Writer.Header().Set("Access-Control-Allow-Origin", "http://45.130.164.130:7777") // Replace with your origin
+		c.Writer.Header().Set("Access-Control-Allow-Origin", "https://soand.prodonik.uz") // Allow only this origin
 		c.Writer.Header().Set("Access-Control-Allow-Methods", "GET, POST, PUT, PATCH, DELETE")
 		c.Writer.Header().Set("Access-Control-Allow-Headers", "Content-Type, Authorization")
 		c.Writer.Header().Set("Access-Control-Allow-Credentials", "true")
