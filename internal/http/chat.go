@@ -49,7 +49,7 @@ type pendingMessage struct {
 // @Failure      400  {object}  map[string]string  "Missing or invalid recipient ID"
 // @Failure      401  {object}  map[string]string  "Unauthorized"
 // @Failure      500  {object}  map[string]string  "WebSocket upgrade failed"
-// @Router       /ws/chat [get]
+// @Router       /chat/direct [get]
 func (h *ChatHandler) HandleChatWebSocket(c *gin.Context) {
 	// Extract recipient ID from query parameters
 	recipientIDStr := c.Query("recipient_id")
@@ -206,7 +206,7 @@ func (h *ChatHandler) HandleChatWebSocket(c *gin.Context) {
 // @Failure      400  {object}  map[string]string  "Invalid recipient ID or pagination parameters"
 // @Failure      401  {object}  map[string]string  "Unauthorized"
 // @Failure      500  {object}  map[string]string  "Could not fetch messages"
-// @Router       /messages [get]
+// @Router       /chat/direct/messages [get]
 func (h *ChatHandler) GetMessages(c *gin.Context) {
 	// Extract sender ID (authenticated user) from request
 	senderID, err := getUserIdFromRequest(c)
@@ -282,7 +282,7 @@ func (h *ChatHandler) GetMessages(c *gin.Context) {
 // @Failure      403  {object}  map[string]string  "Not authorized to update this message"
 // @Failure      404  {object}  map[string]string  "Message not found"
 // @Failure      500  {object}  map[string]string  "Could not update message"
-// @Router       /messages/{message_id} [put]
+// @Router       /chat/update [patch]
 func (h *ChatHandler) UpdateMessage(c *gin.Context) {
 	// Extract authenticated user ID
 	userID, err := getUserIdFromRequest(c)
@@ -355,7 +355,7 @@ func (h *ChatHandler) UpdateMessage(c *gin.Context) {
 // @Failure      403  {object}  map[string]string  "Not authorized to delete this message"
 // @Failure      404  {object}  map[string]string  "Message not found"
 // @Failure      500  {object}  map[string]string  "Could not delete message"
-// @Router       /messages/{message_id} [delete]
+// @Router       /chat/dlete [delete]
 func (h *ChatHandler) DeleteMessage(c *gin.Context) {
 	// Extract authenticated user ID
 	userID, err := getUserIdFromRequest(c)

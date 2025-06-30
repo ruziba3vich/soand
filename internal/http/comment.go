@@ -69,7 +69,7 @@ type (
 // @Failure      400  {object}  map[string]string  "Missing or invalid post ID"
 // @Failure      401  {object}  map[string]string  "Unauthorized"
 // @Failure      500  {object}  map[string]string  "WebSocket upgrade failed"
-// @Router       /ws/comments [get]
+// @Router       /comments/ws [get]
 func (h *CommentHandler) HandleWebSocket(c *gin.Context) {
 	// Extract post ID from query parameters
 	postID := c.Query("post_id")
@@ -232,7 +232,7 @@ func (h *CommentHandler) HandleWebSocket(c *gin.Context) {
 // @Success 200 {array} interface{} "List of comments"
 // @Failure 400 {object} map[string]string "Invalid post ID"
 // @Failure 500 {object} map[string]string "Could not fetch comments"
-// @Router /posts/{post_id}/comments [get]
+// @Router /comments/:post_id [get]
 func (h *CommentHandler) GetCommentsByPostID(c *gin.Context) {
 	userId, _ := getUserIdFromRequest(c)
 	postIDStr := c.Param("post_id")
@@ -348,8 +348,7 @@ func (h *CommentHandler) ReactToComment(c *gin.Context) {
 // @Failure 400 {object} map[string]string "Invalid comment ID or request body"
 // @Failure 401 {object} map[string]string "Unauthorized"
 // @Failure 500 {object} map[string]string "Could not update comment"
-// @Router /comments/{comment_id} [put]
-// UpdateComment updates the text of a comment
+// @Router /comments/:comment_id [patch]
 func (h *CommentHandler) UpdateComment(c *gin.Context) {
 	commentIDStr := c.Param("comment_id")
 	commentID, err := primitive.ObjectIDFromHex(commentIDStr)
@@ -435,8 +434,7 @@ func (h *CommentHandler) UpdateComment(c *gin.Context) {
 // @Failure 400 {object} map[string]string "Invalid comment ID"
 // @Failure 401 {object} map[string]string "Unauthorized"
 // @Failure 500 {object} map[string]string "Could not delete comment"
-// @Router /comments/{comment_id} [delete]
-// DeleteComment removes a comment
+// @Router /comments/:comment_id [delete]
 func (h *CommentHandler) DeleteComment(c *gin.Context) {
 	commentIDStr := c.Param("comment_id")
 	commentID, err := primitive.ObjectIDFromHex(commentIDStr)

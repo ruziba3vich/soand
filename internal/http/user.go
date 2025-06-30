@@ -50,7 +50,7 @@ func NewUserHandler(repo repos.UserRepo, file_store repos.IFIleStoreService, log
 // @Success 200 {object} map[string]string "Response containing the JWT token"
 // @Failure 400 {object} map[string]string "Invalid request body"
 // @Failure 500 {object} map[string]string "Failed to create user"
-// @Router /users [post]
+// @Router /users/ [post]
 func (h *UserHandler) CreateUser(c *gin.Context) {
 	var user models.User
 
@@ -114,7 +114,7 @@ func (h *UserHandler) LoginUser(c *gin.Context) {
 // @Success 200 {object} map[string]string "User deleted successfully"
 // @Failure 401 {object} map[string]string "Unauthorized - missing or invalid token"
 // @Failure 500 {object} map[string]string "Failed to delete user"
-// @Router /users [delete]
+// @Router /users/:id [delete]
 func (h *UserHandler) DeleteUser(c *gin.Context) {
 	userId, err := getUserIdFromRequest(c)
 	if err != nil {
@@ -142,7 +142,7 @@ func (h *UserHandler) DeleteUser(c *gin.Context) {
 // @Failure 400 {object} map[string]string "Invalid user ID"
 // @Failure 401 {object} map[string]string "Unauthorized - missing or invalid token"
 // @Failure 404 {object} map[string]string "User not found"
-// @Router /users/{id} [get]
+// @Router /users/:id [get]
 func (h *UserHandler) GetUserByID(c *gin.Context) {
 	userId := c.Param("id")
 	if len(userId) == 0 {
@@ -174,7 +174,7 @@ func (h *UserHandler) GetUserByID(c *gin.Context) {
 // @Param username path string true "Username of the user"
 // @Success 200 {object} models.User "User details"
 // @Failure 404 {object} map[string]string "User not found"
-// @Router /users/{username} [get]
+// @Router /users/username/:username [get]
 func (h *UserHandler) GetUserByUsername(c *gin.Context) {
 	username := c.Param("username")
 
@@ -238,7 +238,7 @@ func (h *UserHandler) GetUserByUsername(c *gin.Context) {
 // @Failure 400 {object} map[string]string "Invalid request body"
 // @Failure 401 {object} map[string]string "Unauthorized - missing or invalid token"
 // @Failure 500 {object} map[string]string "Failed to update password"
-// @Router /users/password [put]
+// @Router /users/password [patch]
 func (h *UserHandler) UpdatePassword(c *gin.Context) {
 	userId, err := getUserIdFromRequest(c)
 	if err != nil {
@@ -277,7 +277,7 @@ func (h *UserHandler) UpdatePassword(c *gin.Context) {
 // @Failure 400 {object} map[string]string "Invalid request body"
 // @Failure 401 {object} map[string]string "Unauthorized - missing or invalid token"
 // @Failure 500 {object} map[string]string "Failed to update username"
-// @Router /users/username [put]
+// @Router /users/username [patch]
 func (h *UserHandler) UpdateUsername(c *gin.Context) {
 	var request struct {
 		NewUsername string `json:"new_username"`
@@ -438,7 +438,7 @@ func getUserIdFromRequest(c *gin.Context) (primitive.ObjectID, error) {
 // @Failure 400 {object} map[string]string "Invalid request body"
 // @Failure 401 {object} map[string]string "Unauthorized - missing or invalid token"
 // @Failure 500 {object} map[string]string "Failed to update background picture"
-// @Router /users/background [put]
+// @Router /users/background [patch]
 func (h *UserHandler) SetBackgroundPic(c *gin.Context) {
 	var request struct {
 		BackgroundPic string `json:"pic_id"`
@@ -507,7 +507,7 @@ func (h *UserHandler) Home(c *gin.Context) {
 // @Failure      400  {object}  map[string]interface{}  "Invalid file upload or request format"
 // @Failure      401  {object}  map[string]interface{}  "Unauthorized - missing or invalid token"
 // @Failure      500  {object}  map[string]interface{}  "Server error during file upload or database update"
-// @Router       /profile/picture [post]
+// @Router       /users/profile/pic [post]
 // @Note        For frontend devs: Send the file in a multipart/form-data request with the key 'picture'. Example in JS: `formData.append('picture', fileInput.files[0])`. Ensure the file is an image (e.g., .jpg, .png) and keep it under 5MB to avoid timeouts.
 func (h *UserHandler) AddProfilePicture(c *gin.Context) {
 	userID, err := getUserIdFromRequest(c)
@@ -574,7 +574,7 @@ func (h *UserHandler) AddProfilePicture(c *gin.Context) {
 // @Failure      400  {object}  map[string]interface{}  "Missing or invalid file_url"
 // @Failure      401  {object}  map[string]interface{}  "Unauthorized - missing or invalid token"
 // @Failure      500  {object}  map[string]interface{}  "Server error during deletion"
-// @Router       /profile/picture [delete]
+// @Router       /users/profile/pic [delete]
 // @Note        For frontend devs: Pass the file URL (returned from AddProfilePicture) as a query param, e.g., `/profile/picture?file_url=123456789.jpg`. If MinIO deletion fails, the response still succeeds since MongoDB is updated.
 func (h *UserHandler) DeleteProfilePicture(c *gin.Context) {
 	userID, err := getUserIdFromRequest(c)
@@ -616,7 +616,7 @@ func (h *UserHandler) DeleteProfilePicture(c *gin.Context) {
 // @Success      200  {object}  map[string]interface{}  "List of profile pictures with URLs and posted dates"
 // @Failure      401  {object}  map[string]interface{}  "Unauthorized - missing or invalid token"
 // @Failure      500  {object}  map[string]interface{}  "Server error fetching pictures"
-// @Router       /profile/pictures [get]
+// @Router       /users/profile/pic [get]
 // @Note        For frontend devs: Response includes an array of objects with 'url' (string) and 'posted_at' (ISO 8601 timestamp, e.g., '2025-03-18T12:00:00Z'). Use this to display pics in chronological order.
 func (h *UserHandler) GetProfilePictures(c *gin.Context) {
 	userIDstr := c.Query("id")
@@ -640,6 +640,7 @@ func (h *UserHandler) GetProfilePictures(c *gin.Context) {
 	c.JSON(http.StatusOK, gin.H{"data": pics})
 }
 
+// @Router /users/me [get]
 func (h *UserHandler) GetUserMe(c *gin.Context) {
 	userId, err := getUserIdFromRequest(c)
 	if err != nil {

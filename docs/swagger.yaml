@@ -1,10 +1,10 @@
 definitions:
-  github_com_ruziba3vich_soand_internal_models.Background:
+  github_com_ruziba3vich_soand_internal_models.PinChatRequest:
     properties:
-      filename:
+      chat_id:
         type: string
-      id:
-        type: string
+      pin:
+        type: boolean
     type: object
   github_com_ruziba3vich_soand_internal_models.ProfilePic:
     properties:
@@ -89,7 +89,7 @@ paths:
       summary: Access home endpoint
       tags:
       - users
-  /backgrounds:
+  /backgrounds/:
     get:
       description: Retrieves a list of background images with pagination
       parameters:
@@ -101,21 +101,24 @@ paths:
         in: query
         name: pageSize
         type: integer
+      produces:
+      - application/json
       responses:
         "200":
-          description: OK
+          description: List of backgrounds
           schema:
-            items:
-              $ref: '#/definitions/github_com_ruziba3vich_soand_internal_models.Background'
-            type: array
+            additionalProperties: true
+            type: object
         "400":
           description: Invalid query parameters
           schema:
-            type: string
+            additionalProperties: true
+            type: object
         "500":
           description: Internal server error
           schema:
-            type: string
+            additionalProperties: true
+            type: object
       summary: Get all background images
       tags:
       - backgrounds
@@ -135,15 +138,18 @@ paths:
         "201":
           description: File uploaded successfully
           schema:
-            type: string
+            additionalProperties: true
+            type: object
         "400":
           description: Bad request
           schema:
-            type: string
+            additionalProperties: true
+            type: object
         "500":
           description: Internal server error
           schema:
-            type: string
+            additionalProperties: true
+            type: object
       summary: Upload a new background image
       tags:
       - backgrounds
@@ -156,23 +162,29 @@ paths:
         name: id
         required: true
         type: string
+      produces:
+      - application/json
       responses:
         "200":
           description: Background deleted successfully
           schema:
-            type: string
+            additionalProperties: true
+            type: object
         "400":
           description: Invalid ID
           schema:
-            type: string
+            additionalProperties: true
+            type: object
         "404":
           description: Background not found
           schema:
-            type: string
+            additionalProperties: true
+            type: object
         "500":
           description: Internal server error
           schema:
-            type: string
+            additionalProperties: true
+            type: object
       summary: Delete a background image
       tags:
       - backgrounds
@@ -184,27 +196,328 @@ paths:
         name: id
         required: true
         type: string
+      produces:
+      - application/json
       responses:
         "200":
-          description: OK
+          description: Background object
           schema:
-            $ref: '#/definitions/github_com_ruziba3vich_soand_internal_models.Background'
+            additionalProperties: true
+            type: object
         "400":
           description: Invalid ID
           schema:
-            type: string
+            additionalProperties: true
+            type: object
         "404":
           description: Background not found
           schema:
-            type: string
+            additionalProperties: true
+            type: object
         "500":
           description: Internal server error
           schema:
-            type: string
+            additionalProperties: true
+            type: object
       summary: Get a background image by ID
       tags:
       - backgrounds
-  /comments/{comment_id}:
+  /chat/direct:
+    get:
+      consumes:
+      - application/json
+      description: Establishes a WebSocket connection for real-time messaging between
+        two users
+      parameters:
+      - description: Recipient's user ID
+        in: query
+        name: recipient_id
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "101":
+          description: Switching Protocols
+          schema:
+            type: string
+        "400":
+          description: Missing or invalid recipient ID
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "401":
+          description: Unauthorized
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "500":
+          description: WebSocket upgrade failed
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+      security:
+      - BearerAuth: []
+      summary: WebSocket connection for real-time chat
+      tags:
+      - chat
+  /chat/direct/messages:
+    get:
+      consumes:
+      - application/json
+      description: Retrieves paginated messages between the authenticated user and
+        another user
+      parameters:
+      - description: Recipient's user ID
+        in: query
+        name: recipient_id
+        required: true
+        type: string
+      - description: 'Page number (default: 1)'
+        in: query
+        name: page
+        type: string
+      - description: 'Number of messages per page (default: 10)'
+        in: query
+        name: page_size
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Returns paginated messages
+          schema:
+            additionalProperties: true
+            type: object
+        "400":
+          description: Invalid recipient ID or pagination parameters
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "401":
+          description: Unauthorized
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "500":
+          description: Could not fetch messages
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+      security:
+      - BearerAuth: []
+      summary: Get chat messages
+      tags:
+      - chat
+  /chat/dlete:
+    delete:
+      consumes:
+      - application/json
+      description: Deletes a specific message for the authenticated user
+      parameters:
+      - description: Message ID to delete
+        in: path
+        name: message_id
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Message deleted successfully
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "400":
+          description: Invalid message ID
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "401":
+          description: Unauthorized
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "403":
+          description: Not authorized to delete this message
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "404":
+          description: Message not found
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "500":
+          description: Could not delete message
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+      security:
+      - BearerAuth: []
+      summary: Delete a message
+      tags:
+      - chat
+  /chat/update:
+    patch:
+      consumes:
+      - application/json
+      description: Updates the content of a specific message for the authenticated
+        user
+      parameters:
+      - description: Message ID to update
+        in: path
+        name: message_id
+        required: true
+        type: string
+      - description: New message text
+        in: body
+        name: message
+        required: true
+        schema:
+          properties:
+            new_text:
+              type: string
+          type: object
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Message updated successfully
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "400":
+          description: Invalid message ID or request body
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "401":
+          description: Unauthorized
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "403":
+          description: Not authorized to update this message
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "404":
+          description: Message not found
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "500":
+          description: Could not update message
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+      security:
+      - BearerAuth: []
+      summary: Update a message
+      tags:
+      - chat
+  /chats/pin:
+    post:
+      consumes:
+      - application/json
+      description: Pins or unpins a chat for the authenticated user
+      parameters:
+      - description: Pin chat request
+        in: body
+        name: pinChatRequest
+        required: true
+        schema:
+          $ref: '#/definitions/github_com_ruziba3vich_soand_internal_models.PinChatRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Success message
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "400":
+          description: Bad request
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "401":
+          description: Unauthorized
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "500":
+          description: Internal server error
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+      security:
+      - BearerAuth: []
+      summary: Pin or unpin a chat
+      tags:
+      - chats
+  /chats/pinned:
+    get:
+      description: Retrieves a paginated list of pinned chats for the authenticated
+        user
+      parameters:
+      - description: Page number
+        in: query
+        name: page
+        type: integer
+      - description: Page size
+        in: query
+        name: page_size
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: List of pinned chats
+          schema:
+            additionalProperties: true
+            type: object
+        "401":
+          description: Unauthorized
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "500":
+          description: Internal server error
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+      security:
+      - BearerAuth: []
+      summary: Get pinned chats
+      tags:
+      - chats
+  /comments/:comment_id:
     delete:
       description: Deletes a specific comment for the authenticated user
       parameters:
@@ -245,7 +558,7 @@ paths:
       summary: Delete a comment
       tags:
       - comments
-    put:
+    patch:
       consumes:
       - application/json
       description: Updates the text of a specific comment for the authenticated user
@@ -294,6 +607,46 @@ paths:
       security:
       - BearerAuth: []
       summary: Update a comment
+      tags:
+      - comments
+  /comments/:post_id:
+    get:
+      description: Retrieves a paginated list of comments for a specific post
+      parameters:
+      - description: Post ID (MongoDB ObjectID)
+        in: path
+        name: post_id
+        required: true
+        type: string
+      - description: 'Page number (default: 1)'
+        in: query
+        name: page
+        type: string
+      - description: 'Number of comments per page (default: 10)'
+        in: query
+        name: pageSize
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: List of comments
+          schema:
+            items: {}
+            type: array
+        "400":
+          description: Invalid post ID
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "500":
+          description: Could not fetch comments
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+      summary: Get comments by post ID
       tags:
       - comments
   /comments/react:
@@ -346,6 +699,46 @@ paths:
       security:
       - BearerAuth: []
       summary: React to a comment
+      tags:
+      - comments
+  /comments/ws:
+    get:
+      consumes:
+      - application/json
+      description: Establishes a WebSocket connection for real-time comment updates
+        on a specific post
+      parameters:
+      - description: Post ID to subscribe to comments for
+        in: query
+        name: post_id
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "101":
+          description: Switching Protocols
+          schema:
+            type: string
+        "400":
+          description: Missing or invalid post ID
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "401":
+          description: Unauthorized
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "500":
+          description: WebSocket upgrade failed
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+      summary: WebSocket connection for real-time comments
       tags:
       - comments
   /files:
@@ -413,176 +806,6 @@ paths:
       summary: Upload a file
       tags:
       - Files
-  /messages:
-    get:
-      consumes:
-      - application/json
-      description: Retrieves paginated messages between the authenticated user and
-        another user
-      parameters:
-      - description: Recipient's user ID
-        in: query
-        name: recipient_id
-        required: true
-        type: string
-      - description: 'Page number (default: 1)'
-        in: query
-        name: page
-        type: string
-      - description: 'Number of messages per page (default: 10)'
-        in: query
-        name: page_size
-        type: string
-      produces:
-      - application/json
-      responses:
-        "200":
-          description: Returns paginated messages
-          schema:
-            additionalProperties: true
-            type: object
-        "400":
-          description: Invalid recipient ID or pagination parameters
-          schema:
-            additionalProperties:
-              type: string
-            type: object
-        "401":
-          description: Unauthorized
-          schema:
-            additionalProperties:
-              type: string
-            type: object
-        "500":
-          description: Could not fetch messages
-          schema:
-            additionalProperties:
-              type: string
-            type: object
-      security:
-      - BearerAuth: []
-      summary: Get chat messages
-      tags:
-      - chat
-  /messages/{message_id}:
-    delete:
-      consumes:
-      - application/json
-      description: Deletes a specific message for the authenticated user
-      parameters:
-      - description: Message ID to delete
-        in: path
-        name: message_id
-        required: true
-        type: string
-      produces:
-      - application/json
-      responses:
-        "200":
-          description: Message deleted successfully
-          schema:
-            additionalProperties:
-              type: string
-            type: object
-        "400":
-          description: Invalid message ID
-          schema:
-            additionalProperties:
-              type: string
-            type: object
-        "401":
-          description: Unauthorized
-          schema:
-            additionalProperties:
-              type: string
-            type: object
-        "403":
-          description: Not authorized to delete this message
-          schema:
-            additionalProperties:
-              type: string
-            type: object
-        "404":
-          description: Message not found
-          schema:
-            additionalProperties:
-              type: string
-            type: object
-        "500":
-          description: Could not delete message
-          schema:
-            additionalProperties:
-              type: string
-            type: object
-      security:
-      - BearerAuth: []
-      summary: Delete a message
-      tags:
-      - chat
-    put:
-      consumes:
-      - application/json
-      description: Updates the content of a specific message for the authenticated
-        user
-      parameters:
-      - description: Message ID to update
-        in: path
-        name: message_id
-        required: true
-        type: string
-      - description: New message text
-        in: body
-        name: message
-        required: true
-        schema:
-          properties:
-            new_text:
-              type: string
-          type: object
-      produces:
-      - application/json
-      responses:
-        "200":
-          description: Message updated successfully
-          schema:
-            additionalProperties:
-              type: string
-            type: object
-        "400":
-          description: Invalid message ID or request body
-          schema:
-            additionalProperties:
-              type: string
-            type: object
-        "401":
-          description: Unauthorized
-          schema:
-            additionalProperties:
-              type: string
-            type: object
-        "403":
-          description: Not authorized to update this message
-          schema:
-            additionalProperties:
-              type: string
-            type: object
-        "404":
-          description: Message not found
-          schema:
-            additionalProperties:
-              type: string
-            type: object
-        "500":
-          description: Could not update message
-          schema:
-            additionalProperties:
-              type: string
-            type: object
-      security:
-      - BearerAuth: []
-      summary: Update a message
-      tags:
-      - chat
   /posts:
     get:
       consumes:
@@ -754,46 +977,6 @@ paths:
       summary: Update a post
       tags:
       - posts
-  /posts/{post_id}/comments:
-    get:
-      description: Retrieves a paginated list of comments for a specific post
-      parameters:
-      - description: Post ID (MongoDB ObjectID)
-        in: path
-        name: post_id
-        required: true
-        type: string
-      - description: 'Page number (default: 1)'
-        in: query
-        name: page
-        type: string
-      - description: 'Number of comments per page (default: 10)'
-        in: query
-        name: pageSize
-        type: string
-      produces:
-      - application/json
-      responses:
-        "200":
-          description: List of comments
-          schema:
-            items: {}
-            type: array
-        "400":
-          description: Invalid post ID
-          schema:
-            additionalProperties:
-              type: string
-            type: object
-        "500":
-          description: Could not fetch comments
-          schema:
-            additionalProperties:
-              type: string
-            type: object
-      summary: Get comments by post ID
-      tags:
-      - comments
   /posts/all:
     get:
       consumes:
@@ -825,150 +1008,13 @@ paths:
       summary: Get all posts
       tags:
       - posts
-  /profile/picture:
-    delete:
-      description: Removes a profile picture from the user's profile in MongoDB, then
-        deletes it from MinIO. Requires the file URL as a query parameter.
-      parameters:
-      - description: Bearer token for authentication
-        in: header
-        name: Authorization
-        required: true
-        type: string
-      - description: URL of the profile picture to delete (e.g., '123456789.jpg')
-        in: query
-        name: file_url
-        required: true
-        type: string
-      produces:
-      - application/json
-      responses:
-        "200":
-          description: Confirmation of deletion
-          schema:
-            additionalProperties: true
-            type: object
-        "400":
-          description: Missing or invalid file_url
-          schema:
-            additionalProperties: true
-            type: object
-        "401":
-          description: Unauthorized - missing or invalid token
-          schema:
-            additionalProperties: true
-            type: object
-        "500":
-          description: Server error during deletion
-          schema:
-            additionalProperties: true
-            type: object
-      summary: Delete a profile picture
-      tags:
-      - Profile
+  /posts/like:
     post:
-      consumes:
-      - multipart/form-data
-      description: Uploads a single profile picture for the authenticated user. The
-        file is stored in MinIO, then added to the user's profile in MongoDB if successful.
-      parameters:
-      - description: Bearer token for authentication
-        in: header
-        name: Authorization
-        required: true
-        type: string
-      - description: 'Profile picture file (Supported formats: JPEG, PNG, GIF, WEBP.
-          Max size: 5MB recommended)'
-        in: formData
-        name: picture
-        required: true
-        type: file
-      produces:
-      - application/json
-      responses:
-        "200":
-          description: Returns the uploaded file URL
-          schema:
-            additionalProperties: true
-            type: object
-        "400":
-          description: Invalid file upload or request format
-          schema:
-            additionalProperties: true
-            type: object
-        "401":
-          description: Unauthorized - missing or invalid token
-          schema:
-            additionalProperties: true
-            type: object
-        "500":
-          description: Server error during file upload or database update
-          schema:
-            additionalProperties: true
-            type: object
-      summary: Add a new profile picture
-      tags:
-      - Profile
-  /profile/pictures:
-    get:
-      description: Retrieves all profile pictures for the authenticated user, sorted
-        by posted date (newest to oldest).
-      parameters:
-      - description: Bearer token for authentication
-        in: header
-        name: Authorization
-        required: true
-        type: string
-      produces:
-      - application/json
-      responses:
-        "200":
-          description: List of profile pictures with URLs and posted dates
-          schema:
-            additionalProperties: true
-            type: object
-        "401":
-          description: Unauthorized - missing or invalid token
-          schema:
-            additionalProperties: true
-            type: object
-        "500":
-          description: Server error fetching pictures
-          schema:
-            additionalProperties: true
-            type: object
-      summary: Get all profile pictures
-      tags:
-      - Profile
-  /users:
-    delete:
-      description: Deletes the authenticated user's account using their JWT token
-      produces:
-      - application/json
-      responses:
-        "200":
-          description: User deleted successfully
-          schema:
-            additionalProperties:
-              type: string
-            type: object
-        "401":
-          description: Unauthorized - missing or invalid token
-          schema:
-            additionalProperties:
-              type: string
-            type: object
-        "500":
-          description: Failed to delete user
-          schema:
-            additionalProperties:
-              type: string
-            type: object
-      security:
-      - BearerAuth: []
-      summary: Delete a user
-      tags:
-      - users
+      responses: {}
+  /posts/search/title:
+    post:
+      responses: {}
+  /users/:
     post:
       consumes:
       - application/json
@@ -1005,7 +1051,35 @@ paths:
       summary: Create a new user
       tags:
       - users
-  /users/{id}:
+  /users/:id:
+    delete:
+      description: Deletes the authenticated user's account using their JWT token
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: User deleted successfully
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "401":
+          description: Unauthorized - missing or invalid token
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "500":
+          description: Failed to delete user
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+      security:
+      - BearerAuth: []
+      summary: Delete a user
+      tags:
+      - users
     get:
       description: Retrieves user details by their ID, accessible only to the authenticated
         user
@@ -1045,33 +1119,8 @@ paths:
       summary: Get user by ID
       tags:
       - users
-  /users/{username}:
-    get:
-      description: Retrieves user details by their username
-      parameters:
-      - description: Username of the user
-        in: path
-        name: username
-        required: true
-        type: string
-      produces:
-      - application/json
-      responses:
-        "200":
-          description: User details
-          schema:
-            $ref: '#/definitions/github_com_ruziba3vich_soand_internal_models.User'
-        "404":
-          description: User not found
-          schema:
-            additionalProperties:
-              type: string
-            type: object
-      summary: Get user by username
-      tags:
-      - users
   /users/background:
-    put:
+    patch:
       consumes:
       - application/json
       description: Updates the authenticated user's chat background picture using
@@ -1160,8 +1209,11 @@ paths:
       summary: Login a user
       tags:
       - users
+  /users/me:
+    get:
+      responses: {}
   /users/password:
-    put:
+    patch:
       consumes:
       - application/json
       description: Updates the authenticated user's password after verifying the old
@@ -1210,6 +1262,120 @@ paths:
       summary: Update user password
       tags:
       - users
+  /users/profile/pic:
+    delete:
+      description: Removes a profile picture from the user's profile in MongoDB, then
+        deletes it from MinIO. Requires the file URL as a query parameter.
+      parameters:
+      - description: Bearer token for authentication
+        in: header
+        name: Authorization
+        required: true
+        type: string
+      - description: URL of the profile picture to delete (e.g., '123456789.jpg')
+        in: query
+        name: file_url
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Confirmation of deletion
+          schema:
+            additionalProperties: true
+            type: object
+        "400":
+          description: Missing or invalid file_url
+          schema:
+            additionalProperties: true
+            type: object
+        "401":
+          description: Unauthorized - missing or invalid token
+          schema:
+            additionalProperties: true
+            type: object
+        "500":
+          description: Server error during deletion
+          schema:
+            additionalProperties: true
+            type: object
+      summary: Delete a profile picture
+      tags:
+      - Profile
+    get:
+      description: Retrieves all profile pictures for the authenticated user, sorted
+        by posted date (newest to oldest).
+      parameters:
+      - description: Bearer token for authentication
+        in: header
+        name: Authorization
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: List of profile pictures with URLs and posted dates
+          schema:
+            additionalProperties: true
+            type: object
+        "401":
+          description: Unauthorized - missing or invalid token
+          schema:
+            additionalProperties: true
+            type: object
+        "500":
+          description: Server error fetching pictures
+          schema:
+            additionalProperties: true
+            type: object
+      summary: Get all profile pictures
+      tags:
+      - Profile
+    post:
+      consumes:
+      - multipart/form-data
+      description: Uploads a single profile picture for the authenticated user. The
+        file is stored in MinIO, then added to the user's profile in MongoDB if successful.
+      parameters:
+      - description: Bearer token for authentication
+        in: header
+        name: Authorization
+        required: true
+        type: string
+      - description: 'Profile picture file (Supported formats: JPEG, PNG, GIF, WEBP.
+          Max size: 5MB recommended)'
+        in: formData
+        name: picture
+        required: true
+        type: file
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Returns the uploaded file URL
+          schema:
+            additionalProperties: true
+            type: object
+        "400":
+          description: Invalid file upload or request format
+          schema:
+            additionalProperties: true
+            type: object
+        "401":
+          description: Unauthorized - missing or invalid token
+          schema:
+            additionalProperties: true
+            type: object
+        "500":
+          description: Server error during file upload or database update
+          schema:
+            additionalProperties: true
+            type: object
+      summary: Add a new profile picture
+      tags:
+      - Profile
   /users/update:
     put:
       consumes:
@@ -1255,7 +1421,7 @@ paths:
       tags:
       - users
   /users/username:
-    put:
+    patch:
       consumes:
       - application/json
       description: Updates the authenticated user's username to a new value
@@ -1301,88 +1467,31 @@ paths:
       summary: Update user username
       tags:
       - users
-  /ws/chat:
+  /users/username/:username:
     get:
-      consumes:
-      - application/json
-      description: Establishes a WebSocket connection for real-time messaging between
-        two users
+      description: Retrieves user details by their username
       parameters:
-      - description: Recipient's user ID
-        in: query
-        name: recipient_id
+      - description: Username of the user
+        in: path
+        name: username
         required: true
         type: string
       produces:
       - application/json
       responses:
-        "101":
-          description: Switching Protocols
+        "200":
+          description: User details
           schema:
-            type: string
-        "400":
-          description: Missing or invalid recipient ID
-          schema:
-            additionalProperties:
-              type: string
-            type: object
-        "401":
-          description: Unauthorized
+            $ref: '#/definitions/github_com_ruziba3vich_soand_internal_models.User'
+        "404":
+          description: User not found
           schema:
             additionalProperties:
               type: string
             type: object
-        "500":
-          description: WebSocket upgrade failed
-          schema:
-            additionalProperties:
-              type: string
-            type: object
-      security:
-      - BearerAuth: []
-      summary: WebSocket connection for real-time chat
+      summary: Get user by username
       tags:
-      - chat
-  /ws/comments:
-    get:
-      consumes:
-      - application/json
-      description: Establishes a WebSocket connection for real-time comment updates
-        on a specific post
-      parameters:
-      - description: Post ID to subscribe to comments for
-        in: query
-        name: post_id
-        required: true
-        type: string
-      produces:
-      - application/json
-      responses:
-        "101":
-          description: Switching Protocols
-          schema:
-            type: string
-        "400":
-          description: Missing or invalid post ID
-          schema:
-            additionalProperties:
-              type: string
-            type: object
-        "401":
-          description: Unauthorized
-          schema:
-            additionalProperties:
-              type: string
-            type: object
-        "500":
-          description: WebSocket upgrade failed
-          schema:
-            additionalProperties:
-              type: string
-            type: object
-      summary: WebSocket connection for real-time comments
-      tags:
-      - comments
+      - users
 securityDefinitions:
   BearerAuth:
     description: '"JWT Authorization header using the Bearer scheme. Example: ''Bearer

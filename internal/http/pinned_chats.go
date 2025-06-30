@@ -23,6 +23,19 @@ func NewPinnedChatsHandler(service *service.PinnedChatsService, logger *log.Logg
 	}
 }
 
+// SetChatPinned pins or unpins a chat for the authenticated user
+// @Summary Pin or unpin a chat
+// @Description Pins or unpins a chat for the authenticated user
+// @Tags chats
+// @Accept json
+// @Produce json
+// @Security BearerAuth
+// @Param pinChatRequest body models.PinChatRequest true "Pin chat request"
+// @Success 200 {object} map[string]string "Success message"
+// @Failure 400 {object} map[string]string "Bad request"
+// @Failure 401 {object} map[string]string "Unauthorized"
+// @Failure 500 {object} map[string]string "Internal server error"
+// @Router /chats/pin [post]
 func (h *PinnedChatsHandler) SetChatPinned(c *gin.Context) {
 	userID, err := getUserIdFromRequest(c)
 	if err != nil {
@@ -50,6 +63,18 @@ func (h *PinnedChatsHandler) SetChatPinned(c *gin.Context) {
 	c.JSON(http.StatusOK, gin.H{"data": "success"})
 }
 
+// GetPinnedChats gets pinned chats for the authenticated user
+// @Summary Get pinned chats
+// @Description Retrieves a paginated list of pinned chats for the authenticated user
+// @Tags chats
+// @Produce json
+// @Security BearerAuth
+// @Param page query int false "Page number"
+// @Param page_size query int false "Page size"
+// @Success 200 {object} map[string]interface{} "List of pinned chats"
+// @Failure 401 {object} map[string]string "Unauthorized"
+// @Failure 500 {object} map[string]string "Internal server error"
+// @Router /chats/pinned [get]
 func (h *PinnedChatsHandler) GetPinnedChats(c *gin.Context) {
 	userID, err := getUserIdFromRequest(c)
 	if err != nil {
