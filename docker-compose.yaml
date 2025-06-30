@@ -13,7 +13,7 @@ services:
       - MONGO_URI=mongodb://mongo_user:Dost0n1k@mongo:27017/soand?authSource=admin
       - REDIS_HOST=redis
       - REDIS_PORT=6379
-      - MINIO_ENDPOINT=62.171.179.122:9000
+      - MINIO_ENDPOINT=95.111.237.85:9000
       - MINIO_ACCESS_KEY=admin
       - MINIO_SECRET_KEY=secretpass
       - MINIO_BUCKET=soandfiles
