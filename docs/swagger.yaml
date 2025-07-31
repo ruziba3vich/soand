@@ -7,6 +7,10 @@ definitions:
         type: integer
       description:
         type: string
+      pics:
+        items:
+          type: string
+        type: array
       tags:
         items:
           type: string

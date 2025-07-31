@@ -2295,6 +2295,12 @@ const docTemplate = `{
                 "description": {
                     "type": "string"
                 },
+                "pics": {
+                    "type": "array",
+                    "items": {
+                        "type": "string"
+                    }
+                },
                 "tags": {
                     "type": "array",
                     "items": {
