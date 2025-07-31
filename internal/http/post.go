@@ -7,7 +7,9 @@ import (
 
 	"github.com/gin-gonic/gin" // Assuming your model is here
 	dto "github.com/ruziba3vich/soand/internal/dtos"
+	_ "github.com/ruziba3vich/soand/internal/models"
 	"github.com/ruziba3vich/soand/internal/repos" // Assuming a package for common swagger DTOs
+	_ "github.com/ruziba3vich/soand/pkg/swagger"
 	"go.mongodb.org/mongo-driver/bson/primitive"
 )
 

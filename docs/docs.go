@@ -31,23 +31,17 @@ const docTemplate = `{
                         "BearerAuth": []
                     }
                 ],
-                "description": "Verifies user authentication via JWT token and returns a success response",
+                "description": "Verifies user authentication via JWT token and returns a success status if the token is valid. This endpoint has an empty response body on success.",
                 "produces": [
                     "application/json"
                 ],
                 "tags": [
                     "users"
                 ],
-                "summary": "Access home endpoint",
+                "summary": "Access home endpoint (authentication check)",
                 "responses": {
                     "200": {
-                        "description": "User authenticated successfully",
-                        "schema": {
-                            "type": "object",
-                            "additionalProperties": {
-                                "type": "string"
-                            }
-                        }
+                        "description": "User authenticated successfully (empty response body)"
                     },
                     "401": {
                         "description": "Unauthorized - missing or invalid token",
@@ -255,158 +249,14 @@ const docTemplate = `{
                 }
             }
         },
-        "/chat/direct": {
-            "get": {
-                "security": [
-                    {
-                        "BearerAuth": []
-                    }
-                ],
-                "description": "Establishes a WebSocket connection for real-time messaging between two users",
-                "consumes": [
-                    "application/json"
-                ],
-                "produces": [
-                    "application/json"
-                ],
-                "tags": [
-                    "chat"
-                ],
-                "summary": "WebSocket connection for real-time chat",
-                "parameters": [
-                    {
-                        "type": "string",
-                        "description": "Recipient's user ID",
-                        "name": "recipient_id",
-                        "in": "query",
-                        "required": true
-                    }
-                ],
-                "responses": {
-                    "101": {
-                        "description": "Switching Protocols",
-                        "schema": {
-                            "type": "string"
-                        }
-                    },
-                    "400": {
-                        "description": "Missing or invalid recipient ID",
-                        "schema": {
-                            "type": "object",
-                            "additionalProperties": {
-                                "type": "string"
-                            }
-                        }
-                    },
-                    "401": {
-                        "description": "Unauthorized",
-                        "schema": {
-                            "type": "object",
-                            "additionalProperties": {
-                                "type": "string"
-                            }
-                        }
-                    },
-                    "500": {
-                        "description": "WebSocket upgrade failed",
-                        "schema": {
-                            "type": "object",
-                            "additionalProperties": {
-                                "type": "string"
-                            }
-                        }
-                    }
-                }
-            }
-        },
-        "/chat/direct/messages": {
-            "get": {
-                "security": [
-                    {
-                        "BearerAuth": []
-                    }
-                ],
-                "description": "Retrieves paginated messages between the authenticated user and another user",
-                "consumes": [
-                    "application/json"
-                ],
-                "produces": [
-                    "application/json"
-                ],
-                "tags": [
-                    "chat"
-                ],
-                "summary": "Get chat messages",
-                "parameters": [
-                    {
-                        "type": "string",
-                        "description": "Recipient's user ID",
-                        "name": "recipient_id",
-                        "in": "query",
-                        "required": true
-                    },
-                    {
-                        "type": "string",
-                        "description": "Page number (default: 1)",
-                        "name": "page",
-                        "in": "query"
-                    },
-                    {
-                        "type": "string",
-                        "description": "Number of messages per page (default: 10)",
-                        "name": "page_size",
-                        "in": "query"
-                    }
-                ],
-                "responses": {
-                    "200": {
-                        "description": "Returns paginated messages",
-                        "schema": {
-                            "type": "object",
-                            "additionalProperties": true
-                        }
-                    },
-                    "400": {
-                        "description": "Invalid recipient ID or pagination parameters",
-                        "schema": {
-                            "type": "object",
-                            "additionalProperties": {
-                                "type": "string"
-                            }
-                        }
-                    },
-                    "401": {
-                        "description": "Unauthorized",
-                        "schema": {
-                            "type": "object",
-                            "additionalProperties": {
-                                "type": "string"
-                            }
-                        }
-                    },
-                    "500": {
-                        "description": "Could not fetch messages",
-                        "schema": {
-                            "type": "object",
-                            "additionalProperties": {
-                                "type": "string"
-                            }
-                        }
-                    }
-                }
-            }
-        },
-        "/chat/dlete": {
+        "/chat/delete/{message_id}": {
             "delete": {
                 "security": [
                     {
                         "BearerAuth": []
                     }
                 ],
-                "description": "Deletes a specific message for the authenticated user",
-                "consumes": [
-                    "application/json"
-                ],
+                "description": "Deletes a specific message. The user must be the original sender.",
                 "produces": [
                     "application/json"
                 ],
@@ -428,8 +278,10 @@ const docTemplate = `{
                         "description": "Message deleted successfully",
                         "schema": {
                             "type": "object",
-                            "additionalProperties": {
-                                "type": "string"
+                            "properties": {
+                                "message": {
+                                    "type": "string"
+                                }
                             }
                         }
                     },
@@ -437,8 +289,10 @@ const docTemplate = `{
                         "description": "Invalid message ID",
                         "schema": {
                             "type": "object",
-                            "additionalProperties": {
-                                "type": "string"
+                            "properties": {
+                                "error": {
+                                    "type": "string"
+                                }
                             }
                         }
                     },
@@ -446,8 +300,10 @@ const docTemplate = `{
                         "description": "Unauthorized",
                         "schema": {
                             "type": "object",
-                            "additionalProperties": {
-                                "type": "string"
+                            "properties": {
+                                "error": {
+                                    "type": "string"
+                                }
                             }
                         }
                     },
@@ -455,8 +311,10 @@ const docTemplate = `{
                         "description": "Not authorized to delete this message",
                         "schema": {
                             "type": "object",
-                            "additionalProperties": {
-                                "type": "string"
+                            "properties": {
+                                "error": {
+                                    "type": "string"
+                                }
                             }
                         }
                     },
@@ -464,8 +322,10 @@ const docTemplate = `{
                         "description": "Message not found",
                         "schema": {
                             "type": "object",
-                            "additionalProperties": {
-                                "type": "string"
+                            "properties": {
+                                "error": {
+                                    "type": "string"
+                                }
                             }
                         }
                     },
@@ -473,22 +333,189 @@ const docTemplate = `{
                         "description": "Could not delete message",
                         "schema": {
                             "type": "object",
-                            "additionalProperties": {
-                                "type": "string"
+                            "properties": {
+                                "error": {
+                                    "type": "string"
+                                }
                             }
                         }
                     }
                 }
             }
         },
-        "/chat/update": {
+        "/chat/direct": {
+            "get": {
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
+                "description": "Establishes a WebSocket connection for real-time messaging between two users.",
+                "tags": [
+                    "chat"
+                ],
+                "summary": "WebSocket for real-time chat",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "Recipient's user ID",
+                        "name": "recipient_id",
+                        "in": "query",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "101": {
+                        "description": "Switching Protocols",
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
+                    "400": {
+                        "description": "Missing or invalid recipient ID",
+                        "schema": {
+                            "type": "object",
+                            "properties": {
+                                "error": {
+                                    "type": "string"
+                                }
+                            }
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthorized",
+                        "schema": {
+                            "type": "object",
+                            "properties": {
+                                "error": {
+                                    "type": "string"
+                                }
+                            }
+                        }
+                    },
+                    "500": {
+                        "description": "WebSocket upgrade failed",
+                        "schema": {
+                            "type": "object",
+                            "properties": {
+                                "error": {
+                                    "type": "string"
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        },
+        "/chat/direct/messages": {
+            "get": {
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
+                "description": "Retrieves paginated messages between the authenticated user and another user.",
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "chat"
+                ],
+                "summary": "Get chat messages",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "Recipient's user ID",
+                        "name": "recipient_id",
+                        "in": "query",
+                        "required": true
+                    },
+                    {
+                        "type": "integer",
+                        "description": "Page number (default: 1)",
+                        "name": "page",
+                        "in": "query"
+                    },
+                    {
+                        "type": "integer",
+                        "description": "Number of messages per page (default: 10)",
+                        "name": "page_size",
+                        "in": "query"
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Returns paginated messages",
+                        "schema": {
+                            "type": "object",
+                            "properties": {
+                                "data": {
+                                    "type": "object",
+                                    "properties": {
+                                        " page": {
+                                            "type": "integer"
+                                        },
+                                        " page_size": {
+                                            "type": "integer"
+                                        },
+                                        " total": {
+                                            "type": "integer"
+                                        },
+                                        "messages": {
+                                            "type": "array",
+                                            "items": {
+                                                "$ref": "#/definitions/github_com_ruziba3vich_soand_internal_models.Message"
+                                            }
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                    },
+                    "400": {
+                        "description": "Invalid recipient ID or pagination parameters",
+                        "schema": {
+                            "type": "object",
+                            "properties": {
+                                "error": {
+                                    "type": "string"
+                                }
+                            }
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthorized",
+                        "schema": {
+                            "type": "object",
+                            "properties": {
+                                "error": {
+                                    "type": "string"
+                                }
+                            }
+                        }
+                    },
+                    "500": {
+                        "description": "Could not fetch messages",
+                        "schema": {
+                            "type": "object",
+                            "properties": {
+                                "error": {
+                                    "type": "string"
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        },
+        "/chat/update/{message_id}": {
             "patch": {
                 "security": [
                     {
                         "BearerAuth": []
                     }
                 ],
-                "description": "Updates the content of a specific message for the authenticated user",
+                "description": "Updates the content of a specific message. The user must be the original sender.",
                 "consumes": [
                     "application/json"
                 ],
@@ -527,8 +554,10 @@ const docTemplate = `{
                         "description": "Message updated successfully",
                         "schema": {
                             "type": "object",
-                            "additionalProperties": {
-                                "type": "string"
+                            "properties": {
+                                "message": {
+                                    "type": "string"
+                                }
                             }
                         }
                     },
@@ -536,8 +565,10 @@ const docTemplate = `{
                         "description": "Invalid message ID or request body",
                         "schema": {
                             "type": "object",
-                            "additionalProperties": {
-                                "type": "string"
+                            "properties": {
+                                "error": {
+                                    "type": "string"
+                                }
                             }
                         }
                     },
@@ -545,8 +576,10 @@ const docTemplate = `{
                         "description": "Unauthorized",
                         "schema": {
                             "type": "object",
-                            "additionalProperties": {
-                                "type": "string"
+                            "properties": {
+                                "error": {
+                                    "type": "string"
+                                }
                             }
                         }
                     },
@@ -554,8 +587,10 @@ const docTemplate = `{
                         "description": "Not authorized to update this message",
                         "schema": {
                             "type": "object",
-                            "additionalProperties": {
-                                "type": "string"
+                            "properties": {
+                                "error": {
+                                    "type": "string"
+                                }
                             }
                         }
                     },
@@ -563,8 +598,10 @@ const docTemplate = `{
                         "description": "Message not found",
                         "schema": {
                             "type": "object",
-                            "additionalProperties": {
-                                "type": "string"
+                            "properties": {
+                                "error": {
+                                    "type": "string"
+                                }
                             }
                         }
                     },
@@ -572,8 +609,10 @@ const docTemplate = `{
                         "description": "Could not update message",
                         "schema": {
                             "type": "object",
-                            "additionalProperties": {
-                                "type": "string"
+                            "properties": {
+                                "error": {
+                                    "type": "string"
+                                }
                             }
                         }
                     }
@@ -707,7 +746,115 @@ const docTemplate = `{
                 }
             }
         },
-        "/comments/:comment_id": {
+        "/comments/react": {
+            "post": {
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
+                "description": "Adds or updates a reaction to a specific comment",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "comments"
+                ],
+                "summary": "React to a comment",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "Comment ID to react to",
+                        "name": "comment_id",
+                        "in": "query",
+                        "required": true
+                    },
+                    {
+                        "description": "Reaction details",
+                        "name": "reaction",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/internal_http.ReactionRequest"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Reaction successful",
+                        "schema": {
+                            "$ref": "#/definitions/internal_http.SuccessResponse"
+                        }
+                    },
+                    "400": {
+                        "description": "Invalid comment ID or request body",
+                        "schema": {
+                            "$ref": "#/definitions/internal_http.ErrorResponse"
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthorized",
+                        "schema": {
+                            "$ref": "#/definitions/internal_http.ErrorResponse"
+                        }
+                    },
+                    "500": {
+                        "description": "Could not process reaction",
+                        "schema": {
+                            "$ref": "#/definitions/internal_http.ErrorResponse"
+                        }
+                    }
+                }
+            }
+        },
+        "/comments/ws": {
+            "get": {
+                "description": "Establishes a WebSocket connection for real-time comment updates on a specific post",
+                "tags": [
+                    "comments"
+                ],
+                "summary": "WebSocket connection for real-time comments",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "Post ID to subscribe to comments for",
+                        "name": "post_id",
+                        "in": "query",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "101": {
+                        "description": "Switching Protocols",
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
+                    "400": {
+                        "description": "Missing or invalid post ID",
+                        "schema": {
+                            "$ref": "#/definitions/internal_http.ErrorResponse"
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthorized",
+                        "schema": {
+                            "$ref": "#/definitions/internal_http.ErrorResponse"
+                        }
+                    },
+                    "500": {
+                        "description": "WebSocket upgrade failed",
+                        "schema": {
+                            "$ref": "#/definitions/internal_http.ErrorResponse"
+                        }
+                    }
+                }
+            }
+        },
+        "/comments/{comment_id}": {
             "delete": {
                 "security": [
                     {
@@ -735,37 +882,25 @@ const docTemplate = `{
                     "200": {
                         "description": "Comment deleted successfully",
                         "schema": {
-                            "type": "object",
-                            "additionalProperties": {
-                                "type": "string"
-                            }
+                            "$ref": "#/definitions/internal_http.SuccessResponse"
                         }
                     },
                     "400": {
                         "description": "Invalid comment ID",
                         "schema": {
-                            "type": "object",
-                            "additionalProperties": {
-                                "type": "string"
-                            }
+                            "$ref": "#/definitions/internal_http.ErrorResponse"
                         }
                     },
                     "401": {
                         "description": "Unauthorized",
                         "schema": {
-                            "type": "object",
-                            "additionalProperties": {
-                                "type": "string"
-                            }
+                            "$ref": "#/definitions/internal_http.ErrorResponse"
                         }
                     },
                     "500": {
                         "description": "Could not delete comment",
                         "schema": {
-                            "type": "object",
-                            "additionalProperties": {
-                                "type": "string"
-                            }
+                            "$ref": "#/definitions/internal_http.ErrorResponse"
                         }
                     }
                 }
@@ -801,12 +936,7 @@ const docTemplate = `{
                         "in": "body",
                         "required": true,
                         "schema": {
-                            "type": "object",
-                            "properties": {
-                                "new_text": {
-                                    "type": "string"
-                                }
-                            }
+                            "$ref": "#/definitions/internal_http.UpdateCommentRequest"
                         }
                     }
                 ],
@@ -814,43 +944,31 @@ const docTemplate = `{
                     "200": {
                         "description": "Comment updated successfully",
                         "schema": {
-                            "type": "object",
-                            "additionalProperties": {
-                                "type": "string"
-                            }
+                            "$ref": "#/definitions/internal_http.SuccessResponse"
                         }
                     },
                     "400": {
                         "description": "Invalid comment ID or request body",
                         "schema": {
-                            "type": "object",
-                            "additionalProperties": {
-                                "type": "string"
-                            }
+                            "$ref": "#/definitions/internal_http.ErrorResponse"
                         }
                     },
                     "401": {
                         "description": "Unauthorized",
                         "schema": {
-                            "type": "object",
-                            "additionalProperties": {
-                                "type": "string"
-                            }
+                            "$ref": "#/definitions/internal_http.ErrorResponse"
                         }
                     },
                     "500": {
                         "description": "Could not update comment",
                         "schema": {
-                            "type": "object",
-                            "additionalProperties": {
-                                "type": "string"
-                            }
+                            "$ref": "#/definitions/internal_http.ErrorResponse"
                         }
                     }
                 }
             }
         },
-        "/comments/:post_id": {
+        "/comments/{post_id}": {
             "get": {
                 "description": "Retrieves a paginated list of comments for a specific post",
                 "produces": [
@@ -869,13 +987,13 @@ const docTemplate = `{
                         "required": true
                     },
                     {
-                        "type": "string",
+                        "type": "integer",
                         "description": "Page number (default: 1)",
                         "name": "page",
                         "in": "query"
                     },
                     {
-                        "type": "string",
+                        "type": "integer",
                         "description": "Number of comments per page (default: 10)",
                         "name": "pageSize",
                         "in": "query"
@@ -883,168 +1001,21 @@ const docTemplate = `{
                 ],
                 "responses": {
                     "200": {
-                        "description": "List of comments",
+                        "description": "List of comments with user ID",
                         "schema": {
-                            "type": "array",
-                            "items": {}
+                            "$ref": "#/definitions/internal_http.GetCommentsResponse"
                         }
                     },
                     "400": {
                         "description": "Invalid post ID",
                         "schema": {
-                            "type": "object",
-                            "additionalProperties": {
-                                "type": "string"
-                            }
+                            "$ref": "#/definitions/internal_http.ErrorResponse"
                         }
                     },
                     "500": {
                         "description": "Could not fetch comments",
                         "schema": {
-                            "type": "object",
-                            "additionalProperties": {
-                                "type": "string"
-                            }
-                        }
-                    }
-                }
-            }
-        },
-        "/comments/react": {
-            "post": {
-                "security": [
-                    {
-                        "BearerAuth": []
-                    }
-                ],
-                "description": "Adds or updates a reaction to a specific comment",
-                "consumes": [
-                    "application/json"
-                ],
-                "produces": [
-                    "application/json"
-                ],
-                "tags": [
-                    "comments"
-                ],
-                "summary": "React to a comment",
-                "parameters": [
-                    {
-                        "type": "string",
-                        "description": "Comment ID to react to",
-                        "name": "comment_id",
-                        "in": "query",
-                        "required": true
-                    },
-                    {
-                        "description": "Reaction details",
-                        "name": "reaction",
-                        "in": "body",
-                        "required": true,
-                        "schema": {
-                            "type": "object",
-                            "properties": {
-                                "type": {
-                                    "type": "string"
-                                }
-                            }
-                        }
-                    }
-                ],
-                "responses": {
-                    "200": {
-                        "description": "Reaction successful",
-                        "schema": {
-                            "type": "object",
-                            "additionalProperties": {
-                                "type": "string"
-                            }
-                        }
-                    },
-                    "400": {
-                        "description": "Invalid comment ID or request body",
-                        "schema": {
-                            "type": "object",
-                            "additionalProperties": {
-                                "type": "string"
-                            }
-                        }
-                    },
-                    "401": {
-                        "description": "Unauthorized",
-                        "schema": {
-                            "type": "object",
-                            "additionalProperties": {
-                                "type": "string"
-                            }
-                        }
-                    },
-                    "500": {
-                        "description": "Could not process reaction",
-                        "schema": {
-                            "type": "object",
-                            "additionalProperties": {
-                                "type": "string"
-                            }
-                        }
-                    }
-                }
-            }
-        },
-        "/comments/ws": {
-            "get": {
-                "description": "Establishes a WebSocket connection for real-time comment updates on a specific post",
-                "consumes": [
-                    "application/json"
-                ],
-                "produces": [
-                    "application/json"
-                ],
-                "tags": [
-                    "comments"
-                ],
-                "summary": "WebSocket connection for real-time comments",
-                "parameters": [
-                    {
-                        "type": "string",
-                        "description": "Post ID to subscribe to comments for",
-                        "name": "post_id",
-                        "in": "query",
-                        "required": true
-                    }
-                ],
-                "responses": {
-                    "101": {
-                        "description": "Switching Protocols",
-                        "schema": {
-                            "type": "string"
-                        }
-                    },
-                    "400": {
-                        "description": "Missing or invalid post ID",
-                        "schema": {
-                            "type": "object",
-                            "additionalProperties": {
-                                "type": "string"
-                            }
-                        }
-                    },
-                    "401": {
-                        "description": "Unauthorized",
-                        "schema": {
-                            "type": "object",
-                            "additionalProperties": {
-                                "type": "string"
-                            }
-                        }
-                    },
-                    "500": {
-                        "description": "WebSocket upgrade failed",
-                        "schema": {
-                            "type": "object",
-                            "additionalProperties": {
-                                "type": "string"
-                            }
+                            "$ref": "#/definitions/internal_http.ErrorResponse"
                         }
                     }
                 }
@@ -1144,7 +1115,7 @@ const docTemplate = `{
         },
         "/posts": {
             "get": {
-                "description": "Retrieves a single post using its MongoDB ObjectID",
+                "description": "Retrieves a single post using its MongoDB ObjectID from a query parameter.",
                 "consumes": [
                     "application/json"
                 ],
@@ -1158,6 +1129,7 @@ const docTemplate = `{
                 "parameters": [
                     {
                         "type": "string",
+                        "format": "hex",
                         "description": "Post ID (MongoDB ObjectID)",
                         "name": "id",
                         "in": "query",
@@ -1167,24 +1139,20 @@ const docTemplate = `{
                 "responses": {
                     "200": {
                         "description": "Post details",
-                        "schema": {}
+                        "schema": {
+                            "$ref": "#/definitions/github_com_ruziba3vich_soand_internal_models.Post"
+                        }
                     },
                     "400": {
                         "description": "Invalid post ID format",
                         "schema": {
-                            "type": "object",
-                            "additionalProperties": {
-                                "type": "string"
-                            }
+                            "$ref": "#/definitions/github_com_ruziba3vich_soand_pkg_swagger.ErrorResponse"
                         }
                     },
                     "404": {
                         "description": "Post not found",
                         "schema": {
-                            "type": "object",
-                            "additionalProperties": {
-                                "type": "string"
-                            }
+                            "$ref": "#/definitions/github_com_ruziba3vich_soand_pkg_swagger.ErrorResponse"
                         }
                     }
                 }
@@ -1195,9 +1163,9 @@ const docTemplate = `{
                         "BearerAuth": []
                     }
                 ],
-                "description": "Creates a post with description, tags, optional delete_after time, and file attachments",
+                "description": "Creates a post with description and tags from a JSON body. Note: This version does not support file uploads.",
                 "consumes": [
-                    "multipart/form-data"
+                    "application/json"
                 ],
                 "produces": [
                     "application/json"
@@ -1208,72 +1176,50 @@ const docTemplate = `{
                 "summary": "Create a new post",
                 "parameters": [
                     {
-                        "type": "string",
-                        "description": "Post description",
-                        "name": "description",
-                        "in": "formData",
-                        "required": true
-                    },
-                    {
-                        "type": "string",
-                        "description": "Time in minutes after which the post will be deleted",
-                        "name": "delete_after",
-                        "in": "formData"
-                    },
-                    {
-                        "type": "string",
-                        "description": "Comma-separated list of tags or JSON array",
-                        "name": "tags",
-                        "in": "formData"
-                    },
-                    {
-                        "type": "string",
-                        "description": "JSON stringified array of tags (alternative to tags)",
-                        "name": "tags_json",
-                        "in": "formData"
-                    },
-                    {
-                        "type": "file",
-                        "description": "Files to upload (multiple allowed)",
-                        "name": "files",
-                        "in": "formData"
+                        "description": "Post creation payload",
+                        "name": "postRequest",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/github_com_ruziba3vich_soand_internal_dtos.PostRequest"
+                        }
                     }
                 ],
                 "responses": {
                     "201": {
-                        "description": "Post created successfully with ID",
+                        "description": "Post created successfully",
                         "schema": {
-                            "type": "object",
-                            "additionalProperties": {
-                                "type": "string"
-                            }
+                            "allOf": [
+                                {
+                                    "$ref": "#/definitions/github_com_ruziba3vich_soand_pkg_swagger.Response"
+                                },
+                                {
+                                    "type": "object",
+                                    "properties": {
+                                        "data": {
+                                            "$ref": "#/definitions/github_com_ruziba3vich_soand_internal_models.Post"
+                                        }
+                                    }
+                                }
+                            ]
                         }
                     },
                     "400": {
                         "description": "Invalid request payload",
                         "schema": {
-                            "type": "object",
-                            "additionalProperties": {
-                                "type": "string"
-                            }
+                            "$ref": "#/definitions/github_com_ruziba3vich_soand_pkg_swagger.ErrorResponse"
                         }
                     },
                     "401": {
                         "description": "Unauthorized",
                         "schema": {
-                            "type": "object",
-                            "additionalProperties": {
-                                "type": "string"
-                            }
+                            "$ref": "#/definitions/github_com_ruziba3vich_soand_pkg_swagger.ErrorResponse"
                         }
                     },
                     "500": {
                         "description": "Internal server error",
                         "schema": {
-                            "type": "object",
-                            "additionalProperties": {
-                                "type": "string"
-                            }
+                            "$ref": "#/definitions/github_com_ruziba3vich_soand_pkg_swagger.ErrorResponse"
                         }
                     }
                 }
@@ -1281,7 +1227,7 @@ const docTemplate = `{
         },
         "/posts/all": {
             "get": {
-                "description": "Retrieves a paginated list of all posts",
+                "description": "Retrieves a paginated list of all posts using query parameters for pagination.",
                 "consumes": [
                     "application/json"
                 ],
@@ -1294,14 +1240,16 @@ const docTemplate = `{
                 "summary": "Get all posts",
                 "parameters": [
                     {
-                        "type": "string",
-                        "description": "Page number (default: 1)",
+                        "type": "integer",
+                        "default": 1,
+                        "description": "Page number",
                         "name": "page",
                         "in": "query"
                     },
                     {
-                        "type": "string",
-                        "description": "Number of posts per page (default: 10)",
+                        "type": "integer",
+                        "default": 10,
+                        "description": "Number of posts per page",
                         "name": "pageSize",
                         "in": "query"
                     }
@@ -1310,17 +1258,13 @@ const docTemplate = `{
                     "200": {
                         "description": "List of posts",
                         "schema": {
-                            "type": "array",
-                            "items": {}
+                            "$ref": "#/definitions/github_com_ruziba3vich_soand_pkg_swagger.PaginatedPostsResponse"
                         }
                     },
                     "500": {
                         "description": "Failed to retrieve posts",
                         "schema": {
-                            "type": "object",
-                            "additionalProperties": {
-                                "type": "string"
-                            }
+                            "$ref": "#/definitions/github_com_ruziba3vich_soand_pkg_swagger.ErrorResponse"
                         }
                     }
                 }
@@ -1328,12 +1272,127 @@ const docTemplate = `{
         },
         "/posts/like": {
             "post": {
-                "responses": {}
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
+                "description": "Submits a like (or removes a like) for a specific post. The post ID is a query param, and the like status is in the JSON body.",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "posts"
+                ],
+                "summary": "Like or unlike a post",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "format": "hex",
+                        "description": "ID of the post to like/unlike",
+                        "name": "post_id",
+                        "in": "query",
+                        "required": true
+                    },
+                    {
+                        "description": "Like action",
+                        "name": "likeRequest",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/github_com_ruziba3vich_soand_pkg_swagger.LikeRequest"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Action completed successfully",
+                        "schema": {
+                            "$ref": "#/definitions/github_com_ruziba3vich_soand_pkg_swagger.SuccessResponse"
+                        }
+                    },
+                    "400": {
+                        "description": "Invalid post ID or request body",
+                        "schema": {
+                            "$ref": "#/definitions/github_com_ruziba3vich_soand_pkg_swagger.ErrorResponse"
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthorized",
+                        "schema": {
+                            "$ref": "#/definitions/github_com_ruziba3vich_soand_pkg_swagger.ErrorResponse"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal server error",
+                        "schema": {
+                            "$ref": "#/definitions/github_com_ruziba3vich_soand_pkg_swagger.ErrorResponse"
+                        }
+                    }
+                }
             }
         },
         "/posts/search/title": {
             "post": {
-                "responses": {}
+                "description": "Searches for posts by title (from a JSON body) with pagination (from query parameters).",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "posts"
+                ],
+                "summary": "Search for posts",
+                "parameters": [
+                    {
+                        "description": "Search query payload",
+                        "name": "searchRequest",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/github_com_ruziba3vich_soand_pkg_swagger.SearchRequest"
+                        }
+                    },
+                    {
+                        "type": "integer",
+                        "default": 1,
+                        "description": "Page number",
+                        "name": "page",
+                        "in": "query"
+                    },
+                    {
+                        "type": "integer",
+                        "default": 10,
+                        "description": "Number of results per page",
+                        "name": "limit",
+                        "in": "query"
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "A list of matching posts",
+                        "schema": {
+                            "$ref": "#/definitions/github_com_ruziba3vich_soand_pkg_swagger.PaginatedPostsResponse"
+                        }
+                    },
+                    "400": {
+                        "description": "Invalid request payload or query parameters",
+                        "schema": {
+                            "$ref": "#/definitions/github_com_ruziba3vich_soand_pkg_swagger.ErrorResponse"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal server error",
+                        "schema": {
+                            "$ref": "#/definitions/github_com_ruziba3vich_soand_pkg_swagger.ErrorResponse"
+                        }
+                    }
+                }
             }
         },
         "/posts/{id}": {
@@ -1343,7 +1402,7 @@ const docTemplate = `{
                         "BearerAuth": []
                     }
                 ],
-                "description": "Updates a post by ID with new data",
+                "description": "Updates a post by its ID (from the URL path) with data from a JSON body.\n**Security Note:** The current implementation is insecure as it takes ` + "`" + `creator_id` + "`" + ` from the body and does not check for post ownership.",
                 "consumes": [
                     "application/json"
                 ],
@@ -1357,14 +1416,15 @@ const docTemplate = `{
                 "parameters": [
                     {
                         "type": "string",
+                        "format": "hex",
                         "description": "Post ID (MongoDB ObjectID)",
                         "name": "id",
                         "in": "path",
                         "required": true
                     },
                     {
-                        "description": "Fields to update (e.g., description, tags)",
-                        "name": "updateData",
+                        "description": "Fields to update in JSON format",
+                        "name": "updateRequest",
                         "in": "body",
                         "required": true,
                         "schema": {
@@ -1377,28 +1437,25 @@ const docTemplate = `{
                     "200": {
                         "description": "Post updated successfully",
                         "schema": {
-                            "type": "object",
-                            "additionalProperties": {
-                                "type": "string"
-                            }
+                            "$ref": "#/definitions/github_com_ruziba3vich_soand_pkg_swagger.SuccessResponse"
                         }
                     },
                     "400": {
                         "description": "Invalid post ID or payload",
                         "schema": {
-                            "type": "object",
-                            "additionalProperties": {
-                                "type": "string"
-                            }
+                            "$ref": "#/definitions/github_com_ruziba3vich_soand_pkg_swagger.ErrorResponse"
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthorized",
+                        "schema": {
+                            "$ref": "#/definitions/github_com_ruziba3vich_soand_pkg_swagger.ErrorResponse"
                         }
                     },
                     "500": {
                         "description": "Failed to update post",
                         "schema": {
-                            "type": "object",
-                            "additionalProperties": {
-                                "type": "string"
-                            }
+                            "$ref": "#/definitions/github_com_ruziba3vich_soand_pkg_swagger.ErrorResponse"
                         }
                     }
                 }
@@ -1409,7 +1466,7 @@ const docTemplate = `{
                         "BearerAuth": []
                     }
                 ],
-                "description": "Deletes a post using its MongoDB ObjectID",
+                "description": "Deletes a post using its MongoDB ObjectID from the URL path.\n**Security Note:** This does not currently check if the requester is the owner of the post.",
                 "consumes": [
                     "application/json"
                 ],
@@ -1423,6 +1480,7 @@ const docTemplate = `{
                 "parameters": [
                     {
                         "type": "string",
+                        "format": "hex",
                         "description": "Post ID (MongoDB ObjectID)",
                         "name": "id",
                         "in": "path",
@@ -1433,28 +1491,25 @@ const docTemplate = `{
                     "200": {
                         "description": "Post deleted successfully",
                         "schema": {
-                            "type": "object",
-                            "additionalProperties": {
-                                "type": "string"
-                            }
+                            "$ref": "#/definitions/github_com_ruziba3vich_soand_pkg_swagger.SuccessResponse"
                         }
                     },
                     "400": {
                         "description": "Invalid post ID format",
                         "schema": {
-                            "type": "object",
-                            "additionalProperties": {
-                                "type": "string"
-                            }
+                            "$ref": "#/definitions/github_com_ruziba3vich_soand_pkg_swagger.ErrorResponse"
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthorized",
+                        "schema": {
+                            "$ref": "#/definitions/github_com_ruziba3vich_soand_pkg_swagger.ErrorResponse"
                         }
                     },
                     "500": {
                         "description": "Failed to delete post",
                         "schema": {
-                            "type": "object",
-                            "additionalProperties": {
-                                "type": "string"
-                            }
+                            "$ref": "#/definitions/github_com_ruziba3vich_soand_pkg_swagger.ErrorResponse"
                         }
                     }
                 }
@@ -1475,7 +1530,7 @@ const docTemplate = `{
                 "summary": "Create a new user",
                 "parameters": [
                     {
-                        "description": "User data (e.g., username, password, etc.)",
+                        "description": "User data (username and password are required)",
                         "name": "user",
                         "in": "body",
                         "required": true,
@@ -1486,7 +1541,7 @@ const docTemplate = `{
                 ],
                 "responses": {
                     "200": {
-                        "description": "Response containing the JWT token",
+                        "description": "Response containing the JWT token, e.g., {'data': 'jwt_token_string'}",
                         "schema": {
                             "type": "object",
                             "additionalProperties": {
@@ -1513,67 +1568,6 @@ const docTemplate = `{
                         }
                     }
                 }
-            }
-        },
-        "/users/:id": {
-            "get": {
-                "security": [
-                    {
-                        "BearerAuth": []
-                    }
-                ],
-                "description": "Retrieves user details by their ID, accessible only to the authenticated user",
-                "produces": [
-                    "application/json"
-                ],
-                "tags": [
-                    "users"
-                ],
-                "summary": "Get user by ID",
-                "parameters": [
-                    {
-                        "type": "string",
-                        "description": "User ID (MongoDB ObjectID)",
-                        "name": "id",
-                        "in": "path",
-                        "required": true
-                    }
-                ],
-                "responses": {
-                    "200": {
-                        "description": "User details",
-                        "schema": {
-                            "$ref": "#/definitions/github_com_ruziba3vich_soand_internal_models.User"
-                        }
-                    },
-                    "400": {
-                        "description": "Invalid user ID",
-                        "schema": {
-                            "type": "object",
-                            "additionalProperties": {
-                                "type": "string"
-                            }
-                        }
-                    },
-                    "401": {
-                        "description": "Unauthorized - missing or invalid token",
-                        "schema": {
-                            "type": "object",
-                            "additionalProperties": {
-                                "type": "string"
-                            }
-                        }
-                    },
-                    "404": {
-                        "description": "User not found",
-                        "schema": {
-                            "type": "object",
-                            "additionalProperties": {
-                                "type": "string"
-                            }
-                        }
-                    }
-                }
             },
             "delete": {
                 "security": [
@@ -1581,14 +1575,14 @@ const docTemplate = `{
                         "BearerAuth": []
                     }
                 ],
-                "description": "Deletes the authenticated user's account using their JWT token",
+                "description": "Deletes the authenticated user's account using their JWT token.",
                 "produces": [
                     "application/json"
                 ],
                 "tags": [
                     "users"
                 ],
-                "summary": "Delete a user",
+                "summary": "Delete the authenticated user",
                 "responses": {
                     "200": {
                         "description": "User deleted successfully",
@@ -1728,7 +1722,7 @@ const docTemplate = `{
                 ],
                 "responses": {
                     "200": {
-                        "description": "Response containing the JWT token",
+                        "description": "Response containing the JWT token, e.g., {'data': 'jwt_token_string'}",
                         "schema": {
                             "type": "object",
                             "additionalProperties": {
@@ -1759,7 +1753,46 @@ const docTemplate = `{
         },
         "/users/me": {
             "get": {
-                "responses": {}
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
+                "description": "Retrieves the details of the currently authenticated user based on the JWT token.",
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "users"
+                ],
+                "summary": "Get current user",
+                "responses": {
+                    "200": {
+                        "description": "Authenticated user details, wrapped in a 'data' key",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": true
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthorized - missing or invalid token",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": {
+                                "type": "string"
+                            }
+                        }
+                    },
+                    "404": {
+                        "description": "User not found",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": {
+                                "type": "string"
+                            }
+                        }
+                    }
+                }
             }
         },
         "/users/password": {
@@ -1841,49 +1874,58 @@ const docTemplate = `{
         },
         "/users/profile/pic": {
             "get": {
-                "description": "Retrieves all profile pictures for the authenticated user, sorted by posted date (newest to oldest).",
+                "description": "Retrieves all profile pictures for a given user ID, sorted by posted date (newest to oldest). This is a public endpoint.",
                 "produces": [
                     "application/json"
                 ],
                 "tags": [
                     "Profile"
                 ],
-                "summary": "Get all profile pictures",
+                "summary": "Get all profile pictures for a user",
                 "parameters": [
                     {
                         "type": "string",
-                        "description": "Bearer token for authentication",
-                        "name": "Authorization",
-                        "in": "header",
+                        "description": "User ID for whom to fetch pictures",
+                        "name": "id",
+                        "in": "query",
                         "required": true
                     }
                 ],
                 "responses": {
                     "200": {
-                        "description": "List of profile pictures with URLs and posted dates",
+                        "description": "List of profile pictures with URLs and posted dates, wrapped in a 'data' key",
                         "schema": {
                             "type": "object",
                             "additionalProperties": true
                         }
                     },
-                    "401": {
-                        "description": "Unauthorized - missing or invalid token",
+                    "400": {
+                        "description": "Invalid or missing user ID",
                         "schema": {
                             "type": "object",
-                            "additionalProperties": true
+                            "additionalProperties": {
+                                "type": "string"
+                            }
                         }
                     },
                     "500": {
                         "description": "Server error fetching pictures",
                         "schema": {
                             "type": "object",
-                            "additionalProperties": true
+                            "additionalProperties": {
+                                "type": "string"
+                            }
                         }
                     }
                 }
             },
             "post": {
-                "description": "Uploads a single profile picture for the authenticated user. The file is stored in MinIO, then added to the user's profile in MongoDB if successful.",
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
+                "description": "Uploads a single profile picture for the authenticated user. The file is stored, and the reference is added to the user's profile.",
                 "consumes": [
                     "multipart/form-data"
                 ],
@@ -1896,15 +1938,8 @@ const docTemplate = `{
                 "summary": "Add a new profile picture",
                 "parameters": [
                     {
-                        "type": "string",
-                        "description": "Bearer token for authentication",
-                        "name": "Authorization",
-                        "in": "header",
-                        "required": true
-                    },
-                    {
                         "type": "file",
-                        "description": "Profile picture file (Supported formats: JPEG, PNG, GIF, WEBP. Max size: 5MB recommended)",
+                        "description": "Profile picture file (e.g., .jpg, .png). Max size: 5MB recommended.",
                         "name": "picture",
                         "in": "formData",
                         "required": true
@@ -1912,37 +1947,50 @@ const docTemplate = `{
                 ],
                 "responses": {
                     "200": {
-                        "description": "Returns the uploaded file URL",
+                        "description": "Returns the uploaded file name/key, e.g., {'data': 'uuid.jpg'}",
                         "schema": {
                             "type": "object",
-                            "additionalProperties": true
+                            "additionalProperties": {
+                                "type": "string"
+                            }
                         }
                     },
                     "400": {
                         "description": "Invalid file upload or request format",
                         "schema": {
                             "type": "object",
-                            "additionalProperties": true
+                            "additionalProperties": {
+                                "type": "string"
+                            }
                         }
                     },
                     "401": {
                         "description": "Unauthorized - missing or invalid token",
                         "schema": {
                             "type": "object",
-                            "additionalProperties": true
+                            "additionalProperties": {
+                                "type": "string"
+                            }
                         }
                     },
                     "500": {
                         "description": "Server error during file upload or database update",
                         "schema": {
                             "type": "object",
-                            "additionalProperties": true
+                            "additionalProperties": {
+                                "type": "string"
+                            }
                         }
                     }
                 }
             },
             "delete": {
-                "description": "Removes a profile picture from the user's profile in MongoDB, then deletes it from MinIO. Requires the file URL as a query parameter.",
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
+                "description": "Removes a profile picture from the authenticated user's profile and deletes it from storage.",
                 "produces": [
                     "application/json"
                 ],
@@ -1953,14 +2001,7 @@ const docTemplate = `{
                 "parameters": [
                     {
                         "type": "string",
-                        "description": "Bearer token for authentication",
-                        "name": "Authorization",
-                        "in": "header",
-                        "required": true
-                    },
-                    {
-                        "type": "string",
-                        "description": "URL of the profile picture to delete (e.g., '123456789.jpg')",
+                        "description": "The file name/key of the profile picture to delete (e.g., '123456789.jpg')",
                         "name": "file_url",
                         "in": "query",
                         "required": true
@@ -1971,28 +2012,36 @@ const docTemplate = `{
                         "description": "Confirmation of deletion",
                         "schema": {
                             "type": "object",
-                            "additionalProperties": true
+                            "additionalProperties": {
+                                "type": "string"
+                            }
                         }
                     },
                     "400": {
                         "description": "Missing or invalid file_url",
                         "schema": {
                             "type": "object",
-                            "additionalProperties": true
+                            "additionalProperties": {
+                                "type": "string"
+                            }
                         }
                     },
                     "401": {
                         "description": "Unauthorized - missing or invalid token",
                         "schema": {
                             "type": "object",
-                            "additionalProperties": true
+                            "additionalProperties": {
+                                "type": "string"
+                            }
                         }
                     },
                     "500": {
                         "description": "Server error during deletion",
                         "schema": {
                             "type": "object",
-                            "additionalProperties": true
+                            "additionalProperties": {
+                                "type": "string"
+                            }
                         }
                     }
                 }
@@ -2005,7 +2054,7 @@ const docTemplate = `{
                         "BearerAuth": []
                     }
                 ],
-                "description": "Updates the authenticated user's data based on the provided fields",
+                "description": "Updates the authenticated user's data based on the provided fields. Only non-nil fields in the request will be updated.",
                 "consumes": [
                     "application/json"
                 ],
@@ -2141,16 +2190,16 @@ const docTemplate = `{
                 }
             }
         },
-        "/users/username/:username": {
+        "/users/username/{username}": {
             "get": {
-                "description": "Retrieves user details by their username",
+                "description": "Retrieves public user details by their username. This is a public endpoint.",
                 "produces": [
                     "application/json"
                 ],
                 "tags": [
                     "users"
                 ],
-                "summary": "Get user by username",
+                "summary": "Get a public user profile by username",
                 "parameters": [
                     {
                         "type": "string",
@@ -2162,9 +2211,58 @@ const docTemplate = `{
                 ],
                 "responses": {
                     "200": {
-                        "description": "User details",
+                        "description": "User details wrapped in a 'data' key",
                         "schema": {
-                            "$ref": "#/definitions/github_com_ruziba3vich_soand_internal_models.User"
+                            "type": "object",
+                            "additionalProperties": true
+                        }
+                    },
+                    "404": {
+                        "description": "User not found",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": {
+                                "type": "string"
+                            }
+                        }
+                    }
+                }
+            }
+        },
+        "/users/{id}": {
+            "get": {
+                "description": "Retrieves public user details by their ID. This is a public endpoint.",
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "users"
+                ],
+                "summary": "Get a public user profile by ID",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "User ID (MongoDB ObjectID)",
+                        "name": "id",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "User details wrapped in a 'data' key",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": true
+                        }
+                    },
+                    "400": {
+                        "description": "Invalid user ID",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": {
+                                "type": "string"
+                            }
                         }
                     },
                     "404": {
@@ -2181,6 +2279,106 @@ const docTemplate = `{
         }
     },
     "definitions": {
+        "github_com_ruziba3vich_soand_internal_dtos.PostRequest": {
+            "type": "object",
+            "required": [
+                "delete_after",
+                "description"
+            ],
+            "properties": {
+                "creator_id": {
+                    "type": "string"
+                },
+                "delete_after": {
+                    "type": "integer"
+                },
+                "description": {
+                    "type": "string"
+                },
+                "tags": {
+                    "type": "array",
+                    "items": {
+                        "type": "string"
+                    }
+                },
+                "title": {
+                    "type": "string"
+                }
+            }
+        },
+        "github_com_ruziba3vich_soand_internal_models.Comment": {
+            "type": "object",
+            "properties": {
+                "created_at": {
+                    "type": "string"
+                },
+                "id": {
+                    "type": "string"
+                },
+                "owner_full_name": {
+                    "type": "string"
+                },
+                "owner_profile_pic": {
+                    "type": "string"
+                },
+                "pictures": {
+                    "type": "array",
+                    "items": {
+                        "type": "string"
+                    }
+                },
+                "post_id": {
+                    "type": "string"
+                },
+                "reactions": {
+                    "type": "object",
+                    "additionalProperties": {
+                        "type": "array",
+                        "items": {
+                            "type": "string"
+                        }
+                    }
+                },
+                "reply_to": {
+                    "type": "string"
+                },
+                "text": {
+                    "type": "string"
+                },
+                "user_id": {
+                    "type": "string"
+                },
+                "voice_message": {
+                    "type": "string"
+                }
+            }
+        },
+        "github_com_ruziba3vich_soand_internal_models.Message": {
+            "type": "object",
+            "properties": {
+                "content": {
+                    "type": "string"
+                },
+                "created_at": {
+                    "type": "string"
+                },
+                "id": {
+                    "type": "string"
+                },
+                "pictures": {
+                    "type": "array",
+                    "items": {
+                        "type": "string"
+                    }
+                },
+                "recipient_id": {
+                    "type": "string"
+                },
+                "sender_id": {
+                    "type": "string"
+                }
+            }
+        },
         "github_com_ruziba3vich_soand_internal_models.PinChatRequest": {
             "type": "object",
             "properties": {
@@ -2189,6 +2387,63 @@ const docTemplate = `{
                 },
                 "pin": {
                     "type": "boolean"
+                }
+            }
+        },
+        "github_com_ruziba3vich_soand_internal_models.Post": {
+            "type": "object",
+            "properties": {
+                "created_at": {
+                    "description": "Timestamp",
+                    "type": "string"
+                },
+                "creator_id": {
+                    "description": "Creator id",
+                    "type": "string"
+                },
+                "delete_at": {
+                    "description": "Field for automatic deletion",
+                    "type": "string"
+                },
+                "description": {
+                    "description": "Post description",
+                    "type": "string"
+                },
+                "id": {
+                    "description": "MongoDB ObjectID",
+                    "type": "string"
+                },
+                "likes": {
+                    "type": "integer"
+                },
+                "owner_full_name": {
+                    "type": "string"
+                },
+                "owner_profile_pic": {
+                    "type": "string"
+                },
+                "picture": {
+                    "description": "Image URLs or file path",
+                    "type": "array",
+                    "items": {
+                        "type": "string"
+                    }
+                },
+                "reactions": {
+                    "type": "object",
+                    "additionalProperties": {
+                        "type": "integer"
+                    }
+                },
+                "tags": {
+                    "description": "List of tags",
+                    "type": "array",
+                    "items": {
+                        "type": "string"
+                    }
+                },
+                "title": {
+                    "type": "string"
                 }
             }
         },
@@ -2258,6 +2513,114 @@ const docTemplate = `{
                     "type": "boolean"
                 },
                 "userId": {
+                    "type": "string"
+                }
+            }
+        },
+        "github_com_ruziba3vich_soand_pkg_swagger.ErrorResponse": {
+            "type": "object",
+            "properties": {
+                "error": {
+                    "type": "string"
+                }
+            }
+        },
+        "github_com_ruziba3vich_soand_pkg_swagger.LikeRequest": {
+            "type": "object",
+            "properties": {
+                "like": {
+                    "type": "boolean",
+                    "example": true
+                }
+            }
+        },
+        "github_com_ruziba3vich_soand_pkg_swagger.PaginatedPostsResponse": {
+            "type": "object",
+            "properties": {
+                "data": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/github_com_ruziba3vich_soand_internal_models.Post"
+                    }
+                }
+            }
+        },
+        "github_com_ruziba3vich_soand_pkg_swagger.Response": {
+            "type": "object",
+            "properties": {
+                "data": {}
+            }
+        },
+        "github_com_ruziba3vich_soand_pkg_swagger.SearchRequest": {
+            "type": "object",
+            "properties": {
+                "query": {
+                    "type": "string",
+                    "example": "My awesome post title"
+                }
+            }
+        },
+        "github_com_ruziba3vich_soand_pkg_swagger.SuccessResponse": {
+            "type": "object",
+            "properties": {
+                "data": {
+                    "type": "string"
+                }
+            }
+        },
+        "internal_http.ErrorResponse": {
+            "type": "object",
+            "properties": {
+                "error": {
+                    "type": "string"
+                }
+            }
+        },
+        "internal_http.GetCommentsResponse": {
+            "type": "object",
+            "properties": {
+                "data": {
+                    "type": "object",
+                    "properties": {
+                        "comments": {
+                            "type": "array",
+                            "items": {
+                                "$ref": "#/definitions/github_com_ruziba3vich_soand_internal_models.Comment"
+                            }
+                        },
+                        "user_id": {
+                            "type": "string"
+                        }
+                    }
+                }
+            }
+        },
+        "internal_http.ReactionRequest": {
+            "type": "object",
+            "required": [
+                "type"
+            ],
+            "properties": {
+                "type": {
+                    "type": "string"
+                }
+            }
+        },
+        "internal_http.SuccessResponse": {
+            "type": "object",
+            "properties": {
+                "data": {
+                    "type": "string"
+                }
+            }
+        },
+        "internal_http.UpdateCommentRequest": {
+            "type": "object",
+            "required": [
+                "new_text"
+            ],
+            "properties": {
+                "new_text": {
                     "type": "string"
                 }
             }
