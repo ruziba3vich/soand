@@ -70,7 +70,7 @@ func (h *FIleStorageHandler) UploadFile(c *gin.Context) {
 	}
 
 	// Upload the file to MinIO using file_service
-	fileURL, err := h.file_service.UploadFile(file)
+	fileObj, err := h.file_service.UploadFile(file)
 	if err != nil {
 		h.logger.Println("Failed to upload file to storage:", err)
 		c.JSON(http.StatusInternalServerError, gin.H{"error": "failed to upload file"})
@@ -79,9 +79,9 @@ func (h *FIleStorageHandler) UploadFile(c *gin.Context) {
 
 	// Return the file URL on success
 	c.JSON(http.StatusOK, gin.H{
-		"data": map[string]string{
+		"data": map[string]any{
 			"message": "file uploaded successfully",
-			"url":     fileURL,
+			"file":    fileObj,
 		},
 	})
 }

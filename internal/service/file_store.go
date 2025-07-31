@@ -4,6 +4,7 @@ import (
 	"log"
 	"mime/multipart"
 
+	dto "github.com/ruziba3vich/soand/internal/dtos"
 	"github.com/ruziba3vich/soand/internal/repos"
 	"github.com/ruziba3vich/soand/internal/storage"
 )
@@ -22,14 +23,19 @@ func NewFileStoreService(storage *storage.FileStorage, logger *log.Logger) repos
 	}
 }
 
-func (s *FileStoreService) UploadFile(file *multipart.FileHeader) (string, error) {
+func (s *FileStoreService) UploadFile(file *multipart.FileHeader) (*dto.FileObject, error) {
 	path, err := s.storage.UploadFile(file)
 	if err != nil {
 		s.logger.Println("Error uploading file:", err)
-		return "", err
+		return nil, err
 	}
 	s.logger.Println("File uploaded successfully to:", path)
-	return s.storage.GetFile(path)
+	url, err := s.storage.GetFile(path)
+	if err != nil {
+		s.logger.Println("Error retrieving file:", err)
+		return nil, err
+	}
+	return &dto.FileObject{FileUrl: url, FIlename: path}, nil
 }
 
 func (s *FileStoreService) UploadFileFromBytes(data []byte, contentType string) (string, error) {
