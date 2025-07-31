@@ -46,8 +46,8 @@ func NewUserHandler(repo repos.UserRepo, file_store repos.IFIleStoreService, log
 // @Tags users
 // @Accept json
 // @Produce json
-// @Param user body models.User true "User data (e.g., username, password, etc.)"
-// @Success 200 {object} map[string]string "Response containing the JWT token"
+// @Param user body models.User true "User data (username and password are required)"
+// @Success 200 {object} map[string]string "Response containing the JWT token, e.g., {'data': 'jwt_token_string'}"
 // @Failure 400 {object} map[string]string "Invalid request body"
 // @Failure 500 {object} map[string]string "Failed to create user"
 // @Router /users/ [post]
@@ -79,7 +79,7 @@ func (h *UserHandler) CreateUser(c *gin.Context) {
 // @Accept json
 // @Produce json
 // @Param credentials body object{username=string,password=string} true "User login credentials"
-// @Success 200 {object} map[string]string "Response containing the JWT token"
+// @Success 200 {object} map[string]string "Response containing the JWT token, e.g., {'data': 'jwt_token_string'}"
 // @Failure 400 {object} map[string]string "Invalid request body"
 // @Failure 500 {object} map[string]string "Failed to login user"
 // @Router /users/login [post]
@@ -106,15 +106,15 @@ func (h *UserHandler) LoginUser(c *gin.Context) {
 }
 
 // DeleteUser handles user deletion requests
-// @Summary Delete a user
-// @Description Deletes the authenticated user's account using their JWT token
+// @Summary Delete the authenticated user
+// @Description Deletes the authenticated user's account using their JWT token.
 // @Tags users
 // @Security BearerAuth
 // @Produce json
 // @Success 200 {object} map[string]string "User deleted successfully"
 // @Failure 401 {object} map[string]string "Unauthorized - missing or invalid token"
 // @Failure 500 {object} map[string]string "Failed to delete user"
-// @Router /users/:id [delete]
+// @Router /users/ [delete]
 func (h *UserHandler) DeleteUser(c *gin.Context) {
 	userId, err := getUserIdFromRequest(c)
 	if err != nil {
@@ -132,17 +132,15 @@ func (h *UserHandler) DeleteUser(c *gin.Context) {
 }
 
 // GetUserByID handles retrieving a user by ID
-// @Summary Get user by ID
-// @Description Retrieves user details by their ID, accessible only to the authenticated user
+// @Summary Get a public user profile by ID
+// @Description Retrieves public user details by their ID. This is a public endpoint.
 // @Tags users
-// @Security BearerAuth
 // @Produce json
 // @Param id path string true "User ID (MongoDB ObjectID)"
-// @Success 200 {object} models.User "User details"
+// @Success 200 {object} map[string]interface{} "User details wrapped in a 'data' key"
 // @Failure 400 {object} map[string]string "Invalid user ID"
-// @Failure 401 {object} map[string]string "Unauthorized - missing or invalid token"
 // @Failure 404 {object} map[string]string "User not found"
-// @Router /users/:id [get]
+// @Router /users/{id} [get]
 func (h *UserHandler) GetUserByID(c *gin.Context) {
 	userId := c.Param("id")
 	if len(userId) == 0 {
@@ -167,14 +165,14 @@ func (h *UserHandler) GetUserByID(c *gin.Context) {
 }
 
 // GetUserByUsername handles retrieving a user by username
-// @Summary Get user by username
-// @Description Retrieves user details by their username
+// @Summary Get a public user profile by username
+// @Description Retrieves public user details by their username. This is a public endpoint.
 // @Tags users
 // @Produce json
 // @Param username path string true "Username of the user"
-// @Success 200 {object} models.User "User details"
+// @Success 200 {object} map[string]interface{} "User details wrapped in a 'data' key"
 // @Failure 404 {object} map[string]string "User not found"
-// @Router /users/username/:username [get]
+// @Router /users/username/{username} [get]
 func (h *UserHandler) GetUserByUsername(c *gin.Context) {
 	username := c.Param("username")
 
@@ -187,44 +185,6 @@ func (h *UserHandler) GetUserByUsername(c *gin.Context) {
 
 	c.JSON(http.StatusOK, gin.H{"data": user})
 }
-
-// // UpdateFullname handles updating a user's full name
-// // @Summary Update user full name
-// // @Description Updates the authenticated user's full name
-// // @Tags users
-// // @Accept json
-// // @Produce json
-// // @Security BearerAuth
-// // @Param fullname body object{new_fullname=string} true "New full name"
-// // @Success 200 "Full name updated successfully"
-// // @Failure 400 {object} map[string]string "Invalid request body"
-// // @Failure 401 {object} map[string]string "Unauthorized"
-// // @Failure 500 {object} map[string]string "Failed to update fullname"
-// // @Router /users/fullname [put]
-// func (h *UserHandler) UpdateFullname(c *gin.Context) {
-// 	var request struct {
-// 		NewFullname string `json:"new_fullname"`
-// 	}
-
-// 	userId, err := getUserIdFromRequest(c)
-// 	if err != nil {
-// 		c.JSON(http.StatusUnauthorized, gin.H{"error": "Unauthorized"})
-// 		return
-// 	}
-// 	if err := c.ShouldBindJSON(&request); err != nil {
-// 		h.logger.Printf("Error parsing fullname update request: %v", err)
-// 		c.JSON(http.StatusBadRequest, gin.H{"error": "Invalid request body"})
-// 		return
-// 	}
-
-// 	if err := h.repo.UpdateFullname(c.Request.Context(), userId, request.NewFullname); err != nil {
-// 		h.logger.Printf("Error updating fullname: %v", err)
-// 		c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to update fullname"})
-// 		return
-// 	}
-
-// 	c.JSON(http.StatusOK, gin.H{"data": "success"})
-// }
 
 // UpdatePassword handles updating a user's password
 // @Summary Update user password
@@ -306,7 +266,7 @@ func (h *UserHandler) UpdateUsername(c *gin.Context) {
 
 // UpdateUser handles updating user data
 // @Summary Update user data
-// @Description Updates the authenticated user's data based on the provided fields
+// @Description Updates the authenticated user's data based on the provided fields. Only non-nil fields in the request will be updated.
 // @Tags users
 // @Security BearerAuth
 // @Accept json
@@ -336,85 +296,6 @@ func (h *UserHandler) UpdateUser(c *gin.Context) {
 	}
 	c.JSON(http.StatusOK, gin.H{"data": "user updated successfully"})
 }
-
-// // ChangeProfileVisibility handles changing a user's profile visibility
-// // @Summary Change profile visibility
-// // @Description Updates the authenticated user's profile visibility (hidden or visible)
-// // @Tags users
-// // @Accept json
-// // @Produce json
-// // @Security BearerAuth
-// // @Param visibility body object{hidden=boolean} true "Profile visibility status"
-// // @Success 200 {object} map[string]string "Profile visibility updated"
-// // @Failure 400 {object} map[string]string "Invalid request payload"
-// // @Failure 401 {object} map[string]string "Unauthorized"
-// // @Failure 500 {object} map[string]string "Failed to update profile visibility"
-// // @Router /users/visibility [put]
-// func (h *UserHandler) ChangeProfileVisibility(c *gin.Context) {
-// 	userId, err := getUserIdFromRequest(c)
-// 	if err != nil {
-// 		c.JSON(http.StatusUnauthorized, gin.H{"error": "Unauthorized"})
-// 		return
-// 	}
-
-// 	var req struct {
-// 		Hidden bool `json:"hidden"`
-// 	}
-
-// 	if err := c.ShouldBindJSON(&req); err != nil {
-// 		h.logger.Printf("Invalid request payload: %v", err)
-// 		c.JSON(http.StatusBadRequest, gin.H{"error": "invalid request payload"})
-// 		return
-// 	}
-
-// 	if err := h.repo.ChangeProfileVisibility(c.Request.Context(), userId, req.Hidden); err != nil {
-// 		h.logger.Printf("Failed to change profile visibility for user %s: %v", userId.Hex(), err)
-// 		c.JSON(http.StatusInternalServerError, gin.H{"error": "failed to update profile visibility"})
-// 		return
-// 	}
-
-// 	h.logger.Printf("Successfully changed profile visibility for user %s", userId.Hex())
-// 	c.JSON(http.StatusOK, gin.H{"data": "profile visibility updated"})
-// }
-
-// // SetBio handles updating a user's bio
-// // @Summary Set user bio
-// // @Description Updates the authenticated user's bio
-// // @Tags users
-// // @Accept json
-// // @Security BearerAuth
-// // @Produce json
-// // @Param bio body object{bio=string} true "New bio"
-// // @Success 200 "Bio updated successfully"
-// // @Failure 400 {object} map[string]string "Invalid request body"
-// // @Failure 401 {object} map[string]string "Unauthorized"
-// // @Failure 500 {object} map[string]string "Failed to update bio"
-// // @Router /users/bio [put]
-// func (h *UserHandler) SetBio(c *gin.Context) {
-// 	var request struct {
-// 		Bio string `json:"bio"`
-// 	}
-
-// 	userId, err := getUserIdFromRequest(c)
-// 	if err != nil {
-// 		c.JSON(http.StatusUnauthorized, gin.H{"error": "Unauthorized"})
-// 		return
-// 	}
-
-// 	if err := c.ShouldBindJSON(&request); err != nil {
-// 		h.logger.Printf("Error parsing bio request: %v", err)
-// 		c.JSON(http.StatusBadRequest, gin.H{"error": "Invalid request body"})
-// 		return
-// 	}
-
-// 	if err := h.repo.SetBio(c.Request.Context(), userId, request.Bio); err != nil {
-// 		h.logger.Printf("Error updating bio: %v", err)
-// 		c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to update bio"})
-// 		return
-// 	}
-
-// 	c.JSON(http.StatusOK, gin.H{"data": "success"})
-// }
 
 func getUserIdFromRequest(c *gin.Context) (primitive.ObjectID, error) {
 	userID, exists := c.Get("userID")
@@ -466,12 +347,12 @@ func (h *UserHandler) SetBackgroundPic(c *gin.Context) {
 }
 
 // Home handles the home endpoint requiring a valid JWT token
-// @Summary Access home endpoint
-// @Description Verifies user authentication via JWT token and returns a success response
+// @Summary Access home endpoint (authentication check)
+// @Description Verifies user authentication via JWT token and returns a success status if the token is valid. This endpoint has an empty response body on success.
 // @Tags users
 // @Security BearerAuth
 // @Produce json
-// @Success 200 {object} map[string]string "User authenticated successfully"
+// @Success 200 "User authenticated successfully (empty response body)"
 // @Failure 401 {object} map[string]string "Unauthorized - missing or invalid token"
 // @Router / [get]
 func (h *UserHandler) Home(c *gin.Context) {
@@ -497,18 +378,17 @@ func (h *UserHandler) Home(c *gin.Context) {
 
 // AddProfilePicture godoc
 // @Summary      Add a new profile picture
-// @Description  Uploads a single profile picture for the authenticated user. The file is stored in MinIO, then added to the user's profile in MongoDB if successful.
+// @Description  Uploads a single profile picture for the authenticated user. The file is stored, and the reference is added to the user's profile.
 // @Tags         Profile
+// @Security     BearerAuth
 // @Accept       multipart/form-data
 // @Produce      json
-// @Param        Authorization  header    string  true  "Bearer token for authentication"
-// @Param        picture        formData  file    true  "Profile picture file (Supported formats: JPEG, PNG, GIF, WEBP. Max size: 5MB recommended)"
-// @Success      200  {object}  map[string]interface{}  "Returns the uploaded file URL"
-// @Failure      400  {object}  map[string]interface{}  "Invalid file upload or request format"
-// @Failure      401  {object}  map[string]interface{}  "Unauthorized - missing or invalid token"
-// @Failure      500  {object}  map[string]interface{}  "Server error during file upload or database update"
+// @Param        picture   formData  file    true  "Profile picture file (e.g., .jpg, .png). Max size: 5MB recommended."
+// @Success      200  {object}  map[string]string "Returns the uploaded file name/key, e.g., {'data': 'uuid.jpg'}"
+// @Failure      400  {object}  map[string]string "Invalid file upload or request format"
+// @Failure      401  {object}  map[string]string "Unauthorized - missing or invalid token"
+// @Failure      500  {object}  map[string]string "Server error during file upload or database update"
 // @Router       /users/profile/pic [post]
-// @Note        For frontend devs: Send the file in a multipart/form-data request with the key 'picture'. Example in JS: `formData.append('picture', fileInput.files[0])`. Ensure the file is an image (e.g., .jpg, .png) and keep it under 5MB to avoid timeouts.
 func (h *UserHandler) AddProfilePicture(c *gin.Context) {
 	userID, err := getUserIdFromRequest(c)
 	if err != nil {
@@ -565,17 +445,16 @@ func (h *UserHandler) AddProfilePicture(c *gin.Context) {
 
 // DeleteProfilePicture godoc
 // @Summary      Delete a profile picture
-// @Description  Removes a profile picture from the user's profile in MongoDB, then deletes it from MinIO. Requires the file URL as a query parameter.
+// @Description  Removes a profile picture from the authenticated user's profile and deletes it from storage.
 // @Tags         Profile
+// @Security     BearerAuth
 // @Produce      json
-// @Param        Authorization  header    string  true  "Bearer token for authentication"
-// @Param        file_url       query     string  true  "URL of the profile picture to delete (e.g., '123456789.jpg')"
-// @Success      200  {object}  map[string]interface{}  "Confirmation of deletion"
-// @Failure      400  {object}  map[string]interface{}  "Missing or invalid file_url"
-// @Failure      401  {object}  map[string]interface{}  "Unauthorized - missing or invalid token"
-// @Failure      500  {object}  map[string]interface{}  "Server error during deletion"
+// @Param        file_url  query     string  true  "The file name/key of the profile picture to delete (e.g., '123456789.jpg')"
+// @Success      200  {object}  map[string]string "Confirmation of deletion"
+// @Failure      400  {object}  map[string]string "Missing or invalid file_url"
+// @Failure      401  {object}  map[string]string "Unauthorized - missing or invalid token"
+// @Failure      500  {object}  map[string]string "Server error during deletion"
 // @Router       /users/profile/pic [delete]
-// @Note        For frontend devs: Pass the file URL (returned from AddProfilePicture) as a query param, e.g., `/profile/picture?file_url=123456789.jpg`. If MinIO deletion fails, the response still succeeds since MongoDB is updated.
 func (h *UserHandler) DeleteProfilePicture(c *gin.Context) {
 	userID, err := getUserIdFromRequest(c)
 	if err != nil {
@@ -592,9 +471,8 @@ func (h *UserHandler) DeleteProfilePicture(c *gin.Context) {
 	}
 
 	if err := h.file_store.DeleteFile(fileURL); err != nil {
-		h.logger.Printf("Failed to delete file %s from MinIO, but removed from MongoDB: %v", fileURL, err)
-		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
-		return
+		// Note: We might still proceed to remove from DB even if file deletion fails.
+		h.logger.Printf("Failed to delete file %s from storage, but will attempt to remove from DB: %v", fileURL, err)
 	}
 
 	err = h.repo.DeleteProfilePicture(c.Request.Context(), userID, fileURL)
@@ -608,16 +486,15 @@ func (h *UserHandler) DeleteProfilePicture(c *gin.Context) {
 }
 
 // GetProfilePictures godoc
-// @Summary      Get all profile pictures
-// @Description  Retrieves all profile pictures for the authenticated user, sorted by posted date (newest to oldest).
+// @Summary      Get all profile pictures for a user
+// @Description  Retrieves all profile pictures for a given user ID, sorted by posted date (newest to oldest). This is a public endpoint.
 // @Tags         Profile
 // @Produce      json
-// @Param        Authorization  header    string  true  "Bearer token for authentication"
-// @Success      200  {object}  map[string]interface{}  "List of profile pictures with URLs and posted dates"
-// @Failure      401  {object}  map[string]interface{}  "Unauthorized - missing or invalid token"
-// @Failure      500  {object}  map[string]interface{}  "Server error fetching pictures"
+// @Param        id   query     string  true  "User ID for whom to fetch pictures"
+// @Success      200  {object}  map[string]interface{}  "List of profile pictures with URLs and posted dates, wrapped in a 'data' key"
+// @Failure      400  {object}  map[string]string "Invalid or missing user ID"
+// @Failure      500  {object}  map[string]string "Server error fetching pictures"
 // @Router       /users/profile/pic [get]
-// @Note        For frontend devs: Response includes an array of objects with 'url' (string) and 'posted_at' (ISO 8601 timestamp, e.g., '2025-03-18T12:00:00Z'). Use this to display pics in chronological order.
 func (h *UserHandler) GetProfilePictures(c *gin.Context) {
 	userIDstr := c.Query("id")
 	if len(userIDstr) == 0 {
@@ -640,6 +517,15 @@ func (h *UserHandler) GetProfilePictures(c *gin.Context) {
 	c.JSON(http.StatusOK, gin.H{"data": pics})
 }
 
+// GetUserMe godoc
+// @Summary      Get current user
+// @Description  Retrieves the details of the currently authenticated user based on the JWT token.
+// @Tags         users
+// @Security     BearerAuth
+// @Produce      json
+// @Success      200  {object}  map[string]interface{} "Authenticated user details, wrapped in a 'data' key"
+// @Failure      401  {object}  map[string]string "Unauthorized - missing or invalid token"
+// @Failure      404  {object}  map[string]string "User not found"
 // @Router /users/me [get]
 func (h *UserHandler) GetUserMe(c *gin.Context) {
 	userId, err := getUserIdFromRequest(c)
