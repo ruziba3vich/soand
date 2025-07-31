@@ -50,11 +50,11 @@ func (h *PostHandler) CreatePost(c *gin.Context) {
 		return
 	}
 
-	req := dto.PostRequest{
-		Description: c.PostForm("description"),
-		DeleteAfter: stringToInt(c.PostForm("delete_after")),
-		Tags:        c.PostFormArray("tags"),
-		Title:       c.PostForm("title"),
+	var req dto.PostRequest
+
+	if err := c.ShouldBindJSON(&req); err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"error": "bad request : " + err.Error()})
+		return
 	}
 
 	tagsStr := c.PostForm("tags_json")
