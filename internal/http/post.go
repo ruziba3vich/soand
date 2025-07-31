@@ -1,14 +1,15 @@
 package handler
 
 import (
-	"encoding/json"
 	"log"
 	"net/http"
 	"strconv"
 
-	"github.com/gin-gonic/gin"
+	"github.com/gin-gonic/gin" // Assuming your model is here
 	dto "github.com/ruziba3vich/soand/internal/dtos"
-	"github.com/ruziba3vich/soand/internal/repos"
+	_ "github.com/ruziba3vich/soand/internal/models"
+	"github.com/ruziba3vich/soand/internal/repos" // Assuming a package for common swagger DTOs
+	_ "github.com/ruziba3vich/soand/pkg/swagger"
 	"go.mongodb.org/mongo-driver/bson/primitive"
 )
 
@@ -26,22 +27,18 @@ func NewPostHandler(service repos.IPostService, logger *log.Logger) *PostHandler
 	}
 }
 
-// CreatePost creates a new post with optional file uploads
+// CreatePost creates a new post from a JSON payload
 // @Summary Create a new post
-// @Description Creates a post with description, tags, optional delete_after time, and file attachments
+// @Description Creates a post with description and tags from a JSON body. Note: This version does not support file uploads.
 // @Tags posts
-// @Accept multipart/form-data
+// @Accept json
 // @Produce json
 // @Security BearerAuth
-// @Param description formData string true "Post description"
-// @Param delete_after formData string false "Time in minutes after which the post will be deleted"
-// @Param tags formData string false "Comma-separated list of tags or JSON array"
-// @Param tags_json formData string false "JSON stringified array of tags (alternative to tags)"
-// @Param files formData file false "Files to upload (multiple allowed)"
-// @Success 201 {object} map[string]string "Post created successfully with ID"
-// @Failure 400 {object} map[string]string "Invalid request payload"
-// @Failure 401 {object} map[string]string "Unauthorized"
-// @Failure 500 {object} map[string]string "Internal server error"
+// @Param postRequest body dto.PostRequest true "Post creation payload"
+// @Success 201 {object} swagger.Response{data=models.Post} "Post created successfully"
+// @Failure 400 {object} swagger.ErrorResponse "Invalid request payload"
+// @Failure 401 {object} swagger.ErrorResponse "Unauthorized"
+// @Failure 500 {object} swagger.ErrorResponse "Internal server error"
 // @Router /posts [post]
 func (h *PostHandler) CreatePost(c *gin.Context) {
 	userId, err := getUserIdFromRequest(c)
@@ -50,24 +47,28 @@ func (h *PostHandler) CreatePost(c *gin.Context) {
 		return
 	}
 
-	req := dto.PostRequest{
-		Description: c.PostForm("description"),
-		DeleteAfter: stringToInt(c.PostForm("delete_after")),
-		Tags:        c.PostFormArray("tags"),
-		Title:       c.PostForm("title"),
+	var req dto.PostRequest
+
+	// This correctly binds a JSON request body. The annotations now match this.
+	if err := c.ShouldBindJSON(&req); err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"error": "bad request : " + err.Error()})
+		return
 	}
 
-	tagsStr := c.PostForm("tags_json")
-	if tagsStr != "" {
-		if err := json.Unmarshal([]byte(tagsStr), &req.Tags); err != nil {
-			c.JSON(http.StatusBadRequest, gin.H{"error": "Invalid tags format"})
-			return
-		}
-	}
+	// This part of the code is now unreachable if you are using ShouldBindJSON,
+	// because c.PostForm reads from form data, not a JSON body.
+	// tagsStr := c.PostForm("tags_json")
+	// if tagsStr != "" {
+	// 	if err := json.Unmarshal([]byte(tagsStr), &req.Tags); err != nil {
+	// 		c.JSON(http.StatusBadRequest, gin.H{"error": "Invalid tags format"})
+	// 		return
+	// 	}
+	// }
 
 	post := req.ToPost()
 	post.CreatorId = userId
 
+	// This code for multipart form handling is incompatible with ShouldBindJSON
 	// form, err := c.MultipartForm()
 	// if err != nil {
 	// 	c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
@@ -86,14 +87,14 @@ func (h *PostHandler) CreatePost(c *gin.Context) {
 
 // GetPost retrieves a post by its ID
 // @Summary Get a post by ID
-// @Description Retrieves a single post using its MongoDB ObjectID
+// @Description Retrieves a single post using its MongoDB ObjectID from a query parameter.
 // @Tags posts
 // @Accept json
 // @Produce json
-// @Param id query string true "Post ID (MongoDB ObjectID)"
-// @Success 200 {object} interface{} "Post details"
-// @Failure 400 {object} map[string]string "Invalid post ID format"
-// @Failure 404 {object} map[string]string "Post not found"
+// @Param id query string true "Post ID (MongoDB ObjectID)" Format(hex)
+// @Success 200 {object} models.Post "Post details"
+// @Failure 400 {object} swagger.ErrorResponse "Invalid post ID format"
+// @Failure 404 {object} swagger.ErrorResponse "Post not found"
 // @Router /posts [get]
 func (h *PostHandler) GetPost(c *gin.Context) {
 	idParam := c.Query("id")
@@ -115,14 +116,14 @@ func (h *PostHandler) GetPost(c *gin.Context) {
 
 // GetAllPosts retrieves all posts with pagination
 // @Summary Get all posts
-// @Description Retrieves a paginated list of all posts
+// @Description Retrieves a paginated list of all posts using query parameters for pagination.
 // @Tags posts
 // @Accept json
 // @Produce json
-// @Param page query string false "Page number (default: 1)"
-// @Param pageSize query string false "Number of posts per page (default: 10)"
-// @Success 200 {array} interface{} "List of posts"
-// @Failure 500 {object} map[string]string "Failed to retrieve posts"
+// @Param page query integer false "Page number" default(1)
+// @Param pageSize query integer false "Number of posts per page" default(10)
+// @Success 200 {object} swagger.PaginatedPostsResponse "List of posts"
+// @Failure 500 {object} swagger.ErrorResponse "Failed to retrieve posts"
 // @Router /posts/all [get]
 func (h *PostHandler) GetAllPosts(c *gin.Context) {
 	page := c.DefaultQuery("page", "1")
@@ -139,16 +140,18 @@ func (h *PostHandler) GetAllPosts(c *gin.Context) {
 
 // UpdatePost updates an existing post
 // @Summary Update a post
-// @Description Updates a post by ID with new data
+// @Description Updates a post by its ID (from the URL path) with data from a JSON body.
+// @Description **Security Note:** The current implementation is insecure as it takes `creator_id` from the body and does not check for post ownership.
 // @Tags posts
 // @Accept json
-// @Security BearerAuth
 // @Produce json
-// @Param id path string true "Post ID (MongoDB ObjectID)"
-// @Param updateData body map[string]interface{} true "Fields to update (e.g., description, tags)"
-// @Success 200 {object} map[string]string "Post updated successfully"
-// @Failure 400 {object} map[string]string "Invalid post ID or payload"
-// @Failure 500 {object} map[string]string "Failed to update post"
+// @Security BearerAuth
+// @Param id path string true "Post ID (MongoDB ObjectID)" Format(hex)
+// @Param updateRequest body map[string]interface{} true "Fields to update in JSON format"
+// @Success 200 {object} swagger.SuccessResponse "Post updated successfully"
+// @Failure 400 {object} swagger.ErrorResponse "Invalid post ID or payload"
+// @Failure 401 {object} swagger.ErrorResponse "Unauthorized"
+// @Failure 500 {object} swagger.ErrorResponse "Failed to update post"
 // @Router /posts/{id} [put]
 func (h *PostHandler) UpdatePost(c *gin.Context) {
 	idParam := c.Param("id")
@@ -166,6 +169,7 @@ func (h *PostHandler) UpdatePost(c *gin.Context) {
 		return
 	}
 
+	// FIXME: This is a security vulnerability. The updater's ID should come from the request context (token), not the payload.
 	updaterId, _ := primitive.ObjectIDFromHex(updateData["creator_id"].(string))
 
 	if err := h.service.UpdatePost(c.Request.Context(), id, updaterId, updateData); err != nil {
@@ -178,15 +182,17 @@ func (h *PostHandler) UpdatePost(c *gin.Context) {
 
 // DeletePost deletes a post by its ID
 // @Summary Delete a post
-// @Description Deletes a post using its MongoDB ObjectID
+// @Description Deletes a post using its MongoDB ObjectID from the URL path.
+// @Description **Security Note:** This does not currently check if the requester is the owner of the post.
 // @Tags posts
 // @Accept json
 // @Produce json
 // @Security BearerAuth
-// @Param id path string true "Post ID (MongoDB ObjectID)"
-// @Success 200 {object} map[string]string "Post deleted successfully"
-// @Failure 400 {object} map[string]string "Invalid post ID format"
-// @Failure 500 {object} map[string]string "Failed to delete post"
+// @Param id path string true "Post ID (MongoDB ObjectID)" Format(hex)
+// @Success 200 {object} swagger.SuccessResponse "Post deleted successfully"
+// @Failure 400 {object} swagger.ErrorResponse "Invalid post ID format"
+// @Failure 401 {object} swagger.ErrorResponse "Unauthorized"
+// @Failure 500 {object} swagger.ErrorResponse "Failed to delete post"
 // @Router /posts/{id} [delete]
 func (h *PostHandler) DeletePost(c *gin.Context) {
 	idParam := c.Param("id")
@@ -205,12 +211,24 @@ func (h *PostHandler) DeletePost(c *gin.Context) {
 	c.JSON(http.StatusOK, gin.H{"data": "Post deleted successfully"})
 }
 
+// SearchPostsByTitle searches for posts by title
+// @Summary Search for posts
+// @Description Searches for posts by title (from a JSON body) with pagination (from query parameters).
+// @Tags posts
+// @Accept json
+// @Produce json
+// @Param searchRequest body swagger.SearchRequest true "Search query payload"
+// @Param page query integer false "Page number" default(1)
+// @Param limit query integer false "Number of results per page" default(10)
+// @Success 200 {object} swagger.PaginatedPostsResponse "A list of matching posts"
+// @Failure 400 {object} swagger.ErrorResponse "Invalid request payload or query parameters"
+// @Failure 500 {object} swagger.ErrorResponse "Internal server error"
 // @Router /posts/search/title [post]
 func (h *PostHandler) SearchPostsByTitle(c *gin.Context) {
-	var reuest struct {
+	var request struct {
 		Query string `json:"query"`
 	}
-	if err := c.BindJSON(&reuest); err != nil {
+	if err := c.BindJSON(&request); err != nil {
 		h.logger.Println(err.Error())
 		c.JSON(http.StatusBadRequest, gin.H{"error": "bad request: " + err.Error()})
 		return
@@ -220,17 +238,17 @@ func (h *PostHandler) SearchPostsByTitle(c *gin.Context) {
 	page, err := strconv.Atoi(pageStr)
 	if err != nil {
 		h.logger.Println(err.Error())
-		c.JSON(http.StatusBadRequest, gin.H{"error": "bad request: " + err.Error()})
+		c.JSON(http.StatusBadRequest, gin.H{"error": "bad request: invalid page number"})
 		return
 	}
 	limit, err := strconv.Atoi(limitStr)
 	if err != nil {
 		h.logger.Println(err.Error())
-		c.JSON(http.StatusBadRequest, gin.H{"error": "bad request: " + err.Error()})
+		c.JSON(http.StatusBadRequest, gin.H{"error": "bad request: invalid limit number"})
 		return
 	}
 
-	posts, err := h.service.SearchPostsByTitle(c.Request.Context(), reuest.Query, int64(page), int64(limit))
+	posts, err := h.service.SearchPostsByTitle(c.Request.Context(), request.Query, int64(page), int64(limit))
 	if err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
 		return
@@ -238,6 +256,19 @@ func (h *PostHandler) SearchPostsByTitle(c *gin.Context) {
 	c.JSON(http.StatusOK, gin.H{"data": posts})
 }
 
+// LikePostHandler handles liking and unliking a post
+// @Summary Like or unlike a post
+// @Description Submits a like (or removes a like) for a specific post. The post ID is a query param, and the like status is in the JSON body.
+// @Tags posts
+// @Accept json
+// @Produce json
+// @Security BearerAuth
+// @Param post_id query string true "ID of the post to like/unlike" Format(hex)
+// @Param likeRequest body swagger.LikeRequest true "Like action"
+// @Success 200 {object} swagger.SuccessResponse "Action completed successfully"
+// @Failure 400 {object} swagger.ErrorResponse "Invalid post ID or request body"
+// @Failure 401 {object} swagger.ErrorResponse "Unauthorized"
+// @Failure 500 {object} swagger.ErrorResponse "Internal server error"
 // @Router /posts/like [post]
 func (h *PostHandler) LikePostHandler(c *gin.Context) {
 	userId, err := getUserIdFromRequest(c)
@@ -248,6 +279,7 @@ func (h *PostHandler) LikePostHandler(c *gin.Context) {
 	postIdStr := c.Query("post_id")
 	if len(postIdStr) == 0 {
 		c.JSON(http.StatusBadRequest, gin.H{"error": "no post id provided"})
+		return
 	}
 
 	postId, err := primitive.ObjectIDFromHex(postIdStr)
@@ -281,6 +313,7 @@ func (h *PostHandler) LikePostHandler(c *gin.Context) {
 func stringToInt64(s string) int64 {
 	val, err := strconv.ParseInt(s, 10, 64)
 	if err != nil {
+		// Default to 1 for page, but for pageSize, 0 might be better to indicate error
 		return 1
 	}
 	return val

@@ -56,19 +56,44 @@ type (
 	pendingComment struct {
 		Comment models.Comment
 	}
+	// ErrorResponse defines the standard error response structure.
+	ErrorResponse struct {
+		Error string `json:"error"`
+	}
+
+	// SuccessResponse defines the standard success response structure.
+	SuccessResponse struct {
+		Data string `json:"data"`
+	}
+
+	// GetCommentsResponse defines the response for getting comments by post ID.
+	GetCommentsResponse struct {
+		Data struct {
+			Comments []models.Comment `json:"comments"`
+			UserID   string           `json:"user_id"`
+		} `json:"data"`
+	}
+
+	// ReactionRequest defines the expected body for a reaction request.
+	ReactionRequest struct {
+		Type string `json:"type" binding:"required"`
+	}
+
+	// UpdateCommentRequest defines the expected body for updating a comment.
+	UpdateCommentRequest struct {
+		NewText string `json:"new_text" binding:"required"`
+	}
 )
 
 // HandleWebSocket handles WebSocket connections for real-time comments
 // @Summary      WebSocket connection for real-time comments
 // @Description  Establishes a WebSocket connection for real-time comment updates on a specific post
 // @Tags         comments
-// @Accept       json
-// @Produce      json
 // @Param        post_id  query  string  true  "Post ID to subscribe to comments for"
-// @Success      101  {string}  string  "Switching Protocols"
-// @Failure      400  {object}  map[string]string  "Missing or invalid post ID"
-// @Failure      401  {object}  map[string]string  "Unauthorized"
-// @Failure      500  {object}  map[string]string  "WebSocket upgrade failed"
+// @Success      101  {string}  string             "Switching Protocols"
+// @Failure      400  {object}  ErrorResponse      "Missing or invalid post ID"
+// @Failure      401  {object}  ErrorResponse      "Unauthorized"
+// @Failure      500  {object}  ErrorResponse      "WebSocket upgrade failed"
 // @Router       /comments/ws [get]
 func (h *CommentHandler) HandleWebSocket(c *gin.Context) {
 	// Extract post ID from query parameters
@@ -222,17 +247,17 @@ func (h *CommentHandler) HandleWebSocket(c *gin.Context) {
 }
 
 // GetCommentsByPostID retrieves all comments for a post with pagination
-// @Summary Get comments by post ID
-// @Description Retrieves a paginated list of comments for a specific post
-// @Tags comments
-// @Produce json
-// @Param post_id path string true "Post ID (MongoDB ObjectID)"
-// @Param page query string false "Page number (default: 1)"
-// @Param pageSize query string false "Number of comments per page (default: 10)"
-// @Success 200 {array} interface{} "List of comments"
-// @Failure 400 {object} map[string]string "Invalid post ID"
-// @Failure 500 {object} map[string]string "Could not fetch comments"
-// @Router /comments/:post_id [get]
+// @Summary      Get comments by post ID
+// @Description  Retrieves a paginated list of comments for a specific post
+// @Tags         comments
+// @Produce      json
+// @Param        post_id   path      string  true   "Post ID (MongoDB ObjectID)"
+// @Param        page      query     int     false  "Page number (default: 1)"
+// @Param        pageSize  query     int     false  "Number of comments per page (default: 10)"
+// @Success      200       {object}  GetCommentsResponse "List of comments with user ID"
+// @Failure      400       {object}  ErrorResponse      "Invalid post ID"
+// @Failure      500       {object}  ErrorResponse      "Could not fetch comments"
+// @Router       /comments/{post_id} [get]
 func (h *CommentHandler) GetCommentsByPostID(c *gin.Context) {
 	userId, _ := getUserIdFromRequest(c)
 	postIDStr := c.Param("post_id")
@@ -267,12 +292,12 @@ func (h *CommentHandler) GetCommentsByPostID(c *gin.Context) {
 // @Accept       json
 // @Produce      json
 // @Security     BearerAuth
-// @Param        comment_id  query  string  true  "Comment ID to react to"
-// @Param        reaction    body   object{type=string}  true  "Reaction details"
-// @Success      200  {object}  map[string]string  "Reaction successful"
-// @Failure      400  {object}  map[string]string  "Invalid comment ID or request body"
-// @Failure      401  {object}  map[string]string  "Unauthorized"
-// @Failure      500  {object}  map[string]string  "Could not process reaction"
+// @Param        comment_id  query     string             true   "Comment ID to react to"
+// @Param        reaction    body      ReactionRequest    true   "Reaction details"
+// @Success      200         {object}  SuccessResponse    "Reaction successful"
+// @Failure      400         {object}  ErrorResponse      "Invalid comment ID or request body"
+// @Failure      401         {object}  ErrorResponse      "Unauthorized"
+// @Failure      500         {object}  ErrorResponse      "Could not process reaction"
 // @Router       /comments/react [post]
 func (h *CommentHandler) ReactToComment(c *gin.Context) {
 	userId, err := getUserIdFromRequest(c)
@@ -336,19 +361,19 @@ func (h *CommentHandler) ReactToComment(c *gin.Context) {
 }
 
 // UpdateComment updates the text of a comment
-// @Summary Update a comment
-// @Description Updates the text of a specific comment for the authenticated user
-// @Tags comments
-// @Accept json
-// @Produce json
-// @Security BearerAuth
-// @Param comment_id path string true "Comment ID (MongoDB ObjectID)"
-// @Param comment body object{new_text=string} true "New comment text"
-// @Success 200 {object} map[string]string "Comment updated successfully"
-// @Failure 400 {object} map[string]string "Invalid comment ID or request body"
-// @Failure 401 {object} map[string]string "Unauthorized"
-// @Failure 500 {object} map[string]string "Could not update comment"
-// @Router /comments/:comment_id [patch]
+// @Summary      Update a comment
+// @Description  Updates the text of a specific comment for the authenticated user
+// @Tags         comments
+// @Accept       json
+// @Produce      json
+// @Security     BearerAuth
+// @Param        comment_id  path      string                true  "Comment ID (MongoDB ObjectID)"
+// @Param        comment     body      UpdateCommentRequest  true  "New comment text"
+// @Success      200         {object}  SuccessResponse       "Comment updated successfully"
+// @Failure      400         {object}  ErrorResponse         "Invalid comment ID or request body"
+// @Failure      401         {object}  ErrorResponse         "Unauthorized"
+// @Failure      500         {object}  ErrorResponse         "Could not update comment"
+// @Router       /comments/{comment_id} [patch]
 func (h *CommentHandler) UpdateComment(c *gin.Context) {
 	commentIDStr := c.Param("comment_id")
 	commentID, err := primitive.ObjectIDFromHex(commentIDStr)
@@ -424,17 +449,17 @@ func (h *CommentHandler) UpdateComment(c *gin.Context) {
 }
 
 // DeleteComment removes a comment
-// @Summary Delete a comment
-// @Description Deletes a specific comment for the authenticated user
-// @Tags comments
-// @Produce json
-// @Security BearerAuth
-// @Param comment_id path string true "Comment ID (MongoDB ObjectID)"
-// @Success 200 {object} map[string]string "Comment deleted successfully"
-// @Failure 400 {object} map[string]string "Invalid comment ID"
-// @Failure 401 {object} map[string]string "Unauthorized"
-// @Failure 500 {object} map[string]string "Could not delete comment"
-// @Router /comments/:comment_id [delete]
+// @Summary      Delete a comment
+// @Description  Deletes a specific comment for the authenticated user
+// @Tags         comments
+// @Produce      json
+// @Security     BearerAuth
+// @Param        comment_id  path      string           true  "Comment ID (MongoDB ObjectID)"
+// @Success      200         {object}  SuccessResponse  "Comment deleted successfully"
+// @Failure      400         {object}  ErrorResponse    "Invalid comment ID"
+// @Failure      401         {object}  ErrorResponse    "Unauthorized"
+// @Failure      500         {object}  ErrorResponse    "Could not delete comment"
+// @Router       /comments/{comment_id} [delete]
 func (h *CommentHandler) DeleteComment(c *gin.Context) {
 	commentIDStr := c.Param("comment_id")
 	commentID, err := primitive.ObjectIDFromHex(commentIDStr)
