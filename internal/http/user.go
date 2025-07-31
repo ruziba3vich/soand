@@ -524,7 +524,7 @@ func (h *UserHandler) AddProfilePicture(c *gin.Context) {
 		return
 	}
 
-	fileURL, err := h.file_store.UploadFile(file)
+	fileObj, err := h.file_store.UploadFile(file)
 	if err != nil {
 		h.logger.Println("Failed to upload file to MinIO:", err)
 		c.JSON(http.StatusInternalServerError, gin.H{"error": "failed to upload file"})
@@ -534,25 +534,25 @@ func (h *UserHandler) AddProfilePicture(c *gin.Context) {
 	f, err := file.Open()
 	if err != nil {
 		h.logger.Println("Failed to open file:", err)
-		if delErr := h.file_store.DeleteFile(fileURL); delErr != nil {
-			h.logger.Printf("Failed to clean up file %s from MinIO: %v", fileURL, delErr)
+		if delErr := h.file_store.DeleteFile(fileObj.FIlename); delErr != nil {
+			h.logger.Printf("Failed to clean up file %s from MinIO: %v", fileObj, delErr)
 		}
 		c.JSON(http.StatusInternalServerError, gin.H{"error": "could not process file"})
 		return
 	}
 	defer f.Close()
 
-	err = h.repo.AddNewProfilePicture(c.Request.Context(), userID, fileURL)
+	err = h.repo.AddNewProfilePicture(c.Request.Context(), userID, fileObj.FIlename)
 	if err != nil {
 		h.logger.Println("Failed to add profile picture to MongoDB:", err)
-		if delErr := h.file_store.DeleteFile(fileURL); delErr != nil {
-			h.logger.Printf("Failed to clean up file %s from MinIO: %v", fileURL, delErr)
+		if delErr := h.file_store.DeleteFile(fileObj.FIlename); delErr != nil {
+			h.logger.Printf("Failed to clean up file %s from MinIO: %v", fileObj, delErr)
 		}
 		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
 		return
 	}
 
-	url, err := h.file_store.GetFile(fileURL)
+	url, err := h.file_store.GetFile(fileObj.FIlename)
 	if err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
 		return
