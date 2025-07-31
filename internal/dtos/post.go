@@ -14,6 +14,7 @@ type PostRequest struct {
 	DeleteAfter int      `json:"delete_after" binding:"required"`
 	Title       string   `json:"title"`
 	Tags        []string `json:"tags"`
+	Pics        []string `json:"pics"`
 }
 
 // ToPost converts PostRequest to models.Post
@@ -24,6 +25,7 @@ func (p *PostRequest) ToPost() *models.Post {
 		CreatorId:   creatorId,
 		Tags:        p.Tags,
 		Title:       p.Title,
+		Pictures:    p.Pics,
 	}
 }
 
